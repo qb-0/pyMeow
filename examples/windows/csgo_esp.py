@@ -9,8 +9,6 @@ class Offsets:
 
 class Colors:
     orange = get_color("orange")
-    red = get_color("red")
-    blue = get_color("blue")
     cyan = get_color("cyan")
     white = get_color("white")
 

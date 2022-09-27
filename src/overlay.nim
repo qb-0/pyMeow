@@ -1,14 +1,15 @@
 import
+  strformat,
   nimpy,
   nimraylib_now as rl,
   input
 
 when defined(linux):
   const exitKey = 0xFF57
-  import x11/xlib
+  import x11/xlib, strutils, osproc
 elif defined(windows):
   const exitKey = 0x23
-  import winim/inc/winuser
+  import winim
 
 pyExportModule("pyMeow")
 
@@ -22,23 +23,55 @@ proc getScreenResolution: (int, int) =
   elif defined(windows):
     (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)
 
-proc initOverlay(width, height, fps: int = 0, title: string = "PyMeow", logLevel: cint = 5) {.exportpy: "overlay_init"} =
-  var w, h: int
-  if width == 0 and height == 0:
-    var res = getScreenResolution()
-    w = res[0] - 1
-    h = res[1] - 1
-  else:
-    w = width
-    h = height
+proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
+  when defined(linux):
+    let 
+      p = startProcess("xwininfo", "", ["-name", name], options={poUsePath, poStdErrToStdOut})
+      (lines, exitCode) = p.readLines()
 
+    template parseI: int32 = parseInt(i.split()[^1])
+
+    if exitCode != 1:
+      for i in lines:
+        if "error" in i:
+          raise newException(Exception, fmt"Window ({target}) not found")
+        if "te upper-left X:" in i:
+          result.x = parseI
+        elif "te upper-left Y:" in i:
+          result.y = parseI
+        elif "Width:" in i:
+          result.width = parseI
+        elif "Height:" in i:
+          result.height = parseI
+    else:
+      raise newException(IOError, "XWinInfo failed (installed 'xwininfo'?)")
+  elif defined(windows):
+    var rect: RECT
+    let
+      border = 25
+      hwnd = FindWindowA(nil, name)
+    if hwnd == 0:
+      raise newException(Exception, fmt"Window ({target}) not found")
+    discard GetWindowRect(hwnd, rect.addr)
+    result.width = rect.right - rect.left
+    result.height = rect.bottom - rect.top - border
+    result.x = rect.left
+    result.y = rect.height - border
+
+proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: cint = 5) {.exportpy: "overlay_init"} =
+  let res = getScreenResolution()
   setTraceLogLevel(logLevel)
   setTargetFPS(fps.cint)
   setConfigFlags(WINDOW_UNDECORATED)
   setConfigFlags(WINDOW_MOUSE_PASSTHROUGH)
   setConfigFlags(WINDOW_TRANSPARENT)
   setConfigFlags(WINDOW_TOPMOST)
-  initWindow(w, h, title)
+  initWindow(res[0] - 1, res[1] - 1, title)
+
+  if target != "Full":
+    let winInfo = getWindowInfo(target)
+    setWindowSize(winInfo.width, winInfo.height)
+    setWindowPosition(winInfo.x, winInfo.y)
 
 proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   clearBackground(Blank)
