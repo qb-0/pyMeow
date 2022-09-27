@@ -1,0 +1,162 @@
+################################################################################################################
+Memory
+################################################################################################################
+Process
+	name: string
+	pid: int
+	debug: bool
+	when defined(windows):
+  		handle: int
+		
+Module
+	name: string
+	base: int
+	end: int
+	size: int
+
+enum_processes(): Process (iterator)
+get_process_id(procName: string): int
+get_process_name(pid: int): string
+open_process(pid: int = 0, processName: string = "", debug: bool = false): Process
+close_process(process: Process)
+enum_modules(process: Process): Module (iterator)
+get_module(process: Process, moduleName: string): Module
+
+r_string(process: Process, address: int, size: int = 30): string
+r_int(process: Process, address: int): int
+r_ints(process: Process, address: int, size: int): int array
+r_uint(process: Process, address: int): int
+r_uints(process: Process, address: int, size: int): int array
+r_uint64(process: Process, address: int): int
+r_uints64(process: Process, address: int, size: int): int array
+r_int16(process: Process, address: int): int16
+r_ints16(process: Process, address: int): int16 array
+r_int64(process: Process, address: int): int64
+r_ints64(process: Process, address: int, size: int): int64 array
+r_float(process: Process, address: int): float
+r_floats(process: Process, address: int, size: int): float array
+r_float64(process: Process, address: int): float64
+r_floats64(process: Process, address: int, size: int): float64 array
+r_byte(process: Process, address: int): byte
+r_bytes(process: Process, address: int, size: int): byte array
+r_vec2(process: Process, address: int): Vector2
+r_vec3(process: Process, address: int): Vector3
+r_bool(process: Process, address: int): bool
+
+w_string(process: Process, address: int, data: string)
+w_int(process: Process, address: int, data: int)
+w_ints(process: Process, address: int, data: int array)
+w_int16(process: Process, address: int, data: int)
+w_ints16(process: Process, address: int, data: int array)
+w_int64(process: Process, address: int, data: int)
+w_ints64(process: Process, address: int, data: int array)
+w_uint(process: Process, address: int, data: uint)
+w_uints(process: Process, address: int, data: uint array)
+w_uint64(process: Process, address: int, data: uint)
+w_uints64(process: Process, address: int, data: uint array)
+w_float(process: Process, address: int, data: float)
+w_floats(process: Process, address: int, data: float array)
+w_float64(process: Process, address: int, data: float)
+w_floats64(process: Process, address: int, data: float array)
+w_byte(process: Process, address: int, data: byte)
+w_bytes(process: Process, address: int, data: byte array)
+w_vec2(process: Process, address: int, data: Vector2)
+w_vec3(process: Process, address: int, data: Vector3)
+w_bool(process: Process, address: int, data: bool)
+
+pointer_chain_32(process: Process, base: ByteAddress, offsets: int array)
+pointer_chain_64(process: Process, base: ByteAddress, offsets: int array)
+page_protection(Process, address: int, newProtection: int = 0x40) -> int (old protection, windows only)
+
+################################################################################################################
+Overlay
+################################################################################################################
+overlay_init(width, height, fps: int = 0, title: string = "PyMeow", logLevel: int = 5)
+overlay_loop(): bool
+overlay_close()
+toggle_mouse()
+get_fps(): int
+set_fps(fps: int)
+get_screen_height(): int
+get_screen_width(): int
+
+################################################################################################################
+Shapes / Drawing
+################################################################################################################
+begin_drawing()
+end_drawing()
+draw_fps(posX, posY: float)
+draw_text(text: string, posX, posY, fontSize: float, color: Color)
+draw_pixel(posX, posY: float, color: Color)
+draw_line(startPosX, startPosY, endPosX, endPosY: float, color: Color, thick: float = 1.0)
+draw_circle(centerX, centerY, radius: float, color: Color)
+draw_circle_lines(centerX, centerY, radius: float, color: Color)
+draw_ring(centerX, centerY, segments, innerRadius, outerRadius, startAngle, endAngle: float, color: Color)
+draw_ring_lines(centerX, centerY, segments, innerRadius, outerRadius, startAngle, endAngle: float, color: Color)
+draw_ellipse(centerX, centerY, radiusH, radiusV: float, color: Color)
+draw_rectangle(posX, posY, width, height: float, color: Color)
+draw_rectangle_lines(posX, posY, width, height: float, color: Color, lineThick: float = 1.0)
+draw_rectangle_rounded(posX, posY, width, height, roundness: float, segments: int, color: Color)
+draw_rectangle_rounded_lines(posX, posY, width, height, roundness: float, segments: int, color: Color, lineThick: float = 1.0)
+draw_triangle(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
+draw_triangle_lines(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
+load_texture(fileName: string): Texture
+draw_texture(texture: Texture2D, posX, posY: float, tint: Color, rotation, scale: float)
+
+################################################################################################################
+Graphical User Interface (GUI)
+################################################################################################################
+gui_window_box(posX, posY, width, height: float, title: string): bool
+gui_group_box(posX, posY, width, height: float, text: string)
+gui_line(posX, posY, width, height: float, text: string)
+gui_panel(posX, posY, width, height: float)
+gui_label(posX, posY, width, height: float, text: string)
+gui_button(posX, posY, width, height: float, text: string): bool
+gui_label_button(posX, posY, width, height: float, text: string): bool
+gui_check_box(posX, posY, width, height: float, text: string, checked: bool): bool 
+gui_combo_box(posX, posY, width, height: float, text: string, active: int = 0): int
+gui_text_box(posX, posY, width, height: float, editMode: bool = true): string
+gui_progress_bar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float
+gui_status_bar(posX, posY, width, height: float, text: string)
+gui_message_box(posX, posY, width, height: float, title, message, buttons: string): int
+gui_color_picker(posX, posY, width, height: float): Color
+gui_load_style(fileName: string)
+
+################################################################################################################
+Vector
+################################################################################################################
+vec2(x, y: float = 0): Vector2
+vec2_add(a, b: Vector2): Vector2
+vec2_del(a, b: Vector2): Vector2
+vec2_mult(a, b: Vector2): Vector2
+vec2_div(a, b: Vector2): Vector2
+vec2_mag(a, b: Vector2): float
+vec2_magSq(a, b: Vector2): float
+vec2_distance(a, b: Vector2): float
+vec2_closest(a: Vector2, b: Vector2 array): Vector2
+
+vec3(x, y, z: float = 0): Vector3
+vec3_add(a, b: Vector3): Vector3
+vec3_sub(a, b: Vector3): Vector3
+vec3_mult(a, b: Vector3): Vector3
+vec3_div(a, b: Vector3): Vector3
+vec3_mag(a, b: Vector3): float
+vec3_magSq(a, b: Vector3): float
+vec3_distance(a, b: Vector3): float
+vec3_closest(a: Vec2, b: Vector3 array): Vector3
+
+################################################################################################################
+Misc / Utilities
+################################################################################################################
+new_color(r, g, b, a: uint8): Color
+get_color(colorName: string)
+color_set_alpha(color: rl.Color, alpha: uint8): Color
+wts_ogl(matrix: float array (16), pos: Vector3): Vector2
+wts_dx(matrix: float array (16), pos: Vector3): Vector2
+key_pressed(key: int): bool
+press_key(key: int)
+mouse_move(x, y: int)
+mouse_click()
+mouse_position(): (x, y)
+measure_text(text: string, fontSize: int): int
+run_time(): float
