@@ -34,7 +34,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
     if exitCode != 1:
       for i in lines:
         if "error" in i:
-          raise newException(Exception, fmt"Window ({target}) not found")
+          raise newException(Exception, fmt"Window ({name}) not found")
         if "te upper-left X:" in i:
           result.x = parseI
         elif "te upper-left Y:" in i:
@@ -51,12 +51,12 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
       border = 25
       hwnd = FindWindowA(nil, name)
     if hwnd == 0:
-      raise newException(Exception, fmt"Window ({target}) not found")
+      raise newException(Exception, fmt"Window ({name}) not found")
     discard GetWindowRect(hwnd, rect.addr)
     result.width = rect.right - rect.left
     result.height = rect.bottom - rect.top - border
     result.x = rect.left
-    result.y = rect.height - border
+    result.y = rect.top - border
 
 proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: cint = 5) {.exportpy: "overlay_init"} =
   let res = getScreenResolution()

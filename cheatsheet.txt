@@ -71,7 +71,7 @@ page_protection(Process, address: int, newProtection: int = 0x40) -> int (old pr
 ################################################################################################################
 Overlay
 ################################################################################################################
-overlay_init(width, height, fps: int = 0, title: string = "PyMeow", logLevel: int = 5)
+overlay_init(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: cint = 5)
 overlay_loop(): bool
 overlay_close()
 toggle_mouse()
@@ -120,6 +120,7 @@ gui_progress_bar(posX, posY, width, height: float, textLeft, textRight: string, 
 gui_status_bar(posX, posY, width, height: float, text: string)
 gui_message_box(posX, posY, width, height: float, title, message, buttons: string): int
 gui_color_picker(posX, posY, width, height: float): Color
+gui_dropdown_box(posX, posY, width, height: float, text: string, editMode: bool = false): int
 gui_load_style(fileName: string)
 
 ################################################################################################################
