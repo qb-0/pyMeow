@@ -97,6 +97,12 @@ proc getScreenHeight: int {.exportpy: "get_screen_height".} =
 proc getScreenWidth: int {.exportpy: "get_screen_width".} =
   rl.getScreenWidth()
 
+proc setWindowPosition(x, y: int) {.exportpy: "set_window_position".} =
+  rl.setWindowPosition(x, y)
+
+proc setWindowSize(width, height: int) {.exportpy: "set_window_size".} =
+  rl.setWindowSize(width, height)
+
 proc takeScreenshot(fileName: string) {.exportpy: "take_screenshot".} =
   rl.takeScreenshot(fileName)
 

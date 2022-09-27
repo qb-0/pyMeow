@@ -79,6 +79,8 @@ get_fps(): int
 set_fps(fps: int)
 get_screen_height(): int
 get_screen_width(): int
+set_window_position(x, y: int)
+set_window_size(width, height: int)
 
 ################################################################################################################
 Shapes / Drawing
