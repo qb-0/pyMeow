@@ -153,7 +153,7 @@ Misc / Utilities
 ################################################################################################################
 new_color(r, g, b, a: uint8): Color
 get_color(colorName: string)
-color_set_alpha(color: rl.Color, alpha: uint8): Color
+fade_color(color: Color, alpha: float): Color
 wts_ogl(matrix: float array (16), pos: Vector3): Vector2
 wts_dx(matrix: float array (16), pos: Vector3): Vector2
 key_pressed(key: int): bool

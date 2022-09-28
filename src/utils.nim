@@ -24,16 +24,14 @@ proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
       a: 0,
     )
 
+proc fadeColor(color: rl.Color, alpha: float): rl.Color {.exportpy: "fade_color".} =
+  rl.fade(color, alpha)
+
 proc measureText(text: string, fontSize: cint): int {.exportpy: "measure_text".} =
   rl.measureText(text, fontSize)
 
 proc runTime: float64 {.exportpy: "run_time".} =
   rl.getTime()
-
-proc colorSetAlpha(color: rl.Color, alpha: uint8): rl.Color {.exportpy: "color_set_alpha".} =
-  var c = color
-  c.a = alpha
-  c
 
 proc wtsOgl(matrix: array[0..15, float32], pos: Vector3): Vector2 {.exportpy: "wts_ogl".} =
   var 
