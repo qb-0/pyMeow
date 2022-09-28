@@ -1,9 +1,31 @@
-import 
-  nimpy, 
+import
+  tables,
+  nimpy,
   nimraylib_now/raylib,
   nimraylib_now/raygui as rg
 
 pyExportModule("pyMeow")
+
+type
+  DropDownBox = object
+    rec: Rectangle
+    text: string
+    active: cint
+    editMode: bool
+
+  TextBox = object
+    rec: Rectangle
+    text: string
+    editMode: bool
+
+  ColorPicker = object
+    rec: Rectangle
+    color: Color
+
+var
+  DropDownTable: Table[int, DropDownBox]
+  TextBoxTable: Table[int, TextBox]
+  ColorPickerTable: Table[int, ColorPicker]
 
 template getRec: Rectangle =
   Rectangle(
@@ -40,19 +62,25 @@ proc checkBox(posX, posY, width, height: float, text: string, checked: bool): bo
 proc comboBox(posX, posY, width, height: float, text: string, active: int = 0): int {.exportpy: "gui_combo_box".} =
   rg.comboBox(getRec, text, active.cint)
 
-proc dropdownBox(posX, posY, width, height: float, text: string): int {.exportpy: "gui_dropdown_box".} =
-  var 
-    active {.global.}: cint
-    open {.global.}: bool
+proc dropdownBox(posX, posY, width, height: float, text: string, id: int): int {.exportpy: "gui_dropdown_box".} =
+  if id notin DropDownTable:
+    DropDownTable[id] = DropDownBox(
+      rec: getRec,
+      text: text,
+    )
+  if rg.dropdownBox(DropDownTable[id].rec, DropDownTable[id].text.cstring, DropDownTable[id].active.addr, DropDownTable[id].editMode):
+    DropDownTable[id].editMode = not DropDownTable[id].editMode
+  DropDownTable[id].active
 
-  if rg.dropdownBox(getRec, text, active.addr, open):
-    open = not open
-  active
-
-proc textBox(posX, posY, width, height: float, editMode: bool = true): string {.exportpy: "gui_text_box".} =
-  var textBuf = newString(64)
-  discard rg.textBox(getRec, textBuf.cstring, 64, editMode)
-  textBuf
+proc textBox(posX, posY, width, height: float, id: int): string {.exportpy: "gui_text_box".} =
+  if id notin TextBoxTable:
+    TextBoxTable[id] = TextBox(
+      rec: getRec,
+      text: newString(250),
+    )
+  if rg.textBox(TextBoxTable[id].rec, TextBoxTable[id].text.cstring, TextBoxTable[id].text.len.cint, TextBoxTable[id].editMode):
+    TextBoxTable[id].editMode = not TextBoxTable[id].editMode    
+  TextBoxTable[id].text
 
 proc progressBar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_progress_bar".} =
   rg.progressBar(getRec, textLeft, textRight, value, minValue, maxValue)
@@ -63,10 +91,14 @@ proc statusBar(posX, posY, width, height: float, text: string) {.exportpy: "gui_
 proc messageBox(posX, posY, width, height: float, title, message, buttons: string): int {.exportpy: "gui_message_box".} =
   rg.messageBox(getRec, title, message, buttons)
 
-var pickedColor = Raywhite
-proc colorPicker(posX, posY, width, height: float): Color {.exportpy: "gui_color_picker".} =
-  pickedColor = rg.colorPicker(getRec, pickedColor)
-  pickedColor
+proc colorPicker(posX, posY, width, height: float, id: int): Color {.exportpy: "gui_color_picker".} =
+  if id notin ColorPickerTable:
+    ColorPickerTable[id] = ColorPicker(
+      rec: getRec,
+      color: Raywhite
+    )
+  ColorPickerTable[id].color = rg.colorPicker(getRec, ColorPickerTable[id].color)
+  ColorPickerTable[id].color
 
 proc loadStyle(fileName: string) {.exportpy: "gui_load_style".} =
   rg.loadStyle(fileName)
