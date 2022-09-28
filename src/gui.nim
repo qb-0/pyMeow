@@ -40,12 +40,13 @@ proc checkBox(posX, posY, width, height: float, text: string, checked: bool): bo
 proc comboBox(posX, posY, width, height: float, text: string, active: int = 0): int {.exportpy: "gui_combo_box".} =
   rg.comboBox(getRec, text, active.cint)
 
-#proc dropdownBox*(bounds: Rectangle; text: cstring; active: ptr cint; editMode: bool): bool {.
-    #cdecl, importc: "GuiDropdownBox", header: rayguiHeader.}
+proc dropdownBox(posX, posY, width, height: float, text: string): int {.exportpy: "gui_dropdown_box".} =
+  var 
+    active {.global.}: cint
+    open {.global.}: bool
 
-proc dropdownBox(posX, posY, width, height: float, text: string, editMode: bool = false): int {.exportpy: "gui_dropdown_box".} =
-  var active: cint
-  discard rg.dropdownBox(getRec, text, active.addr, editMode)
+  if rg.dropdownBox(getRec, text, active.addr, open):
+    open = not open
   active
 
 proc textBox(posX, posY, width, height: float, editMode: bool = true): string {.exportpy: "gui_text_box".} =
