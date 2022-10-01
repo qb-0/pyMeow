@@ -33,7 +33,7 @@ proc measureText(text: string, fontSize: cint): int {.exportpy: "measure_text".}
 proc runTime: float64 {.exportpy: "run_time".} =
   rl.getTime()
 
-proc worldToScreen(matrix: array[0..15, float32], pos: Vector3, algo: int = 0): Vector2 {.exportpy: "world_to_screen".} =
+proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Vector2 {.exportpy: "world_to_screen".} =
   var
     clip: Vector3
     ndc: Vector2
@@ -54,3 +54,9 @@ proc worldToScreen(matrix: array[0..15, float32], pos: Vector3, algo: int = 0): 
   ndc.y = clip.y / clip.z
   result.x = (getScreenWidth() / 2 * ndc.x) + (ndc.x + getScreenWidth() / 2)
   result.y = -(getScreenHeight() / 2 * ndc.y) + (ndc.y + getScreenHeight() / 2)
+
+proc checkCollisionRecs(rec1, rec2: Rectangle): bool {.exportpy: "check_collision_recs".} =
+  rl.checkCollisionRecs(rec1, rec2)
+
+proc checkCollisionCircleRec(posX, posY, radius: float, rec: Rectangle): bool {.exportpy: "check_collision_circle_rec".} =
+  rl.checkCollisionCircleRec(Vector2(x: posX, y: posY), radius, rec)
