@@ -27,6 +27,8 @@ var
   TextBoxTable: Table[int, TextBox]
   ColorPickerTable: Table[int, ColorPicker]
 
+converter toCint(x: float|int): cint = x.cint
+
 template getRec: Rectangle =
   Rectangle(
     x: posX,
@@ -60,7 +62,7 @@ proc checkBox(posX, posY, width, height: float, text: string, checked: bool): bo
   rg.checkBox(getRec, text, checked)
 
 proc comboBox(posX, posY, width, height: float, text: string, active: int = 0): int {.exportpy: "gui_combo_box".} =
-  rg.comboBox(getRec, text, active.cint)
+  rg.comboBox(getRec, text, active)
 
 proc dropdownBox(posX, posY, width, height: float, text: string, id: int): int {.exportpy: "gui_dropdown_box".} =
   if id notin DropDownTable:
@@ -99,6 +101,9 @@ proc colorPicker(posX, posY, width, height: float, id: int): Color {.exportpy: "
     )
   ColorPickerTable[id].color = rg.colorPicker(getRec, ColorPickerTable[id].color)
   ColorPickerTable[id].color
+
+proc scrollBar(posX, posY, width, height: float, value, minValue, maxValue: int): int {.exportpy: "gui_scroll_bar"} =
+  rg.scrollBar(getRec, value, minValue, maxValue)
 
 proc loadStyle(fileName: string) {.exportpy: "gui_load_style".} =
   rg.loadStyle(fileName)
