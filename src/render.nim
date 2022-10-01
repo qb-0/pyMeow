@@ -1,6 +1,14 @@
 import 
   nimraylib_now as rl,
-  nimpy
+  nimpy, tables
+
+type
+  FontObj = object
+    id: int
+    font: Font
+  
+var
+  FontTable: Table[int, FontObj]
 
 pyExportModule("pyMeow")
 
@@ -88,8 +96,13 @@ proc loadTexture(fileName: string): Texture2D {.exportpy: "load_texture".} =
 proc drawTexture(texture: Texture2D, posX, posY: float, tint: Color, rotation, scale: float) {.exportpy: "draw_texture".} =
   rl.drawTextureEx(texture, Vector2(x: posX, y: posY), rotation, scale, tint)
 
-#proc loadFont(fileName: string): Font {.exportpy: "load_font".} =
-#  rl.loadFont(fileName)
+proc loadFont(fileName: string, fontId: int) {.exportpy: "load_font".} =
+  FontTable[fontId] = FontObj(
+    id: fontId,
+    font: rl.loadFont(fileName)
+  )
 
-#proc drawFont(font: Font, text: string, posX, posY: int, fontSize, spacing: float, tint: Color) {.exportpy: "draw_font".} =
-#  rl.drawTextEx(font, text, Vector2(x: posX, y: posY), fontSize, spacing, tint)
+proc drawFont(fontId: int, text: string, posX, posY, fontSize, spacing: float, tint: Color) {.exportpy: "draw_font".} =
+  if fontId notin FontTable:
+    raise newException(Exception, "Unknown Font ID")
+  rl.drawTextEx(FontTable[fontId].font, text, Vector2(x: posX, y: posY), fontSize, spacing, tint)

@@ -104,6 +104,8 @@ draw_triangle(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
 draw_triangle_lines(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
 load_texture(fileName: string): Texture
 draw_texture(texture: Texture2D, posX, posY: float, tint: Color, rotation, scale: float)
+load_font(fileName: string, fontId: int)
+draw_font(fontId: int, text: string, posX, posY, fontSize, spacing: float, tint: Color)
 
 ################################################################################################################
 Graphical User Interface (GUI)
