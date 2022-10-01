@@ -77,7 +77,7 @@ def main():
 
                 if ent_obj.health > 0:
                     try:
-                        ent_obj.pos2d = pm.wts_ogl(matrix, ent_obj.pos3d)
+                        ent_obj.pos2d = pm.world_to_screen(matrix, ent_obj.pos3d)
                         ent_obj.render_snapline()
                         ent_obj.render_info()
                     except:

@@ -161,8 +161,7 @@ Misc / Utilities
 new_color(r, g, b, a: uint8): Color
 get_color(colorName: string)
 fade_color(color: Color, alpha: float): Color
-wts_ogl(matrix: float array (16), pos: Vector3): Vector2
-wts_dx(matrix: float array (16), pos: Vector3): Vector2
+world_to_screen(matrix: float array (16), pos: Vector3, algo: int = 0): Vector2
 key_pressed(key: int): bool
 press_key(key: int)
 mouse_move(x, y: int)

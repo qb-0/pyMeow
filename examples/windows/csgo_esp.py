@@ -1,5 +1,5 @@
 import sys
-from pyMeow import *
+import pyMeow as pm
 from requests import get
 
 
@@ -8,9 +8,9 @@ class Offsets:
 
 
 class Colors:
-    orange = get_color("orange")
-    cyan = get_color("cyan")
-    white = get_color("white")
+    orange = pm.get_color("orange")
+    cyan = pm.get_color("cyan")
+    white = pm.get_color("white")
 
 
 class Entity:
@@ -20,25 +20,25 @@ class Entity:
         self.mem = mem
         self.gmod = gmod
 
-        self.id = r_int(self.mem, self.addr + 0x64)
-        self.health = r_int(self.mem, self.addr + Offsets.m_iHealth)
-        self.dormant = r_int(self.mem, self.addr + Offsets.m_bDormant)
-        self.team = r_int(self.mem, self.addr + Offsets.m_iTeamNum)
-        self.bone_base = r_int(self.mem, self.addr + Offsets.m_dwBoneMatrix)
-        self.pos = r_vec3(self.mem, self.addr + Offsets.m_vecOrigin)
+        self.id = pm.r_int(self.mem, self.addr + 0x64)
+        self.health = pm.r_int(self.mem, self.addr + Offsets.m_iHealth)
+        self.dormant = pm.r_int(self.mem, self.addr + Offsets.m_bDormant)
+        self.team = pm.r_int(self.mem, self.addr + Offsets.m_iTeamNum)
+        self.bone_base = pm.r_int(self.mem, self.addr + Offsets.m_dwBoneMatrix)
+        self.pos = pm.r_vec3(self.mem, self.addr + Offsets.m_vecOrigin)
         self.color = Colors.cyan if self.team == 3 else Colors.orange
 
     @property
     def name(self):
-        radar_base = r_int(self.mem, self.gmod + Offsets.dwRadarBase)
-        hud_radar = r_int(self.mem, radar_base + 0x78)
-        return r_string(self.mem, hud_radar + 0x300 + (0x174 * (self.id - 1)))
+        radar_base = pm.r_int(self.mem, self.gmod + Offsets.dwRadarBase)
+        hud_radar = pm.r_int(self.mem, radar_base + 0x78)
+        return pm.r_string(self.mem, hud_radar + 0x300 + (0x174 * (self.id - 1)))
 
     def bone_pos(self, bone_id):
-        return vec3(
-            r_float(self.mem, self.bone_base + 0x30 * bone_id + 0x0C),
-            r_float(self.mem, self.bone_base + 0x30 * bone_id + 0x1C),
-            r_float(self.mem, self.bone_base + 0x30 * bone_id + 0x2C),
+        return pm.vec3(
+            pm.r_float(self.mem, self.bone_base + 0x30 * bone_id + 0x0C),
+            pm.r_float(self.mem, self.bone_base + 0x30 * bone_id + 0x1C),
+            pm.r_float(self.mem, self.bone_base + 0x30 * bone_id + 0x2C),
         )
 
 
@@ -54,43 +54,43 @@ def main():
     except:
         sys.exit("Unable to fetch Hazedumper's Offsets")
 
-    csgo_proc = open_process(processName="csgo.exe")
-    game_module = get_module(csgo_proc, "client.dll")["base"]
-    overlay_init(fps=144)
+    csgo_proc = pm.open_process(processName="csgo.exe")
+    game_module = pm.get_module(csgo_proc, "client.dll")["base"]
+    pm.overlay_init(fps=144)
 
-    while overlay_loop():
+    while pm.overlay_loop():
         try:
-            local_player_addr = r_int(csgo_proc, game_module + Offsets.dwLocalPlayer)
+            local_player_addr = pm.r_int(csgo_proc, game_module + Offsets.dwLocalPlayer)
         except:
             continue
 
-        begin_drawing()
-        draw_fps(10, 10)
+        pm.begin_drawing()
+        pm.draw_fps(10, 10)
 
         if local_player_addr:
-            ent_addrs = r_ints(csgo_proc, game_module + Offsets.dwEntityList, 128)[0::4]
-            view_matrix = r_floats(csgo_proc, game_module + Offsets.dwViewMatrix, 16)
+            ent_addrs = pm.r_ints(csgo_proc, game_module + Offsets.dwEntityList, 128)[0::4]
+            view_matrix = pm.r_floats(csgo_proc, game_module + Offsets.dwViewMatrix, 16)
             for ent_addr in ent_addrs:
                 if ent_addr > 0 and ent_addr != local_player_addr:
                     ent = Entity(ent_addr, csgo_proc, game_module)
                     if not ent.dormant and ent.health > 0:
                         try:
-                            ent.wts = wts_dx(view_matrix, ent.pos)
-                            head_pos = wts_dx(view_matrix, ent.bone_pos(8))
+                            ent.wts = pm.world_to_screen(view_matrix, ent.pos, 1)
+                            head_pos = pm.world_to_screen(view_matrix, ent.bone_pos(8), 1)
 
                             head = ent.wts["y"] - head_pos["y"]
                             width = head / 2
                             center = width / 2
 
                             # Box
-                            draw_rectangle(
+                            pm.draw_rectangle(
                                 posX=head_pos["x"] - center,
                                 posY=head_pos["y"] - center / 2,
                                 width=width,
                                 height=head + center / 2,
-                                color=fade_color(ent.color, 0.3),
+                                color=pm.fade_color(ent.color, 0.3),
                             )
-                            draw_rectangle_lines(
+                            pm.draw_rectangle_lines(
                                 posX=head_pos["x"] - center,
                                 posY=head_pos["y"] - center / 2,
                                 width=width,
@@ -100,8 +100,8 @@ def main():
                             )
 
                             # Snapline
-                            draw_line(
-                                startPosX=get_screen_width() // 2,
+                            pm.draw_line(
+                                startPosX=pm.get_screen_width() // 2,
                                 startPosY=0,
                                 endPosX=head_pos["x"] - center,
                                 endPosY=head_pos["y"] - center / 2,
@@ -110,7 +110,7 @@ def main():
                             )
 
                             # Health
-                            gui_progress_bar(
+                            pm.gui_progress_bar(
                                 posX=head_pos["x"] - center,
                                 posY=ent.wts["y"],
                                 width=width,
@@ -123,7 +123,7 @@ def main():
                             )
 
                             # Name
-                            draw_text(
+                            pm.draw_text(
                                 text=ent.name,
                                 posX=head_pos["x"] - center + 4,
                                 posY=head_pos["y"] - center / 2 + 4,
@@ -133,7 +133,7 @@ def main():
                         except:
                             continue
 
-        end_drawing()
+        pm.end_drawing()
 
 
 if __name__ == "__main__":
