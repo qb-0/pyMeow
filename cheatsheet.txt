@@ -71,7 +71,7 @@ page_protection(Process, address: int, newProtection: int = 0x40) -> int (old pr
 ################################################################################################################
 Overlay
 ################################################################################################################
-overlay_init(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: cint = 5)
+overlay_init(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5)
 overlay_loop(): bool
 overlay_close()
 toggle_mouse()
@@ -168,6 +168,7 @@ mouse_move(x, y: int)
 mouse_click()
 mouse_position(): (x, y)
 measure_text(text: string, fontSize: int): int
+measure_font(fontId: int, text: string, fontSize, spacing: float): Vector2
 run_time(): float
 check_collision_recs(rec1, rec2: Rectangle): bool
 check_collision_circle_rec(posX, posY, radius: float, rec: Rectangle): bool

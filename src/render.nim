@@ -104,3 +104,8 @@ proc drawFont(fontId: int, text: string, posX, posY, fontSize, spacing: float, t
   if fontId notin FontTable:
     raise newException(Exception, "Unknown Font ID")
   rl.drawTextEx(FontTable[fontId].font, text, Vector2(x: posX, y: posY), fontSize, spacing, tint)
+
+proc measureFont(fontId: int, text: string, fontSize, spacing: float): Vector2 {.exportpy: "measure_font".} =
+  if fontId notin FontTable:
+    raise newException(Exception, "Unknown Font ID")
+  rl.measureTextEx(FontTable[fontId].font, text, fontSize, spacing)
