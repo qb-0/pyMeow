@@ -43,7 +43,7 @@ def main():
                 y -= speed
 
         pm.begin_drawing()
-        [pm.draw_pixel(int(vec["x"]), int(vec["y"]), pm.get_color("white")) for vec in stars]
+        [pm.draw_pixel(vec["x"], vec["y"], pm.get_color("white")) for vec in stars]
         pm.draw_circle(x, y, radius, circle_color)
         pm.draw_fps(width // 2, height // 2)
 
@@ -70,6 +70,7 @@ def main():
             pm.set_fps(fps)
 
         pm.gui_progress_bar(350, 10, 200, 30, "Speed: ", str(speed), speed, 0, max_speed)
+        radius = pm.gui_scroll_bar(350, 60, 200, 30, radius, 0, 150)
         pm.draw_text("Exit with 'END'", 50, 100, 25, pm.get_color("white"))
         pm.end_drawing()
 
