@@ -83,11 +83,18 @@ def main():
                             center = width / 2
 
                             # Box
+                            draw_rectangle(
+                                posX=head_pos["x"] - center,
+                                posY=head_pos["y"] - center / 2,
+                                width=width,
+                                height=head + center / 2,
+                                color=fade_color(ent.color, 0.3),
+                            )
                             draw_rectangle_lines(
-                                posX=int(head_pos["x"] - center),
-                                posY=int(head_pos["y"] - center / 2),
-                                width=int(width),
-                                height=int(head + center / 2),
+                                posX=head_pos["x"] - center,
+                                posY=head_pos["y"] - center / 2,
+                                width=width,
+                                height=head + center / 2,
                                 color=ent.color,
                                 lineThick=1.2,
                             )
@@ -96,17 +103,17 @@ def main():
                             draw_line(
                                 startPosX=get_screen_width() // 2,
                                 startPosY=0,
-                                endPosX=int(head_pos["x"] - center),
-                                endPosY=int(head_pos["y"] - center / 2),
+                                endPosX=head_pos["x"] - center,
+                                endPosY=head_pos["y"] - center / 2,
                                 color=ent.color,
                                 thick=1.2,
                             )
 
                             # Health
                             gui_progress_bar(
-                                posX=int(head_pos["x"] - center),
-                                posY=int(ent.wts["y"]),
-                                width=int(width),
+                                posX=head_pos["x"] - center,
+                                posY=ent.wts["y"],
+                                width=width,
                                 height=10,
                                 textLeft="HP: ",
                                 textRight=f" {ent.health}",
@@ -118,8 +125,8 @@ def main():
                             # Name
                             draw_text(
                                 text=ent.name,
-                                posX=int(head_pos["x"] - center + 4),
-                                posY=int(head_pos["y"] - center / 2 + 4),
+                                posX=head_pos["x"] - center + 4,
+                                posY=head_pos["y"] - center / 2 + 4,
                                 fontSize=15,
                                 color=Colors.white,
                             )

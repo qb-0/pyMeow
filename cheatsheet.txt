@@ -123,7 +123,12 @@ gui_progress_bar(posX, posY, width, height: float, textLeft, textRight: string, 
 gui_status_bar(posX, posY, width, height: float, text: string)
 gui_message_box(posX, posY, width, height: float, title, message, buttons: string): int
 gui_color_picker(posX, posY, width, height: float, id: int): Color
+gui_scroll_bar(posX, posY, width, height: float, value, minValue, maxValue: int): int
+gui_spinner(posX, posY, width, height: float, text: string, value, minValue, maxValue, id: int): int
+gui_slider(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float
+gui_slider_bar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float)
 gui_load_style(fileName: string)
+gui_fade(alpha: float)
 
 ################################################################################################################
 Vector

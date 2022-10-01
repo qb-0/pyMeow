@@ -5,6 +5,8 @@ from random import randint
 def main():
     fps = 60
     pm.overlay_init(fps=fps)
+    pm.toggle_mouse()
+    pm.gui_fade(0.9)
     radius = 50
     width, height = pm.get_screen_width(), pm.get_screen_height()
     x, y = width // 2, height // 2
@@ -16,8 +18,6 @@ def main():
     stars = list()
     for _ in range(300):
         stars.append(pm.vec2(randint(0, width), randint(0, height)))
-
-    pm.toggle_mouse()
 
     while pm.overlay_loop():
         if ball_left:
@@ -70,7 +70,7 @@ def main():
             pm.set_fps(fps)
 
         pm.gui_progress_bar(350, 10, 200, 30, "Speed: ", str(speed), speed, 0, max_speed)
-        radius = pm.gui_scroll_bar(350, 60, 200, 30, radius, 0, 150)
+        radius = pm.gui_slider(350, 60, 200, 30, "Radius", f"{radius}", radius, 0, 150)
         pm.draw_text("Exit with 'END'", 50, 100, 25, pm.get_color("white"))
         pm.end_drawing()
 

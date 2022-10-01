@@ -22,10 +22,16 @@ type
     rec: Rectangle
     color: Color
 
+  Spinner = object
+    rec: Rectangle
+    value: cint
+    editMode: bool
+
 var
   DropDownTable: Table[int, DropDownBox]
   TextBoxTable: Table[int, TextBox]
   ColorPickerTable: Table[int, ColorPicker]
+  SpinnerTable: Table[int, Spinner]
 
 converter toCint(x: float|int): cint = x.cint
 
@@ -36,6 +42,9 @@ template getRec: Rectangle =
     width: width,
     height: height
   )
+
+proc fade(alpha: float) {.exportpy: "gui_fade".} =
+  rg.fade(alpha)
 
 proc windowBox(posX, posY, width, height: float, title: string): bool {.exportpy: "gui_window_box".} =
   rg.windowBox(getRec, title)
@@ -104,6 +113,21 @@ proc colorPicker(posX, posY, width, height: float, id: int): Color {.exportpy: "
 
 proc scrollBar(posX, posY, width, height: float, value, minValue, maxValue: int): int {.exportpy: "gui_scroll_bar"} =
   rg.scrollBar(getRec, value, minValue, maxValue)
+
+proc spinner(posX, posY, width, height: float, text: string, value, minValue, maxValue, id: int): int {.exportpy: "gui_spinner".} =
+  if id notin SpinnerTable:
+    SpinnerTable[id] = Spinner(
+      rec: getRec,
+    )
+
+  SpinnerTable[id].editMode = rg.spinner(getRec, text, SpinnerTable[id].value.addr, minValue, maxValue, SpinnerTable[id].editMode)
+  SpinnerTable[id].value
+
+proc slider(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_slider".} =
+  rg.slider(getRec, textLeft, textRight, value, minValue, maxValue)
+
+proc sliderBar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_slider_bar".} =
+  rg.sliderBar(getRec, textLeft, textRight, value, minValue, maxValue)
 
 proc loadStyle(fileName: string) {.exportpy: "gui_load_style".} =
   rg.loadStyle(fileName)
