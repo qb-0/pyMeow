@@ -4,14 +4,14 @@ import
   nimraylib_now as rl,
   input
 
+pyExportModule("pyMeow")
+
 when defined(linux):
   const exitKey = 0xFF57
   import x11/xlib, strutils, osproc
 elif defined(windows):
   const exitKey = 0x23
   import winim
-
-pyExportModule("pyMeow")
 
 proc getScreenResolution: (int, int) =
   when defined(linux):
