@@ -96,10 +96,10 @@ draw_circle_lines(centerX, centerY, radius: float, color: Color)
 draw_ring(centerX, centerY, segments, innerRadius, outerRadius, startAngle, endAngle: float, color: Color)
 draw_ring_lines(centerX, centerY, segments, innerRadius, outerRadius, startAngle, endAngle: float, color: Color)
 draw_ellipse(centerX, centerY, radiusH, radiusV: float, color: Color)
-draw_rectangle(posX, posY, width, height: float, color: Color)
-draw_rectangle_lines(posX, posY, width, height: float, color: Color, lineThick: float = 1.0)
-draw_rectangle_rounded(posX, posY, width, height, roundness: float, segments: int, color: Color)
-draw_rectangle_rounded_lines(posX, posY, width, height, roundness: float, segments: int, color: Color, lineThick: float = 1.0)
+draw_rectangle(posX, posY, width, height: float, color: Color): Rectangle
+draw_rectangle_lines(posX, posY, width, height: float, color: Color, lineThick: float = 1.0): Rectangle
+draw_rectangle_rounded(posX, posY, width, height, roundness: float, segments: int, color: Color): Rectangle
+draw_rectangle_rounded_lines(posX, posY, width, height, roundness: float, segments: int, color: Color, lineThick: float = 1.0): Rectangle
 draw_triangle(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
 draw_triangle_lines(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
 load_texture(fileName: string): Texture
@@ -169,3 +169,5 @@ mouse_click()
 mouse_position(): (x, y)
 measure_text(text: string, fontSize: int): int
 run_time(): float
+check_collision_recs(rec1, rec2: Rectangle): bool
+check_collision_circle_rec(posX, posY, radius: float, rec: Rectangle): bool
