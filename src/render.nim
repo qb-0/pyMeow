@@ -2,6 +2,8 @@ import
   nimraylib_now as rl,
   nimpy, tables
 
+pyExportModule("pyMeow")
+
 type
   FontObj = object
     id: int
@@ -9,8 +11,6 @@ type
   
 var
   FontTable: Table[int, FontObj]
-
-pyExportModule("pyMeow")
 
 converter toCint(x: float|int): cint = x.cint
 
@@ -44,35 +44,33 @@ proc drawRingLines(centerX, centerY, segments, innerRadius, outerRadius, startAn
 proc drawEllipse(centerX, centerY, radiusH, radiusV: float, color: Color) {.exportpy: "draw_ellipse".} =
   rl.drawEllipse(centerX, centerY, radiusH, radiusV, color)
 
-proc drawRectangle(posX, posY, width, height: float, color: Color) {.exportpy: "draw_rectangle".} =
+proc drawRectangle(posX, posY, width, height: float, color: Color): Rectangle {.exportpy: "draw_rectangle".} =
+  result.x = posX 
+  result.y = posY 
+  result.width = width
+  result.height = height
   rl.drawRectangle(posX, posY, width, height, color)
 
-proc drawRectangleLines(posX, posY, width, height: float, color: Color, lineThick: float = 1.0) {.exportpy: "draw_rectangle_lines".} =
-  let r = Rectangle(
-    x: posX,
-    y: posY,
-    width: width,
-    height: height,
-  )
-  rl.drawRectangleLinesEx(r, lineThick, color)
+proc drawRectangleLines(posX, posY, width, height: float, color: Color, lineThick: float = 1.0): Rectangle {.exportpy: "draw_rectangle_lines".} =
+  result.x = posX
+  result.y = posY
+  result.width = width
+  result.height = height
+  rl.drawRectangleLinesEx(result, lineThick, color)
 
-proc drawRectangleRounded(posX, posY, width, height, roundness: float, segments: int, color: Color) {.exportpy: "draw_rectangle_rounded".} =
-  let r = Rectangle(
-    x: posX,
-    y: posY,
-    width: width,
-    height: height,
-  )
-  rl.drawRectangleRounded(r, roundness, segments, color)
+proc drawRectangleRounded(posX, posY, width, height, roundness: float, segments: int, color: Color): Rectangle {.exportpy: "draw_rectangle_rounded".} =
+  result.x = posX
+  result.y = posY
+  result.width = width
+  result.height = height
+  rl.drawRectangleRounded(result, roundness, segments, color)
 
-proc drawRectangleRoundedLines(posX, posY, width, height, roundness: float, segments: int, color: Color, lineThick: float = 1.0) {.exportpy: "draw_rectangle_rounded_lines".} =
-  let r = Rectangle(
-    x: posX,
-    y: posY,
-    width: width,
-    height: height,
-  )
-  rl.drawRectangleRoundedLines(r, roundness, segments, lineThick, color)
+proc drawRectangleRoundedLines(posX, posY, width, height, roundness: float, segments: int, color: Color, lineThick: float = 1.0): Rectangle {.exportpy: "draw_rectangle_rounded_lines".} =
+  result.x = posX
+  result.y = posY
+  result.width = width
+  result.height = height
+  rl.drawRectangleRoundedLines(result, roundness, segments, lineThick, color)
 
 proc drawTriangle(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color) {.exportpy: "draw_triangle".} =
   rl.drawTriangle(
