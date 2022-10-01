@@ -1,10 +1,10 @@
 import 
-  nimraylib_now as rl, 
+  nimraylib_now as rl,
   nimpy
 
 pyExportModule("pyMeow")
 
-converter toCint(x: float): cint = x.cint
+converter toCint(x: float|int): cint = x.cint
 
 proc drawFPS(posX, posY: float) {.exportpy: "draw_fps".} =
   rl.drawFPS(posX, posY)
