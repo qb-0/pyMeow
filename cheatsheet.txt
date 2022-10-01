@@ -2,17 +2,17 @@
 Memory
 ################################################################################################################
 Process
-	name: string
-	pid: int
-	debug: bool
-	when defined(windows):
-  		handle: int
+  name: string
+  pid: int
+  debug: bool
+  when defined(windows):
+    handle: int
 		
 Module
-	name: string
-	base: int
-	end: int
-	size: int
+  name: string
+  base: int
+  end: int
+  size: int
 
 enum_processes(): Process (iterator)
 get_process_id(procName: string): int
