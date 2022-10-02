@@ -60,3 +60,20 @@ proc checkCollisionRecs(rec1, rec2: Rectangle): bool {.exportpy: "check_collisio
 
 proc checkCollisionCircleRec(posX, posY, radius: float, rec: Rectangle): bool {.exportpy: "check_collision_circle_rec".} =
   rl.checkCollisionCircleRec(Vector2(x: posX, y: posY), radius, rec)
+
+proc checkCollisionLines(startPos1X, endPos1X, startPos1Y, endPos1Y, startPos2X, startPos2Y, endPos2X, endPos2Y: float): Vector2 {.exportpy: "check_collision_lines".} =
+  discard rl.checkCollisionLines(
+    Vector2(x: startPos1X, y: startPos1Y),
+    Vector2(x: endPos1X, y: endPos1Y),
+    Vector2(x: startPos2X, y: startPos2Y),
+    Vector2(x: endPos2X, y: endPos2Y),
+    result.addr
+  )
+
+proc checkCollisionCircles(pos1X, pos1Y, radius1, pos2X, pos2Y, radius2: float): bool {.exportpy: "check_collision_circles".} =
+  rl.checkCollisionCircles(
+    Vector2(x: pos1X, y: pos1Y),
+    radius1,
+    Vector2(x: pos2X, y: pos2Y),
+    radius2
+  )
