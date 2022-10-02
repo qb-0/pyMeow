@@ -1,4 +1,4 @@
-## PyMeow ([Discord](https://discord.gg/B34S4aMYqY))
+### PyMeow ([Discord](https://discord.gg/B34S4aMYqY))
 #### [Cheatsheet / Features](https://github.com/qb-0/pyMeow./blob/master/cheatsheet.txt)
 ---
 
