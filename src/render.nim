@@ -50,6 +50,9 @@ proc drawRingLines(centerX, centerY, segments, innerRadius, outerRadius, startAn
 proc drawEllipse(centerX, centerY, radiusH, radiusV: float, color: Color) {.exportpy: "draw_ellipse".} =
   rl.drawEllipse(centerX, centerY, radiusH, radiusV, color)
 
+proc drawEllipseLines(centerX, centerY, radiusH, radiusV: float, color: Color) {.exportpy: "draw_ellipse_lines".} =
+  rl.drawEllipseLines(centerX, centerY, radiusH, radiusV, color)
+
 proc drawRectangle(posX, posY, width, height: float, color: Color): Rectangle {.exportpy: "draw_rectangle".} =
   result.x = posX 
   result.y = posY 
