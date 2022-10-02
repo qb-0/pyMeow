@@ -35,6 +35,12 @@ proc drawCircle(centerX, centerY, radius: float, color: Color) {.exportpy: "draw
 proc drawCircleLines(centerX, centerY, radius: float, color: Color) {.exportpy: "draw_circle_lines".} =
   rl.drawCircleLines(centerX, centerY, radius, color)
 
+proc drawCircleSector(centerX, centerY, radius, startAngle, endAngle: float, segments: int, color: Color) {.exportpy: "draw_circle_sector".} =
+  rl.drawCircleSector(Vector2(x: centerX, y: centerY), radius, startAngle, endAngle, segments, color)
+
+proc drawCircleSectorLines(centerX, centerY, radius, startAngle, endAngle: float, segments: int, color: Color) {.exportpy: "draw_circle_sector_lines".} =
+  rl.drawCircleSectorLines(Vector2(x: centerX, y: centerY), radius, startAngle, endAngle, segments, color)
+ 
 proc drawRing(centerX, centerY, segments, innerRadius, outerRadius, startAngle, endAngle: float, color: Color) {.exportpy: "draw_ring".} =
   rl.drawRing(Vector2(x: centerX, y: centerY), innerRadius, outerRadius, startAngle, endAngle, segments, color)
 
