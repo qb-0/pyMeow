@@ -10,7 +10,7 @@ type
     font: Font
   
 var
-  FontTable: Table[int, FontObj]
+  fontTable: Table[int, FontObj]
 
 converter toCint(x: float|int): cint = x.cint
 
@@ -107,17 +107,17 @@ proc drawTexture(texture: Texture2D, posX, posY: float, tint: Color, rotation, s
   rl.drawTextureEx(texture, Vector2(x: posX, y: posY), rotation, scale, tint)
 
 proc loadFont(fileName: string, fontId: int) {.exportpy: "load_font".} =
-  FontTable[fontId] = FontObj(
+  fontTable[fontId] = FontObj(
     id: fontId,
     font: rl.loadFont(fileName)
   )
 
 proc drawFont(fontId: int, text: string, posX, posY, fontSize, spacing: float, tint: Color) {.exportpy: "draw_font".} =
-  if fontId notin FontTable:
+  if fontId notin fontTable:
     raise newException(Exception, "Unknown Font ID")
-  rl.drawTextEx(FontTable[fontId].font, text, Vector2(x: posX, y: posY), fontSize, spacing, tint)
+  rl.drawTextEx(fontTable[fontId].font, text, Vector2(x: posX, y: posY), fontSize, spacing, tint)
 
 proc measureFont(fontId: int, text: string, fontSize, spacing: float): Vector2 {.exportpy: "measure_font".} =
-  if fontId notin FontTable:
+  if fontId notin fontTable:
     raise newException(Exception, "Unknown Font ID")
-  rl.measureTextEx(FontTable[fontId].font, text, fontSize, spacing)
+  rl.measureTextEx(fontTable[fontId].font, text, fontSize, spacing)

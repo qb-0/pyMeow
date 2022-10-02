@@ -56,16 +56,16 @@ proc vec3Distance(a, b: Vector3): float32 {.exportpy: "vec3_distance".} =
   vec3Mag(vec3Sub(a, b))
 
 proc vec2Closest(a: Vector2, b: varargs[Vector2]): Vector2 {.exportpy: "vec2_closest".} =
-  var closest_value = float32.high
+  var closestValue = float32.high
   for v in b:
     let dist = a.vec2Distance(v)
-    if dist < closest_value:
+    if dist < closestValue:
       result = v
-      closest_value = dist
+      closestValue = dist
 proc vec3Closest(a: Vector3, b: varargs[Vector3]): Vector3 {.exportpy: "vec3_closest".} =
-  var closest_value = float32.high
+  var closestValue = float32.high
   for v in b:
     let dist = a.vec3Distance(v)
-    if a.vec3Distance(v) < closest_value:
+    if a.vec3Distance(v) < closestValue:
       result = v
-      closest_value = dist
+      closestValue = dist

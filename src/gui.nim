@@ -28,10 +28,10 @@ type
     editMode: bool
 
 var
-  DropDownTable: Table[int, DropDownBox]
-  TextBoxTable: Table[int, TextBox]
-  ColorPickerTable: Table[int, ColorPicker]
-  SpinnerTable: Table[int, Spinner]
+  dropDownTable: Table[int, DropDownBox]
+  textBoxTable: Table[int, TextBox]
+  colorPickerTable: Table[int, ColorPicker]
+  spinnerTable: Table[int, Spinner]
 
 converter toCint(x: float|int): cint = x.cint
 
@@ -74,24 +74,24 @@ proc comboBox(posX, posY, width, height: float, text: string, active: int = 0): 
   rg.comboBox(getRec, text, active)
 
 proc dropdownBox(posX, posY, width, height: float, text: string, id: int): int {.exportpy: "gui_dropdown_box".} =
-  if id notin DropDownTable:
-    DropDownTable[id] = DropDownBox(
+  if id notin dropDownTable:
+    dropDownTable[id] = DropDownBox(
       rec: getRec,
       text: text,
     )
-  if rg.dropdownBox(DropDownTable[id].rec, DropDownTable[id].text.cstring, DropDownTable[id].active.addr, DropDownTable[id].editMode):
-    DropDownTable[id].editMode = not DropDownTable[id].editMode
-  DropDownTable[id].active
+  if rg.dropdownBox(dropDownTable[id].rec, dropDownTable[id].text.cstring, dropDownTable[id].active.addr, dropDownTable[id].editMode):
+    dropDownTable[id].editMode = not dropDownTable[id].editMode
+  dropDownTable[id].active
 
 proc textBox(posX, posY, width, height: float, id: int): string {.exportpy: "gui_text_box".} =
-  if id notin TextBoxTable:
-    TextBoxTable[id] = TextBox(
+  if id notin textBoxTable:
+    textBoxTable[id] = TextBox(
       rec: getRec,
       text: newString(250),
     )
-  if rg.textBox(TextBoxTable[id].rec, TextBoxTable[id].text.cstring, TextBoxTable[id].text.len.cint, TextBoxTable[id].editMode):
-    TextBoxTable[id].editMode = not TextBoxTable[id].editMode    
-  TextBoxTable[id].text
+  if rg.textBox(textBoxTable[id].rec, textBoxTable[id].text.cstring, textBoxTable[id].text.len.cint, textBoxTable[id].editMode):
+    textBoxTable[id].editMode = not textBoxTable[id].editMode    
+  textBoxTable[id].text
 
 proc progressBar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_progress_bar".} =
   rg.progressBar(getRec, textLeft, textRight, value, minValue, maxValue)
@@ -103,25 +103,25 @@ proc messageBox(posX, posY, width, height: float, title, message, buttons: strin
   rg.messageBox(getRec, title, message, buttons)
 
 proc colorPicker(posX, posY, width, height: float, id: int): Color {.exportpy: "gui_color_picker".} =
-  if id notin ColorPickerTable:
-    ColorPickerTable[id] = ColorPicker(
+  if id notin colorPickerTable:
+    colorPickerTable[id] = ColorPicker(
       rec: getRec,
       color: Raywhite
     )
-  ColorPickerTable[id].color = rg.colorPicker(getRec, ColorPickerTable[id].color)
-  ColorPickerTable[id].color
+  colorPickerTable[id].color = rg.colorPicker(getRec, colorPickerTable[id].color)
+  colorPickerTable[id].color
 
 proc scrollBar(posX, posY, width, height: float, value, minValue, maxValue: int): int {.exportpy: "gui_scroll_bar"} =
   rg.scrollBar(getRec, value, minValue, maxValue)
 
 proc spinner(posX, posY, width, height: float, text: string, value, minValue, maxValue, id: int): int {.exportpy: "gui_spinner".} =
-  if id notin SpinnerTable:
-    SpinnerTable[id] = Spinner(
+  if id notin spinnerTable:
+    spinnerTable[id] = Spinner(
       rec: getRec,
     )
 
-  SpinnerTable[id].editMode = rg.spinner(getRec, text, SpinnerTable[id].value.addr, minValue, maxValue, SpinnerTable[id].editMode)
-  SpinnerTable[id].value
+  spinnerTable[id].editMode = rg.spinner(getRec, text, spinnerTable[id].value.addr, minValue, maxValue, spinnerTable[id].editMode)
+  spinnerTable[id].value
 
 proc slider(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_slider".} =
   rg.slider(getRec, textLeft, textRight, value, minValue, maxValue)
