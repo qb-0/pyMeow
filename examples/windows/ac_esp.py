@@ -9,6 +9,7 @@ try:
 except Exception as e:
     sys.exit(e)
 
+
 class Pointer:
     player_count = 0x18AC0C
     entity_list = 0x18AC04
@@ -24,11 +25,13 @@ class Offsets:
     pos = 0x4
     fpos = 0x28
 
+
 class Colors:
     cyan = pm.get_color("cyan")
     orange = pm.get_color("orange")
     white = pm.get_color("white")
     black = pm.get_color("black")
+
 
 class Entity:
     def __init__(self, addr):
@@ -76,11 +79,11 @@ class Entity:
     def draw_name(self):
         textSize = pm.measure_text(self.name, 15) / 2
         pm.draw_text(
-            text=self.name, 
-            posX=self.pos2d["x"] - textSize, 
-            posY=self.pos2d["y"], 
-            fontSize=15, 
-            color=Colors.white
+            text=self.name,
+            posX=self.pos2d["x"] - textSize,
+            posY=self.pos2d["y"],
+            fontSize=15,
+            color=Colors.white,
         )
 
     def draw_health(self):
@@ -103,6 +106,7 @@ class Entity:
             color=self.color,
         )
 
+
 def main():
     pm.overlay_init(target="AssaultCube", fps=144)
     while pm.overlay_loop():
@@ -111,7 +115,9 @@ def main():
 
         player_count = pm.r_int(proc, base + Pointer.player_count)
         if player_count > 1:
-            ent_buffer = pm.r_ints(proc, pm.r_int(proc, base + Pointer.entity_list), player_count)[1:]
+            ent_buffer = pm.r_ints(
+                proc, pm.r_int(proc, base + Pointer.entity_list), player_count
+            )[1:]
             v_matrix = pm.r_floats(proc, base + Pointer.view_matrix, 16)
             for addr in ent_buffer:
                 try:
@@ -124,5 +130,6 @@ def main():
                     continue
         pm.end_drawing()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
