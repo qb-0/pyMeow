@@ -23,4 +23,3 @@ git clone "https://github.com/qb-0/pyMeow." pyMeow
 # Compile
 cd pyMeow && nim c pyMeow
 ```
-Test
