@@ -88,6 +88,12 @@ proc drawTriangleLines(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: C
     color
   )
 
+proc drawPoly(posX, posY: float, sides: int, radius, rotation: float, color: Color) {.exportpy: "draw_poly"} =
+  rl.drawPoly(Vector2(x: posX, y: posY), sides, radius, rotation, color)
+
+proc drawPolyLines(posX, posY: float, sides: int, radius, rotation, lineThick: float, color: Color) {.exportpy: "draw_poly_lines".} =
+  rl.drawPolyLinesEx(Vector2(x: posX, y: posY), sides, radius, rotation, lineThick, color)
+
 proc loadTexture(fileName: string): Texture2D {.exportpy: "load_texture".} =
   rl.loadTexture(fileName)
 

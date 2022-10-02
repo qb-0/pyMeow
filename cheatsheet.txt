@@ -102,6 +102,8 @@ draw_rectangle_rounded(posX, posY, width, height, roundness: float, segments: in
 draw_rectangle_rounded_lines(posX, posY, width, height, roundness: float, segments: int, color: Color, lineThick: float = 1.0): Rectangle
 draw_triangle(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
 draw_triangle_lines(pos1X, pos1Y, pos2X, pos2Y, pos3X, pos3Y: float, color: Color)
+draw_poly(posX, posY: float, sides: int, radius, rotation: float, color: Color)
+draw_poly_lines(posX, posY: float, sides: int, radius, rotation, lineThick: float, color: Color)
 load_texture(fileName: string): Texture
 draw_texture(texture: Texture2D, posX, posY: float, tint: Color, rotation, scale: float)
 load_font(fileName: string, fontId: int)
