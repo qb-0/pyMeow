@@ -8,7 +8,7 @@ pyMeow combines a memory module and the functionality of [Raylib](https://www.ra
 An overview of the functionality can be found in the [Cheatsheet](https://github.com/qb-0/pyMeow./blob/master/cheatsheet.txt)
 
 ## Installation
-- Make sure you use a **64bit** version of Python 3
+- Make sure you use a **64bit** version of Python
 - Download the latest PyMeow Module from the ![Release Section](https://github.com/qb-0/pyMeow./releases)
 - Extract the files and use pip to install pyMeow: `pip install .`
 
