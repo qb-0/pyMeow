@@ -2,4 +2,4 @@
 #### First builds of this version are available at Discord.
 #### Description will be updated soon.
 
-<img src="https://github.com/qb-0/pyMeow./raw/master/examples/screenshots/csgo.png" alt="alt text" width="350" height="250"> <img src="https://github.com/qb-0/pyMeow./raw/master/examples/screenshots/csgo.png" alt="alt text" width="350" height="250">
+<img src="https://github.com/qb-0/pyMeow./raw/master/examples/screenshots/csgo.png" alt="alt text" width="450" height="350"> <img src="https://github.com/qb-0/pyMeow./raw/master/examples/screenshots/sauerbraten.png" alt="alt text" width="450" height="350">
