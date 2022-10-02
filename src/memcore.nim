@@ -13,18 +13,18 @@ elif defined(linux):
 
   proc process_vm_readv(
     pid: int, 
-    local_iov: ptr IOVec, 
+    localIov: ptr IOVec, 
     liovcnt: culong, 
-    remote_iov: ptr IOVec, 
+    remoteIov: ptr IOVec, 
     riovcnt: culong, 
     flags: culong
   ): cint {.importc, header: "<sys/uio.h>", discardable.}
 
   proc process_vm_writev(
       pid: int, 
-      local_iov: ptr IOVec, 
+      localIov: ptr IOVec, 
       liovcnt: culong, 
-      remote_iov: ptr IOVec, 
+      remoteIov: ptr IOVec, 
       riovcnt: culong, 
       flags: culong
   ): cint {.importc, header: "<sys/uio.h>", discardable.}
