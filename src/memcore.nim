@@ -114,7 +114,9 @@ proc openProcess(pid: int = 0, processName: string = "", debug: bool = false): P
     for p in enumProcesses():
       if processName in p.name:
         sPid = p.pid
+        break
   elif pid != 0:
+    # ToDo: Check if pid exists
     sPid = pid
 
   checkRoot()
