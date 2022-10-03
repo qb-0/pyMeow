@@ -80,6 +80,7 @@ set_fps(fps: int)
 get_screen_height(): int
 get_screen_width(): int
 set_window_position(x, y: int)
+get_window_position: Vector2
 set_window_size(width, height: int)
 
 ################################################################################################################

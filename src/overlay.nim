@@ -46,19 +46,20 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
     else:
       raise newException(IOError, "XWinInfo failed (installed 'xwininfo'?)")
   elif defined(windows):
-    var rect: RECT
-    let
-      border = 25
-      hwnd = FindWindowA(nil, name)
+    var 
+      rect: RECT
+      winInfo: WINDOWINFO
+    let hwnd = FindWindowA(nil, name)
     if hwnd == 0:
       raise newException(Exception, fmt"Window ({name}) not found")
-    discard GetWindowRect(hwnd, rect.addr)
-    result.width = rect.right - rect.left
-    result.height = rect.bottom - rect.top - border
-    result.x = rect.left
-    result.y = rect.top - border
+    discard GetClientRect(hwnd, rect.addr)
+    discard GetWindowInfo(hwnd, winInfo.addr)
+    result.x = winInfo.rcClient.left
+    result.y = winInfo.rcClient.top
+    result.width = rect.right
+    result.height = rect.bottom
 
-proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: cint = 5) {.exportpy: "overlay_init"} =
+proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5) {.exportpy: "overlay_init"} =
   let res = getScreenResolution()
   setTraceLogLevel(logLevel)
   setTargetFPS(fps.cint)
@@ -100,6 +101,9 @@ proc getScreenWidth: int {.exportpy: "get_screen_width".} =
 
 proc setWindowPosition(x, y: int) {.exportpy: "set_window_position".} =
   rl.setWindowPosition(x, y)
+
+proc getWindowPosition: Vector2 {.exportpy: "get_window_position".} =
+  rl.getWindowPosition()
 
 proc setWindowSize(width, height: int) {.exportpy: "set_window_size".} =
   rl.setWindowSize(width, height)
