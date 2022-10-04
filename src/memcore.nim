@@ -72,7 +72,7 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
     let allFiles = toSeq(walkDir("/proc", relative = true))
     for pid in mapIt(filterIt(allFiles, isDigit(it.path[0])), parseInt(it.path)):
         p.pid = pid
-        p.name = readLines(fmt"/proc/{pid}/status", 1)[0].split()[1]
+        p.name = readFile(fmt"/proc/{pid}/comm").strip()
         yield p
   
   elif defined(windows):
