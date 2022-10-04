@@ -44,7 +44,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
         elif "Height:" in i:
           result.height = parseI
     else:
-      raise newException(IOError, "XWinInfo failed (installed 'xwininfo'?)")
+      raise newException(Exception, "XWinInfo failed (installed 'xwininfo'?)")
   elif defined(windows):
     var 
       rect: RECT
