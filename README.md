@@ -19,7 +19,7 @@ An overview of the functionality can be found in the [Cheatsheet](https://github
 # Install requirements:
 nimble install -y nimpy nimraylib_now x11 winim
 # Clone the repository
-git clone "https://github.com/qb-0/pyMeow." pyMeow
+git clone "https://github.com/qb-0/pyMeow"
 # Compile
 cd pyMeow && nim c pyMeow
 ```
