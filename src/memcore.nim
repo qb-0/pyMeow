@@ -115,6 +115,8 @@ proc openProcess(pid: int = 0, processName: string = "", debug: bool = false): P
       if processName in p.name:
         sPid = p.pid
         break
+    if sPid == 0:
+      raise newException(Exception, fmt"Process '{processName}' not found")
   elif pid != 0:
     # ToDo: Check if pid exists
     sPid = pid
