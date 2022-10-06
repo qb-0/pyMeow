@@ -126,7 +126,7 @@ gui_label_button(posX, posY, width, height: float, text: string): bool
 gui_check_box(posX, posY, width, height: float, text: string, checked: bool): bool 
 gui_combo_box(posX, posY, width, height: float, text: string, active: int): int 
 gui_dropdown_box(posX, posY, width, height: float, text: string, id: int): int
-gui_text_box(posX, posY, width, height: float, id: int): string
+gui_text_box(posX, posY, width, height: float, text: string, id: int): string
 gui_progress_bar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float
 gui_status_bar(posX, posY, width, height: float, text: string)
 gui_message_box(posX, posY, width, height: float, title, message, buttons: string): int

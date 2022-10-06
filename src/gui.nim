@@ -83,13 +83,13 @@ proc dropdownBox(posX, posY, width, height: float, text: string, id: int): int {
     dropDownTable[id].editMode = not dropDownTable[id].editMode
   dropDownTable[id].active
 
-proc textBox(posX, posY, width, height: float, id: int): string {.exportpy: "gui_text_box".} =
+proc textBox(posX, posY, width, height: float, text: string, id: int): string {.exportpy: "gui_text_box".} =
   if id notin textBoxTable:
     textBoxTable[id] = TextBox(
       rec: getRec,
-      text: newString(250),
+      text: text & newString(200),
     )
-  if rg.textBox(textBoxTable[id].rec, textBoxTable[id].text.cstring, textBoxTable[id].text.len.cint, textBoxTable[id].editMode):
+  if rg.textBox(textBoxTable[id].rec, textBoxTable[id].text.cstring, 250, textBoxTable[id].editMode):
     textBoxTable[id].editMode = not textBoxTable[id].editMode    
   textBoxTable[id].text
 
