@@ -21,7 +21,7 @@ proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
       r: 0,
       g: 0,
       b: 0,
-      a: 0,
+      a: 255,
     )
 
 proc fadeColor(color: rl.Color, alpha: float): rl.Color {.exportpy: "fade_color".} =
