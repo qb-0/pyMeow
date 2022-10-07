@@ -111,6 +111,12 @@ proc colorPicker(posX, posY, width, height: float, id: int): Color {.exportpy: "
   colorPickerTable[id].color = rg.colorPicker(getRec, colorPickerTable[id].color)
   colorPickerTable[id].color
 
+proc colorBarAlpha(posX, posY, width, height: float, alpha: float): float {.exportpy: "gui_color_bar_alpha".} =
+  rg.colorBarAlpha(getRec, alpha)
+
+proc colorBarHue(posX, posY, width, height: float, value: float): float {.exportpy: "gui_color_bar_hue".} =
+  rg.colorBarHue(getRec, value)
+
 proc scrollBar(posX, posY, width, height: float, value, minValue, maxValue: int): int {.exportpy: "gui_scroll_bar"} =
   rg.scrollBar(getRec, value, minValue, maxValue)
 

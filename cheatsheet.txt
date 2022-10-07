@@ -131,6 +131,8 @@ gui_progress_bar(posX, posY, width, height: float, textLeft, textRight: string, 
 gui_status_bar(posX, posY, width, height: float, text: string)
 gui_message_box(posX, posY, width, height: float, title, message, buttons: string): int
 gui_color_picker(posX, posY, width, height: float, id: int): Color
+gui_color_bar_alpha(posX, posY, width, height: float, alpha: float): float
+gui_color_bar_hue(posX, posY, width, height: float, value: float): float
 gui_scroll_bar(posX, posY, width, height: float, value, minValue, maxValue: int): int
 gui_spinner(posX, posY, width, height: float, text: string, value, minValue, maxValue, id: int): int
 gui_slider(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float
