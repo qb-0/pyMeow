@@ -26,6 +26,6 @@ cd pyMeow && nim c pyMeow
 
 ## Projects<br>
 #### [pyMeow SWBF2](https://github.com/qb-0/pyMeowSWBF2) by [qb](https://github.com/qb-0)
-> Cross platform configurable Starwars Battlefront 2 ESP
+> Configurable cross platform Starwars Battlefront 2 ESP
 
 <img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/screenshot.png" alt="alt text" width="350" height="250"><img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/menu.png" alt="alt text" width="350" height="250">
