@@ -91,6 +91,9 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
       yield p
       hResult = Process32Next(hSnapShot, pe.addr)
 
+proc pidExists(pid: int): bool {.exportpy: "pid_exists".} =
+  pid in mapIt(toSeq(enumProcesses()), it.pid)
+
 proc getProcessId(procName: string): int {.exportpy: "get_process_id".} =
   checkRoot()
   for process in enumProcesses():
@@ -118,7 +121,8 @@ proc openProcess(pid: int = 0, processName: string = "", debug: bool = false): P
     if sPid == 0:
       raise newException(Exception, fmt"Process '{processName}' not found")
   elif pid != 0:
-    # ToDo: Check if pid exists
+    if not pidExists(pid):
+      raise newException(Exception, fmt"Process ID '{pid} does not exist")
     sPid = pid
 
   checkRoot()

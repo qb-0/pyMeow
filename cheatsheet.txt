@@ -15,6 +15,7 @@ Module
   size: int
 
 enum_processes(): Process (iterator)
+pid_exists(pid: int): bool
 get_process_id(procName: string): int
 get_process_name(pid: int): string
 open_process(pid: int = 0, processName: string = "", debug: bool = false): Process
