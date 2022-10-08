@@ -1,5 +1,5 @@
 import 
-  os, strformat, 
+  os, strformat, sequtils,
   strutils, nimpy
 
 pyExportModule("pyMeow")
@@ -8,8 +8,7 @@ when defined(windows):
   import winim
 elif defined(linux):
   import 
-    posix, sequtils, strscans,
-    tables
+    posix, strscans, tables
 
   proc process_vm_readv(
     pid: int, 
