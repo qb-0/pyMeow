@@ -45,7 +45,7 @@ type
 proc checkRoot =
   when defined(linux):
     if getuid() != 0:
-      raise newException(IOError, "Root required!")
+      raise newException(IOError, "Root access required!")
 
 proc getErrorStr: string =
   when defined(linux):
@@ -152,7 +152,9 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
         if modName notin modTable:
           modTable[modName] = Module(name: modName)
           modTable[modName].base = pageStart
-        modTable[modName].size += pageEnd - pageStart
+          modTable[modName].size = pageEnd - modTable[modName].base
+        else:
+          modTable[modName].size = pageEnd - modTable[modName].base
     
     for name, module in modTable:
       modTable[name].`end` = module.base + module.size
@@ -270,9 +272,63 @@ proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = b
   if process.debug:
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
-# Windows only
+proc aob(pattern: string, byteBuffer: seq[byte]): int =
+  const
+    wildCard = "??"
+    wildCardByte = 200.byte # Not safe
+
+  proc patternToBytes(pattern: string): seq[byte] =
+    var patt = pattern.replace(" ", "")
+    try:
+      for i in countup(0, patt.len-1, 2):
+        let hex = patt[i..i+1]
+        if hex == wildCard:
+          result.add(wildCardByte)
+        else:
+          result.add(parseHexInt(hex).byte)
+    except:
+      raise newException(Exception, "Invalid pattern")
+
+  let bytePattern = patternToBytes(pattern)
+  var byteHits: int
+
+  for b in byteBuffer:
+    inc result
+    let p = bytePattern[byteHits]
+    if p == wildCardByte or p == b:
+      inc byteHits
+    else:
+      byteHits = 0
+    if byteHits == bytePattern.len:
+      result = result - bytePattern.len
+      return
+  result = 0
+
+proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false): ByteAddress {.exportpy: "aob_scan_module".} =
+  let 
+    module = getModule(process, moduleName)
+    # ToDo: Reading a whole module is a bad idea. Will be changed.
+    byteBuffer = process.readSeq(module.base, module.size)
+    aobScan = aob(pattern, byteBuffer)
+
+  if aobScan != 0:
+    result = if relative: aobScan else: aobScan + module.base
+
+proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteAddress, relative: bool = false): ByteAddress {.exportpy: "aob_scan_range".} =
+  if rangeStart >= rangeEnd:
+    raise newException(Exception, "Invalid range (rangeStart > rangeEnd)")
+
+  let 
+    byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
+    aobScan = aob(pattern, byteBuffer)
+
+  if aobScan != 0:
+    result = if relative: aobScan else: aobScan + rangeStart
+
+#[ Windows only! ]#
 when defined(windows):
   proc pageProtection(a: Process, address: ByteAddress, newProtection: int32 = 0x40): int32 {.exportpy: "page_protection".} =
     var mbi = MEMORY_BASIC_INFORMATION()
     discard VirtualQueryEx(a.handle, cast[LPCVOID](address), mbi.addr, sizeof(mbi).SIZE_T)
     discard VirtualProtectEx(a.handle, cast[LPCVOID](address), mbi.RegionSize, newProtection, result.addr)
+

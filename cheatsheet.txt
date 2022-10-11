@@ -23,6 +23,11 @@ close_process(process: Process)
 enum_modules(process: Process): Module (iterator)
 get_module(process: Process, moduleName: string): Module
 
+aob_scan_module(process: Process, moduleName, pattern: string, relative: bool = false): int                     # Wildcard = ??
+aob_scan_range(process: Process, pattern: string, rangeStart, rangeEnd: int, relative: bool = false)           # Wildcard = ??
+pointer_chain_32(process: Process, base: int, offsets: int array)
+pointer_chain_64(process: Process, base: int, offsets: int array)
+
 r_string(process: Process, address: int, size: int = 30): string
 r_int(process: Process, address: int): int
 r_ints(process: Process, address: int, size: int): int array
@@ -65,9 +70,8 @@ w_vec2(process: Process, address: int, data: Vector2)
 w_vec3(process: Process, address: int, data: Vector3)
 w_bool(process: Process, address: int, data: bool)
 
-pointer_chain_32(process: Process, base: ByteAddress, offsets: int array)
-pointer_chain_64(process: Process, base: ByteAddress, offsets: int array)
-page_protection(Process, address: int, newProtection: int = 0x40) -> int (old protection, windows only)
+Windows only:
+page_protection(Process, address: int, newProtection: int = 0x40): int (old protection)
 
 ################################################################################################################
 Overlay
