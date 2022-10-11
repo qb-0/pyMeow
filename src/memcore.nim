@@ -272,7 +272,7 @@ proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = b
   if process.debug:
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
-proc aob(pattern: string, byteBuffer: seq[byte]): int =
+proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
   const
     wildCard = "??"
     wildCardByte = 200.byte # Not safe
@@ -291,39 +291,41 @@ proc aob(pattern: string, byteBuffer: seq[byte]): int =
 
   let bytePattern = patternToBytes(pattern)
   var byteHits: int
-
-  for b in byteBuffer:
-    inc result
+  for i, b in byteBuffer:
     let p = bytePattern[byteHits]
     if p == wildCardByte or p == b:
       inc byteHits
     else:
       byteHits = 0
     if byteHits == bytePattern.len:
-      result = result - bytePattern.len
-      return
-  result = 0
+      result.add(i+1 - bytePattern.len)
+      byteHits = 0
+      if single:
+        return
 
-proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false): ByteAddress {.exportpy: "aob_scan_module".} =
+proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true): seq[ByteAddress] {.exportpy: "aob_scan_module".} =
   let 
     module = getModule(process, moduleName)
-    # ToDo: Reading a whole module is a bad idea. Will be changed.
+    # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
-    aobScan = aob(pattern, byteBuffer)
+  
+  result = aob(pattern, byteBuffer, single)
+  if result.len != 0:
+    if not relative:
+      for i, a in result:
+        result[i] += module.base
 
-  if aobScan != 0:
-    result = if relative: aobScan else: aobScan + module.base
-
-proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteAddress, relative: bool = false): ByteAddress {.exportpy: "aob_scan_range".} =
+proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteAddress, relative: bool = false, single: bool = true): seq[ByteAddress] {.exportpy: "aob_scan_range".} =
   if rangeStart >= rangeEnd:
     raise newException(Exception, "Invalid range (rangeStart > rangeEnd)")
 
-  let 
-    byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
-    aobScan = aob(pattern, byteBuffer)
-
-  if aobScan != 0:
-    result = if relative: aobScan else: aobScan + rangeStart
+  let byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
+  
+  result = aob(pattern, byteBuffer, single)
+  if result.len != 0:
+    if not relative:
+      for i, a in result:
+        result[i] += rangeStart
 
 #[ Windows only! ]#
 when defined(windows):
