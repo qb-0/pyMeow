@@ -2,7 +2,9 @@
 
 import pyMeow as pm
 
-DEBUG = True
+DEBUG = False
+RAPID_FIRE = True
+AMMO_HACK = True
 
 
 class Pointer:
@@ -59,6 +61,17 @@ def main():
     proc = pm.open_process(processName="linux_64_client", debug=DEBUG)
     base = pm.get_module(proc, "linux_64_client")["base"]
     entity_list = pm.r_int(proc, base + Pointer.entity_list)
+
+    if RAPID_FIRE:
+        rapidScan = pm.aob_scan_module(proc, "linux_64_client", "89 01 48 8B 43")
+        if rapidScan:
+            pm.page_protection(proc, rapidScan[0], 7)
+            pm.w_bytes(proc, rapidScan[0], [0x90, 0x90])
+
+    if AMMO_HACK:
+        ammoScan = pm.aob_scan_module(proc, "linux_64_client", "83 00 FF 48 8B 43")
+        pm.page_protection(proc, ammoScan[0], 7)
+        pm.w_bytes(proc, ammoScan[0], [0x90, 0x90, 0x90])
 
     pm.overlay_init(target="AssaultCube", fps=144)
     while pm.overlay_loop():
