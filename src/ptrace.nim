@@ -6,7 +6,9 @@
   Currently just x64 processes are supported
 ]#
 
-import posix, strformat, strscans, strutils
+import 
+  posix, strformat, 
+  strscans, strutils
 
 {.pragma: sys, importc, header: "sys/syscall.h".}
 
