@@ -8,7 +8,8 @@ when defined(windows):
   import winim
 elif defined(linux):
   import 
-    posix, strscans, tables
+    posix, strscans, tables,
+    ptrace
 
   proc process_vm_readv(
     pid: int, 
@@ -62,6 +63,17 @@ proc memoryErr(m: string, address: ByteAddress) {.inline.} =
     AccessViolationDefect,
     fmt"{m} failed [Address: 0x{address.toHex()}] {getErrorStr()}"
   )
+
+proc is64bit(process: Process): bool {.exportpy: "is_64_bit".} =
+  when defined(linux):
+    var buffer = newSeq[byte](5)
+    let exe = open(fmt"/proc/{process.pid}/exe", fmRead)
+    discard exe.readBytes(buffer, 0, 5)
+    result = buffer[4] == 2
+  elif defined(windows):
+    var wow64: BOOL
+    discard IsWow64Process(process.handle, wow64.addr)
+    result = wow64 != TRUE
 
 iterator enumProcesses: Process {.exportpy: "enum_processes".} =
   var p: Process
@@ -133,7 +145,7 @@ proc openProcess(pid: int = 0, processName: string = "", debug: bool = false): P
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
     if result.handle == FALSE:
       raise newException(Exception, fmt"Unable to open Process [Pid: {pid}] {getErrorStr()}")
-
+  
 proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):
     CloseHandle(process.handle)
@@ -327,10 +339,22 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteA
       for i, a in result:
         result[i] += rangeStart
 
-#[ Windows only! ]#
-when defined(windows):
-  proc pageProtection(a: Process, address: ByteAddress, newProtection: int32 = 0x40): int32 {.exportpy: "page_protection".} =
+proc pageProtection(process: Process, address: ByteAddress, newProtection: int32): int32 {.exportpy: "page_protection".} =
+  when defined(linux):
+    ptrace.pageProtection(process.pid, address, newProtection)
+  elif defined(windows):
     var mbi = MEMORY_BASIC_INFORMATION()
-    discard VirtualQueryEx(a.handle, cast[LPCVOID](address), mbi.addr, sizeof(mbi).SIZE_T)
-    discard VirtualProtectEx(a.handle, cast[LPCVOID](address), mbi.RegionSize, newProtection, result.addr)
+    discard VirtualQueryEx(process.handle, cast[LPCVOID](address), mbi.addr, sizeof(mbi).SIZE_T)
+    discard VirtualProtectEx(process.handle, cast[LPCVOID](address), mbi.RegionSize, newProtection, result.addr)
 
+proc allocateMemory(process: Process, size: int, protection: int32 = 0): ByteAddress {.exportpy: "allocate_memory".} =
+  when defined(linux):
+    var prot = PROT_READ or PROT_WRITE or PROT_EXEC
+    if protection != 0:
+      prot = protection
+    ptrace.allocateMemory(process.pid, size, prot)
+  elif defined(windows):
+    var prot = PAGE_EXECUTE_READWRITE
+    if protection != 0:
+      prot = protection
+    cast[ByteAddress](VirtualAllocEx(process.handle, nil, size, MEM_COMMIT or MEM_RESERVE, prot.int32))

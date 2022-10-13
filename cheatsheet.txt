@@ -22,11 +22,15 @@ open_process(pid: int = 0, processName: string = "", debug: bool = false): Proce
 close_process(process: Process)
 enum_modules(process: Process): Module (iterator)
 get_module(process: Process, moduleName: string): Module
+is_64_bit(process: Process): bool
 
 aob_scan_module(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true): int array                    # Wildcard = ??
 aob_scan_range(process: Process, pattern: string, rangeStart, rangeEnd: int, relative: bool = false, single: bool = true): int array      # Wildcard = ??
 pointer_chain_32(process: Process, base: int, offsets: int array)
 pointer_chain_64(process: Process, base: int, offsets: int array)
+
+pageProtection(process: Process, address: ByteAddress, newProtection: int): int
+allocateMemory(process: Process, size: int, protection: int = 0): int
 
 r_string(process: Process, address: int, size: int = 30): string
 r_int(process: Process, address: int): int
@@ -69,9 +73,6 @@ w_bytes(process: Process, address: int, data: byte array)
 w_vec2(process: Process, address: int, data: Vector2)
 w_vec3(process: Process, address: int, data: Vector3)
 w_bool(process: Process, address: int, data: bool)
-
-Windows only:
-page_protection(Process, address: int, newProtection: int = 0x40): int (old protection)
 
 ################################################################################################################
 Overlay
