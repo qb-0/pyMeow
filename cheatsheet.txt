@@ -29,8 +29,8 @@ aob_scan_range(process: Process, pattern: string, rangeStart, rangeEnd: int, rel
 pointer_chain_32(process: Process, base: int, offsets: int array)
 pointer_chain_64(process: Process, base: int, offsets: int array)
 
-pageProtection(process: Process, address: ByteAddress, newProtection: int): int
-allocateMemory(process: Process, size: int, protection: int = 0): int
+page_protection(process: Process, address: ByteAddress, newProtection: int): int
+allocate_memory(process: Process, size: int, protection: int = 0): int
 
 r_string(process: Process, address: int, size: int = 30): string
 r_int(process: Process, address: int): int
