@@ -1,5 +1,5 @@
 # pyMeow
-# https://github.com/qb-0/pyMeow.
+# https://github.com/qb-0/pyMeow
 
 import src/[
   memcore,
