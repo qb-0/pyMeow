@@ -26,8 +26,8 @@ is_64_bit(process: Process): bool
 
 aob_scan_module(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true): int array                    # Wildcard = ??
 aob_scan_range(process: Process, pattern: string, rangeStart, rangeEnd: int, relative: bool = false, single: bool = true): int array      # Wildcard = ??
-pointer_chain_32(process: Process, base: int, offsets: int array)
-pointer_chain_64(process: Process, base: int, offsets: int array)
+pointer_chain_32(process: Process, base: int, offsets: int array): int
+pointer_chain_64(process: Process, base: int, offsets: int array): int
 
 page_protection(process: Process, address: ByteAddress, newProtection: int): int
 allocate_memory(process: Process, size: int, protection: int = 0): int
