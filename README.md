@@ -1,4 +1,4 @@
-# :cat: pyMeow [![](https://dcbadge.vercel.app/api/server/B34S4aMYqY)](https://discord.gg/B34S4aMYqY)
+# :cat: pyMeow<br>[![](https://dcbadge.vercel.app/api/server/B34S4aMYqY)](https://discord.gg/B34S4aMYqY)
 pyMeow combines a memory module and functionality of [Raylib](https://www.raylib.com/) to a library which makes it easy to create external cheats with Python on Windows or Linux:
 
 <img src="https://github.com/qb-0/pyMeow./raw/master/examples/screenshots/csgo.png" alt="alt text" width="350" height="250"> <img src="https://github.com/qb-0/pyMeow./raw/master/examples/screenshots/sauerbraten.png" alt="alt text" width="350" height="250">
