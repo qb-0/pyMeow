@@ -6,6 +6,7 @@ import
 
 pyExportModule("pyMeow")
 
+# exitKey: 'END'
 when defined(linux):
   const exitKey = 0xFF57
   import x11/xlib, strutils, osproc
