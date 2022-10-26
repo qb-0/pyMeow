@@ -73,13 +73,14 @@ proc checkBox(posX, posY, width, height: float, text: string, checked: bool): bo
 proc comboBox(posX, posY, width, height: float, text: string, active: int = 0): int {.exportpy: "gui_combo_box".} =
   rg.comboBox(getRec, text, active)
 
-proc dropdownBox(posX, posY, width, height: float, text: string, id: int): int {.exportpy: "gui_dropdown_box".} =
+proc dropdownBox(posX, posY, width, height: float, text: string, id: int, active: int = 0): int {.exportpy: "gui_dropdown_box".} =
   if id notin dropDownTable:
     dropDownTable[id] = DropDownBox(
       rec: getRec,
       text: text,
+      active: active,
     )
-  if rg.dropdownBox(dropDownTable[id].rec, dropDownTable[id].text.cstring, dropDownTable[id].active.addr, dropDownTable[id].editMode):
+  if rg.dropdownBox(getRec, dropDownTable[id].text.cstring, dropDownTable[id].active.addr, dropDownTable[id].editMode):
     dropDownTable[id].editMode = not dropDownTable[id].editMode
   dropDownTable[id].active
 
@@ -89,7 +90,7 @@ proc textBox(posX, posY, width, height: float, text: string, id: int): string {.
       rec: getRec,
       text: text & newString(200),
     )
-  if rg.textBox(textBoxTable[id].rec, textBoxTable[id].text.cstring, 250, textBoxTable[id].editMode):
+  if rg.textBox(getRec, textBoxTable[id].text.cstring, 250, textBoxTable[id].editMode):
     textBoxTable[id].editMode = not textBoxTable[id].editMode    
   textBoxTable[id].text
 
