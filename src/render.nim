@@ -106,8 +106,14 @@ proc drawPolyLines(posX, posY: float, sides: int, radius, rotation, lineThick: f
 proc loadTexture(fileName: string): Texture2D {.exportpy: "load_texture".} =
   rl.loadTexture(fileName)
 
+proc loadTextureBytes(fileType: string, data: openArray[uint8]): Texture2D {.exportpy: "load_texture_bytes".} =
+  rl.loadTextureFromImage(rl.loadImageFromMemory(fileType, data[0].unsafeAddr, data.len))
+
 proc drawTexture(texture: Texture2D, posX, posY: float, tint: Color, rotation, scale: float) {.exportpy: "draw_texture".} =
   rl.drawTextureEx(texture, Vector2(x: posX, y: posY), rotation, scale, tint)
+
+proc unloadTexture(texture: Texture2D) {.exportpy: "unload_texture".} =
+  rl.unloadTexture(texture)
 
 proc loadFont(fileName: string, fontId: int) {.exportpy: "load_font".} =
   fontTable[fontId] = FontObj(
