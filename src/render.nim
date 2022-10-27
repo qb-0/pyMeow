@@ -8,7 +8,7 @@ type
   FontObj = object
     id: int
     font: Font
-  
+
 var
   fontTable: Table[int, FontObj]
 

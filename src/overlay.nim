@@ -8,10 +8,10 @@ pyExportModule("pyMeow")
 
 # exitKey: 'END'
 when defined(linux):
-  const exitKey = 0xFF57
+  var globalExitKey = 0xFF57
   import x11/xlib, strutils, osproc
 elif defined(windows):
-  const exitKey = 0x23
+  var globalExitKey = 0x23
   import winim
 
 proc getScreenResolution: (int, int) =
@@ -60,7 +60,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
     result.width = rect.right
     result.height = rect.bottom
 
-proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5) {.exportpy: "overlay_init"} =
+proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1) {.exportpy: "overlay_init"} =
   let res = getScreenResolution()
   setTraceLogLevel(logLevel)
   setTargetFPS(fps.cint)
@@ -79,9 +79,13 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
     setWindowSize(winInfo.width, winInfo.height)
     setWindowPosition(winInfo.x, winInfo.y)
 
+  if exitKey != -1:
+    globalExitKey = exitKey
+  setExitKey(KeyboardKey.NULL)
+
 proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   clearBackground(Blank)
-  if keyPressed(exitKey):
+  if keyPressed(globalExitKey):
     rl.closeWindow()
   not windowShouldClose()
 

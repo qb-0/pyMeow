@@ -9,10 +9,10 @@ when defined(linux):
     display = XOpenDisplay(nil)
     root = XRootWindow(display, 0)
 
-  proc keyPressed*(key: KeySym): bool {.exportpy: "key_pressed".} =
+  proc keyPressed*(key: int): bool {.exportpy: "key_pressed".} =
     var keys: array[0..31, char]
     discard XQueryKeymap(display, keys)
-    let keycode = XKeysymToKeycode(display, key)
+    let keycode = XKeysymToKeycode(display, key.culong)
     (ord(keys[keycode.int div 8]) and (1 shl (keycode.int mod 8))) != 0
 
   proc pressKey*(key: KeySym, hold: bool = false) {.exportpy: "press_key".} =
@@ -51,7 +51,7 @@ elif defined(windows):
   proc keyPressed*(vKey: int32): bool {.exportpy: "key_pressed".} =
     GetAsyncKeyState(vKey).bool
 
-  proc pressKey(vKey: int32) {.exportpy: "press_key".} =
+  proc pressKey(vKey: int) {.exportpy: "press_key".} =
     var input: INPUT
     input.`type` = INPUT_KEYBOARD
     input.ki.wScan = 0

@@ -77,7 +77,7 @@ w_bool(process: Process, address: int, data: bool)
 ################################################################################################################
 Overlay
 ################################################################################################################
-overlay_init(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5)
+overlay_init(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1)
 overlay_loop(): bool
 overlay_close()
 toggle_mouse()
