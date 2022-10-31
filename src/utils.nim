@@ -88,7 +88,6 @@ proc getDisplayResolution*: (int, int) {.exportpy: "get_display_resolution".} =
     let
       disp = XOpenDisplay(nil)
       scrn = DefaultScreenOfDisplay(disp)
-
     defer: discard XCloseDisplay(disp)
     (scrn.width.int, scrn.height.int)
   elif defined(windows):
