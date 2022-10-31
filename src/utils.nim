@@ -60,10 +60,10 @@ proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Ve
   result.x = (getScreenWidth() / 2 * ndc.x) + (ndc.x + getScreenWidth() / 2)
   result.y = -(getScreenHeight() / 2 * ndc.y) + (ndc.y + getScreenHeight() / 2)
 
-proc checkCollisionRecs(rec1, rec2: Rectangle): bool {.exportpy: "check_collision_recs".} =
+proc checkCollisionRecs(rec1, rec2: rl.Rectangle): bool {.exportpy: "check_collision_recs".} =
   rl.checkCollisionRecs(rec1, rec2)
 
-proc checkCollisionCircleRec(posX, posY, radius: float, rec: Rectangle): bool {.exportpy: "check_collision_circle_rec".} =
+proc checkCollisionCircleRec(posX, posY, radius: float, rec: rl.Rectangle): bool {.exportpy: "check_collision_circle_rec".} =
   rl.checkCollisionCircleRec(Vector2(x: posX, y: posY), radius, rec)
 
 proc checkCollisionLines(startPos1X, endPos1X, startPos1Y, endPos1Y, startPos2X, startPos2Y, endPos2X, endPos2Y: float): Vector2 {.exportpy: "check_collision_lines".} =
