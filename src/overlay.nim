@@ -4,25 +4,17 @@ import
   nimraylib_now as rl,
   input
 
+from utils import getDisplayResolution
+
 pyExportModule("pyMeow")
 
 # exitKey: 'END'
 when defined(linux):
   var globalExitKey = 0xFF57
-  import x11/xlib, strutils, osproc
+  import strutils, osproc
 elif defined(windows):
   var globalExitKey = 0x23
   import winim
-
-proc getScreenResolution: (int, int) =
-  when defined(linux):
-    let
-      disp = XOpenDisplay(nil)
-      scrn = DefaultScreenOfDisplay(disp)
-
-    (scrn.width.int, scrn.height.int)
-  elif defined(windows):
-    (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)
 
 proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
   when defined(linux):
@@ -61,7 +53,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
     result.height = rect.bottom
 
 proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1) {.exportpy: "overlay_init"} =
-  let res = getScreenResolution()
+  let res = getDisplayResolution()
   setTraceLogLevel(logLevel)
   setTargetFPS(fps.cint)
   setConfigFlags(WINDOW_UNDECORATED)
@@ -109,6 +101,9 @@ proc getScreenWidth: int {.exportpy: "get_screen_width".} =
 
 proc setWindowPosition(x, y: int) {.exportpy: "set_window_position".} =
   rl.setWindowPosition(x, y)
+
+proc setWindowIcon(filePath: string) {.exportpy: "set_window_icon".} =
+  rl.setWindowIcon(rl.loadImage(filePath))
 
 proc getWindowPosition: Vector2 {.exportpy: "get_window_position".} =
   rl.getWindowPosition()

@@ -4,6 +4,11 @@ import
 
 pyExportModule("pyMeow")
 
+when defined(linux):
+  import x11/xlib
+elif defined(windows):
+  import winim
+
 proc newColor(r, g, b, a: uint8): rl.Color {.exportpy: "new_color".} =
   rl.Color(r: r, g: g, b: b, a: a)
 
@@ -77,3 +82,14 @@ proc checkCollisionCircles(pos1X, pos1Y, radius1, pos2X, pos2Y, radius2: float):
     Vector2(x: pos2X, y: pos2Y),
     radius2
   )
+
+proc getDisplayResolution*: (int, int) {.exportpy: "get_display_resolution".} =
+  when defined(linux):
+    let
+      disp = XOpenDisplay(nil)
+      scrn = DefaultScreenOfDisplay(disp)
+
+    defer: discard XCloseDisplay(disp)
+    (scrn.width.int, scrn.height.int)
+  elif defined(windows):
+    (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)

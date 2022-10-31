@@ -88,6 +88,7 @@ get_screen_width(): int
 set_window_position(x, y: int)
 get_window_position: Vector2
 set_window_size(width, height: int)
+set_window_icon(filePath: string)
 
 ################################################################################################################
 Shapes / Drawing
@@ -174,6 +175,7 @@ vec3_closest(a: Vec2, b: Vector3 array): Vector3
 ################################################################################################################
 Misc / Utilities
 ################################################################################################################
+get_display_resolution(): (int, int)
 new_color(r, g, b, a: uint8): Color
 get_color(colorName: string)
 fade_color(color: Color, alpha: float): Color

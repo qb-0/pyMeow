@@ -50,13 +50,16 @@ proc checkRoot =
 
 proc getErrorStr: string =
   when defined(linux):
-    fmt"[Error: {errno} - {strerror(errno)}]"
+    let
+      errCode = errno
+      errMsg = strerror(errCode)
   elif defined(windows):
     var 
       errCode = osLastError()
       errMsg = osErrorMsg(errCode)
     stripLineEnd(errMsg)
-    fmt"[Error: {errCode} - {errMsg}]"
+  
+  result = fmt"[Error: {errCode} - {errMsg}]"
 
 proc memoryErr(m: string, address: ByteAddress) {.inline.} =
   raise newException(
