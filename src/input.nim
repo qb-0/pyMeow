@@ -1,4 +1,5 @@
-import os, nimpy, nimraylib_now
+import 
+  os, nimpy, nimraylib_now
 
 pyExportModule("pyMeow")
 
@@ -35,7 +36,7 @@ when defined(linux):
     discard XTestFakeButtonEvent(display, 1, 0, 0)
     discard XFlush(display)
 
-  proc mousePosition: Vector2 {.exportpy: "mouse_position".} =
+  proc mousePosition*: Vector2 {.exportpy: "mouse_position".} =
     var 
       qRoot, qChild: Window
       qRootX, qRootY, qChildX, qChildY: cint
@@ -80,7 +81,7 @@ elif defined(windows):
     sleep(3)
     SendInput(1, release.addr, sizeof(release).int32)
 
-  proc mousePosition: Vector2 {.exportpy: "mouse_position".} =
+  proc mousePosition*: Vector2 {.exportpy: "mouse_position".} =
     var point: POINT
     discard GetCursorPos(point.addr)
     result.x = point.x.cfloat
