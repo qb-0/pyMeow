@@ -1,6 +1,5 @@
 import
-  strformat,
-  nimpy,
+  strformat, nimpy,
   nimraylib_now as rl,
   input
 
