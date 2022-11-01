@@ -93,7 +93,7 @@ proc getDisplayResolution*: (int, int) {.exportpy: "get_display_resolution".} =
   elif defined(windows):
     (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)
 
-proc compareColorPCT(color1, color2: rl.Color): float {.exportpy: "compare_color_pct".} =
+proc compareColorPCT*(color1, color2: rl.Color): float {.exportpy: "compare_color_pct".} =
   let
     r = abs(color1.r.int - color2.r.int).float / 255
     g = abs(color1.g.int - color2.g.int).float / 255
