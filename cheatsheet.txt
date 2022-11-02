@@ -173,6 +173,19 @@ vec3_distance(a, b: Vector3): float
 vec3_closest(a: Vec2, b: Vector3 array): Vector3
 
 ################################################################################################################
+Pixel Scanning
+################################################################################################################
+Pixel
+  x, y: int
+  color: Color
+
+pixel_enum_region(x, y, width, height: float): Pixel (iterator)
+pixel_enum_screen(): Pixel (iterator)
+pixel_at_mouse(): Pixel
+pixel_save_to_file(x, y, width, height: float, fileName: string)
+pixel_search_colors(x, y, width, height: float, colors: Color array, similarity: float): Pixel (iterator)
+
+################################################################################################################
 Misc / Utilities
 ################################################################################################################
 get_display_resolution(): (int, int)

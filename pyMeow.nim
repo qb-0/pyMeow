@@ -9,5 +9,6 @@ import src/[
   utils,
   input,
   gui,
-  vec
+  vec,
+  pixel,
 ]
