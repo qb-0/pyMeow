@@ -313,7 +313,7 @@ proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = b
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
 proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
-  # Credits to Iago Beuller for realizing the boyer moore horspool algorithm
+  # Credits to Iago Beuller
   const
     wildCard = '?'
     doubleWildCard = "??"
