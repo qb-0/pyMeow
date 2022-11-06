@@ -43,6 +43,11 @@ type
     `end`: ByteAddress
     size: int
 
+  Page = object
+    start: ByteAddress
+    `end`: ByteAddress
+    size: int
+
 proc checkRoot =
   when defined(linux):
     if getuid() != 0:
@@ -201,6 +206,26 @@ proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_mo
       return module
   raise newException(Exception, fmt"Module '{moduleName}' not found")
 
+iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "enum_memory_regions".} =
+  var result: Page
+  when defined(linux):
+    checkRoot()
+    var pageStart, pageEnd: ByteAddress
+    for l in lines(fmt"/proc/{process.pid}/maps"):
+      if module.name in l and scanf(l, "$h-$h", result.start, result.`end`):
+        result.size = pageEnd - pageStart
+        yield result
+  elif defined(windows):
+    var
+      mbi = MEMORY_BASIC_INFORMATION()
+      curAddr = module.base
+    while VirtualQueryEx(process.handle, cast[LPCVOID](curAddr), mbi.addr, sizeof(mbi).SIZE_T) != 0 and curAddr != module.`end`:
+      result.start = curAddr
+      result.`end` = result.start + mbi.RegionSize.int
+      result.size = mbi.RegionSize.int
+      curAddr += result.size
+      yield result
+
 proc read*(process: Process, address: ByteAddress, t: typedesc): t =
   when defined(linux):
     var
@@ -305,18 +330,15 @@ proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress]
       raise newException(Exception, "Invalid pattern")
 
   let bytePattern = patternToBytes(pattern)
-  var byteHits: int
-  for i, b in byteBuffer:
-    let p = bytePattern[byteHits]
-    if p == wildCardByte or p == b:
-      inc byteHits
-    else:
-      byteHits = 0
-    if byteHits == bytePattern.len:
-      result.add(i+1 - bytePattern.len)
-      byteHits = 0
-      if single:
-        return
+  for curIndex, _ in byteBuffer:
+    for sigIndex, s in bytePattern:
+      if byteBuffer[curIndex + sigIndex] != s and s != wildCardByte:
+        break
+      elif sigIndex == bytePattern.len-1:
+        result.add(curIndex)
+        if single:
+          return
+        break
 
 proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true): seq[ByteAddress] {.exportpy: "aob_scan_module".} =
   let 
