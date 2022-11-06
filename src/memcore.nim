@@ -356,7 +356,7 @@ proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress]
     result.insert(lastHexByteIndex, 0)
 
   let 
-    hexPattern = pattern.split(" ")
+    hexPattern = pattern.split()
     bytePattern = patternToBytes(hexPattern)
     pIndexMatchOrder = getIndexMatchOrder(hexPattern)
 
