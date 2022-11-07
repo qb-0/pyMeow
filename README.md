@@ -10,7 +10,7 @@ An overview of the functionality can be found in the [Cheatsheet](https://github
 ## :floppy_disk: Installation
 - Make sure you use a **64bit** version of Python
 - Download the latest PyMeow Module from the ![Release Section](https://github.com/qb-0/pyMeow./releases)
-- Extract the files and use pip to install pyMeow: `pip install .`
+- Use pip to install `pip install pyMeow*.zip`
 
 ## :desktop_computer: Compiling
 ```bash
