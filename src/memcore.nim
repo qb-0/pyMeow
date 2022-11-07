@@ -63,7 +63,6 @@ proc getErrorStr: string =
       errCode = osLastError()
       errMsg = osErrorMsg(errCode)
     stripLineEnd(errMsg)
-  
   result = fmt"[Error: {errCode} - {errMsg}]"
 
 proc memoryErr(m: string, address: ByteAddress) {.inline.} =
@@ -78,6 +77,7 @@ proc is64bit(process: Process): bool {.exportpy: "is_64_bit".} =
     let exe = open(fmt"/proc/{process.pid}/exe", fmRead)
     discard exe.readBytes(buffer, 0, 5)
     result = buffer[4] == 2
+    close(exe)
   elif defined(windows):
     var wow64: BOOL
     discard IsWow64Process(process.handle, wow64.addr)
@@ -85,7 +85,6 @@ proc is64bit(process: Process): bool {.exportpy: "is_64_bit".} =
 
 iterator enumProcesses: Process {.exportpy: "enum_processes".} =
   var p: Process
-
   when defined(linux):
     checkRoot()
     let allFiles = toSeq(walkDir("/proc", relative = true))
@@ -93,16 +92,13 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
         p.pid = pid
         p.name = readFile(fmt"/proc/{pid}/comm").strip()
         yield p
-  
   elif defined(windows):
     var 
       pe: PROCESSENTRY32
       hResult: WINBOOL
-
     let hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
     defer: CloseHandle(hSnapShot)
     pe.dwSize = sizeof(PROCESSENTRY32).DWORD
-
     hResult = Process32First(hSnapShot, pe.addr)
     while hResult:
       p.name = nullTerminated($$pe.szExeFile)
@@ -113,12 +109,12 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
 proc pidExists(pid: int): bool {.exportpy: "pid_exists".} =
   pid in mapIt(toSeq(enumProcesses()), it.pid)
 
-proc getProcessId(procName: string): int {.exportpy: "get_process_id".} =
+proc getProcessId(processName: string): int {.exportpy: "get_process_id".} =
   checkRoot()
   for process in enumProcesses():
-    if process.name in procName:
+    if process.name in processName:
       return process.pid
-  raise newException(Exception, fmt"Process '{procName}' not found")
+  raise newException(Exception, fmt"Process '{processName}' not found")
 
 proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
   checkRoot()
