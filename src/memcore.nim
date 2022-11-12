@@ -308,7 +308,8 @@ proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = b
   if process.debug:
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
-proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
+proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
+  # Credits to Iago Beuller
   const
     wildCard = '?'
     doubleWildCard = "??"
@@ -423,7 +424,7 @@ proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool
     # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
   
-  result = if algorithm == 0: aob(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:
       for i, a in result:
@@ -435,7 +436,7 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteA
 
   let byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
   
-  result = if algorithm == 0: aob(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:
       for i, a in result:
