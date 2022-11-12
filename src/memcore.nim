@@ -309,34 +309,36 @@ proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = b
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
 proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
-  # Credits to Iago Beuller
   const
     wildCard = '?'
     doubleWildCard = "??"
     wildCardIntL = 256
     wildCardIntR = 257
-    doubleWildCardInt  = 258
+    doubleWildCardInt = 258
 
-  proc patternToBytes(pattern: seq[string]): seq[int] =
+  proc splitPattern(pattern: string): seq[string] =
+    var patt = pattern.replace(" ", "")
     try:
-      for hex in pattern:
-        if wildCard in hex:
-          if hex == doubleWildCard:
-            result.add(doubleWildCardInt)
-          elif hex[0] == wildCard:
-            result.add(wildCardIntL)
-          else:
-            result.add(wildCardIntR)
-        else:
-            result.add(parseHexInt(hex))
+      for i in countup(0, patt.len-1, 2):
+        result.add(patt[i..i+1])
     except:
       raise newException(Exception, "Invalid pattern")
 
+  proc patternToInts(pattern: seq[string]): seq[int] =
+    for hex in pattern:
+      if wildCard in hex:
+        if hex == doubleWildCard:
+          result.add(doubleWildCardInt)
+        elif hex[0] == wildCard:
+          result.add(wildCardIntL)
+        else:
+          result.add(wildCardIntR)
+      else:
+          result.add(parseHexInt(hex))
+
   proc getIndexMatchOrder(pattern: seq[string]): seq[int] =
     let middleIndex = (pattern.len div 2) - 1
-    var 
-      midHexByteIndex: int
-      lastHexByteIndex: int
+    var midHexByteIndex, lastHexByteIndex: int
 
     for i, hb in pattern:
       if hb != doubleWildCard:
@@ -351,15 +353,15 @@ proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress]
     result.insert(midHexByteIndex, 1)
     result.insert(lastHexByteIndex, 0)
 
-  let 
-    hexPattern = pattern.split()
-    bytePattern = patternToBytes(hexPattern)
+  let
+    hexPattern = splitPattern(pattern)
+    intsPattern = patternToInts(hexPattern)
     pIndexMatchOrder = getIndexMatchOrder(hexPattern)
 
   if pIndexMatchOrder.len == 0:
     return
 
-  var 
+  var
     found: bool
     b, p: int
 
@@ -367,9 +369,11 @@ proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress]
     found = true
     for pId in pIndexMatchOrder:
       b = byteBuffer[i+pId].int
-      p = bytePattern[pId]
+      p = intsPattern[pId]
+
       if p != b:
         found = false
+
         if p == wildCardIntL:
           if b.toHex(1)[0] == hexPattern[pId][1]:
             found = true
@@ -385,25 +389,53 @@ proc aob(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress]
       if single:
         return
 
-proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true): seq[ByteAddress] {.exportpy: "aob_scan_module".} =
+proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
+  const
+    wildCard = "??"
+    wildCardByte = 200.byte # Not safe
+
+  proc patternToBytes(pattern: string): seq[byte] =
+    var patt = pattern.replace(" ", "")
+    try:
+      for i in countup(0, patt.len-1, 2):
+        let hex = patt[i..i+1]
+        if hex == wildCard:
+          result.add(wildCardByte)
+        else:
+          result.add(parseHexInt(hex).byte)
+    except:
+      raise newException(Exception, "Invalid pattern")
+
+  let bytePattern = patternToBytes(pattern)
+  for curIndex, _ in byteBuffer:
+    for sigIndex, s in bytePattern:
+      if byteBuffer[curIndex + sigIndex] != s and s != wildCardByte:
+        break
+      elif sigIndex == bytePattern.len-1:
+        result.add(curIndex)
+        if single:
+          return
+        break
+
+proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[ByteAddress] {.exportpy: "aob_scan_module".} =
   let 
     module = getModule(process, moduleName)
     # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
   
-  result = aob(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:
       for i, a in result:
         result[i] += module.base
 
-proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteAddress, relative: bool = false, single: bool = true): seq[ByteAddress] {.exportpy: "aob_scan_range".} =
+proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteAddress, relative: bool = false, single: bool = true, algorithm: int = 0): seq[ByteAddress] {.exportpy: "aob_scan_range".} =
   if rangeStart >= rangeEnd:
     raise newException(Exception, "Invalid range (rangeStart > rangeEnd)")
 
   let byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
   
-  result = aob(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:
       for i, a in result:
