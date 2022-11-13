@@ -66,8 +66,8 @@ elif defined(windows):
     var input: INPUT
     input.mi = MOUSE_INPUT(
       dwFlags: MOUSEEVENTF_MOVE, 
-      dx: (x - (getScreenWidth() div 2)).int32,
-      dy: -(y - (getScreenHeight() div 2)).int32,
+      dx: x.int32,
+      dy: y.int32,
     )
     SendInput(1, input.addr, sizeof(input).int32)
 
