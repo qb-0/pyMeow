@@ -78,6 +78,9 @@ proc pixelAtMouse: Pixel {.exportpy: "pixel_at_mouse".} =
   let pos = mousePosition()
   result = pixelEnumRegion(pos.x, pos.y, 1, 1).toSeq()[0]
 
+proc pixelAtPos(x, y: float): Pixel {.exportpy: "pixel_at_pos".} =
+  result = pixelEnumRegion(x, y, 1, 1).toSeq()[0]
+
 proc pixelSaveToFile(x, y, width, height: float, fileName: string): bool {.exportpy: "pixel_save_to_file".} =
   rl.setTraceLogLevel(5)
   var img = genImageColor(width.int, height.int, Blank)
