@@ -60,6 +60,9 @@ proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Ve
   result.x = (getScreenWidth() / 2 * ndc.x) + (ndc.x + getScreenWidth() / 2)
   result.y = -(getScreenHeight() / 2 * ndc.y) + (ndc.y + getScreenHeight() / 2)
 
+proc checkCollisionPointRec(pointX, pointY: float, rec: rl.Rectangle): bool {.exportpy: "check_collision_point_rec".} =
+  rl.checkCollisionPointRec(Vector2(x: pointX, y: pointY), rec)
+
 proc checkCollisionRecs(rec1, rec2: rl.Rectangle): bool {.exportpy: "check_collision_recs".} =
   rl.checkCollisionRecs(rec1, rec2)
 

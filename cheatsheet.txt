@@ -202,6 +202,7 @@ mouse_position(): (x, y)
 measure_text(text: string, fontSize: int): int
 measure_font(fontId: int, text: string, fontSize, spacing: float): Vector2
 run_time(): float
+check_collision_point_rec(pointX, pointY: float, rec: Rectangle): bool
 check_collision_recs(rec1, rec2: Rectangle): bool
 check_collision_circle_rec(posX, posY, radius: float, rec: Rectangle): bool
 check_collision_lines(startPos1X, endPos1X, startPos1Y, endPos1Y, startPos2X, startPos2Y, endPos2X, endPos2Y: float): Vector2
