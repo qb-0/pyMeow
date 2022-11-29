@@ -126,7 +126,6 @@ proc spinner(posX, posY, width, height: float, text: string, value, minValue, ma
     spinnerTable[id] = Spinner(
       rec: getRec,
     )
-
   spinnerTable[id].editMode = rg.spinner(getRec, text, spinnerTable[id].value.addr, minValue, maxValue, spinnerTable[id].editMode)
   spinnerTable[id].value
 
