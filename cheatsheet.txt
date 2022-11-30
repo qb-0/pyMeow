@@ -189,6 +189,7 @@ pixel_search_colors(x, y, width, height: float, colors: Color array, similarity:
 Misc / Utilities
 ################################################################################################################
 get_display_resolution(): (int, int)
+get_window_info(name: string): (x, y, width, height: int)
 new_color(r, g, b, a: uint8): Color
 get_color(colorName: string)
 compare_color_pct(color1, color2: Color): float

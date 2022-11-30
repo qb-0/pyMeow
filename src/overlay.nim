@@ -15,7 +15,7 @@ elif defined(windows):
   var globalExitKey = 0x23
   import winim
 
-proc getWindowInfo(name: string): tuple[x, y, width, height: int] =
+proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "get_window_info".} =
   when defined(linux):
     let 
       p = startProcess("xwininfo", "", ["-name", name], options={poUsePath, poStdErrToStdOut})
