@@ -456,7 +456,7 @@ proc injectSyscall(pid: int, syscall: int, arg0, arg1, arg2, arg3, arg4, arg5: p
   ptrace(PTRACE_SETREGS, pid, nil, oldRegs.addr)
   ptrace(PTRACE_DETACH, pid, nil, nil)
 
-proc pageProtection*(pid: int, src, protection: int) =
+proc pageProtection*(pid, src, protection: int) =
   var pageStart, pageEnd: ByteAddress
   for l in lines(fmt"/proc/{pid}/maps"):
     discard scanf(l, "$h-$h", pageStart, pageEnd)
