@@ -109,6 +109,14 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
 proc pidExists(pid: int): bool {.exportpy: "pid_exists".} =
   pid in mapIt(toSeq(enumProcesses()), it.pid)
 
+proc processRunning(process: Process): bool {.exportpy: "process_running".} =
+  when defined(linux):
+    return kill(process.pid.cint, 0) == 0
+  elif defined(windows):
+    var exitCode: DWORD
+    GetExitCodeProcess(process.handle, exitCode.addr)
+    return exitCode == STILL_ACTIVE
+
 proc getProcessId(processName: string): int {.exportpy: "get_process_id".} =
   checkRoot()
   for process in enumProcesses():
