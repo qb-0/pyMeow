@@ -109,6 +109,9 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
 proc pidExists(pid: int): bool {.exportpy: "pid_exists".} =
   pid in mapIt(toSeq(enumProcesses()), it.pid)
 
+proc processExists(processName: string): bool {.exportpy: "process_exists".} =
+  processName in mapIt(toSeq(enumProcesses()), it.name)
+
 proc processRunning(process: Process): bool {.exportpy: "process_running".} =
   when defined(linux):
     return kill(process.pid.cint, 0) == 0
