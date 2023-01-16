@@ -110,6 +110,9 @@ proc getWindowPosition: Vector2 {.exportpy: "get_window_position".} =
 proc setWindowSize(width, height: int) {.exportpy: "set_window_size".} =
   rl.setWindowSize(width, height)
 
+proc setWindowTitle(title: string) {.exportpy: "set_window_title".} =
+  rl.setWindowTitle(title)
+
 proc takeScreenshot(fileName: string) {.exportpy: "take_screenshot".} =
   rl.takeScreenshot(fileName)
 

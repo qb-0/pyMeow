@@ -91,6 +91,7 @@ set_window_position(x, y: int)
 get_window_position(): Vector2
 set_window_size(width, height: int)
 set_window_icon(filePath: string)
+set_window_title(title: string)
 
 ################################################################################################################
 Shapes / Drawing
