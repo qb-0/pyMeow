@@ -82,6 +82,10 @@ proc dropdownBox(posX, posY, width, height: float, text: string, id: int, active
     )
   if rg.dropdownBox(getRec, dropDownTable[id].text.cstring, dropDownTable[id].active.addr, dropDownTable[id].editMode):
     dropDownTable[id].editMode = not dropDownTable[id].editMode
+    if dropDownTable[id].editMode:
+      rg.lock()
+    else:
+      rg.unlock()
   dropDownTable[id].active
 
 proc textBox(posX, posY, width, height: float, text: string, id: int): string {.exportpy: "gui_text_box".} =
@@ -125,6 +129,7 @@ proc spinner(posX, posY, width, height: float, text: string, value, minValue, ma
   if id notin spinnerTable:
     spinnerTable[id] = Spinner(
       rec: getRec,
+      value: value
     )
   spinnerTable[id].editMode = rg.spinner(getRec, text, spinnerTable[id].value.addr, minValue, maxValue, spinnerTable[id].editMode)
   spinnerTable[id].value
