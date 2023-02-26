@@ -24,10 +24,7 @@ proc drawPixel(posX, posY: float, color: Color) {.exportpy: "draw_pixel".} =
   rl.drawPixel(posX, posY, color)
 
 proc drawLine(startPosX, startPosY, endPosX, endPosY: float, color: Color, thick: float = 1.0) {.exportpy: "draw_line".} =
-  let
-    startPos = Vector2(x: startPosX, y: startPosY)
-    endPos = Vector2(x: endPosX, y: endPosY)
-  rl.drawLineEx(startPos, endPos, thick, color)
+  rl.drawLineEx(Vector2(x: startPosX, y: startPosY), Vector2(x: endPosX, y: endPosY), thick, color)
 
 proc drawCircle(centerX, centerY, radius: float, color: Color) {.exportpy: "draw_circle".} =
   rl.drawCircle(centerX, centerY, radius, color)
