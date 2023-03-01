@@ -194,6 +194,7 @@ Misc / Utilities
 get_display_resolution(): (int, int)
 get_window_info(name: string): (x, y, width, height: int)
 new_color(r, g, b, a: uint8): Color
+new_color_hex(hexValue: uint): Color
 get_color(colorName: string)
 compare_color_pct(color1, color2: Color): float
 fade_color(color: Color, alpha: float): Color

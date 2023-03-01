@@ -12,6 +12,9 @@ elif defined(windows):
 proc newColor(r, g, b, a: uint8): rl.Color {.exportpy: "new_color".} =
   rl.Color(r: r, g: g, b: b, a: a)
 
+proc newColorHex(hexValue: uint): rl.Color {.exportpy: "new_color_hex".} =
+  rl.getColor(hexValue.cuint)
+
 proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
   try:
     let c = parseColor(colorName).extractRGB()
