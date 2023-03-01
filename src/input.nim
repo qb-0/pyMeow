@@ -47,7 +47,7 @@ when defined(linux):
     result.y = qRootY.cfloat
 
 elif defined(windows):
-  import winim, nimraylib_now/raylib
+  import winim
 
   proc keyPressed*(vKey: int32): bool {.exportpy: "key_pressed".} =
     GetAsyncKeyState(vKey).bool
@@ -55,11 +55,7 @@ elif defined(windows):
   proc pressKey(vKey: int) {.exportpy: "press_key".} =
     var input: INPUT
     input.`type` = INPUT_KEYBOARD
-    input.ki.wScan = 0
-    input.ki.time = 0
-    input.ki.dwExtraInfo = 0
     input.ki.wVk = vKey.uint16
-    input.ki.dwFlags = 0
     SendInput(1, input.addr, sizeof(input).int32)
 
   proc mouseMove(x, y: int32) {.exportpy: "mouse_move".} =
