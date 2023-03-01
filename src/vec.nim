@@ -1,5 +1,5 @@
 import 
-  math, nimpy, nimraylib_now
+  nimpy, nimraylib_now, nimraylib_now/raymath as rm
 
 pyExportModule("pyMeow")
 
@@ -8,64 +8,64 @@ proc vec2(x, y: float = 0): Vector2 {.exportpy: "vec2".} =
 proc vec3(x, y, z: float = 0): Vector3 {.exportpy: "vec3".} =
   Vector3(x: x, y: y, z: z)
 
-proc vec2Add(a, b: Vector2): Vector2 {.exportpy: "vec2_add".} =
-  result.x = a.x + b.x
-  result.y = a.y + b.y
-proc vec3Add(a, b: Vector3): Vector3 {.exportpy: "vec3_add".} =
-  result.x = a.x + b.x
-  result.y = a.y + b.y
-  result.z = a.z + b.z
+proc vec2Add(v1, v2: Vector2): Vector2 {.exportpy: "vec2_add".} =
+  rm.add(v1, v2)
+proc vec2AddValue(v: Vector2, value: float): Vector2 {.exportpy: "vec2_add_value".} =
+  rm.addValue(v, value)
+proc vec3Add(v1, v2: Vector3): Vector3 {.exportpy: "vec3_add".} =
+  rm.add(v1, v2)
+proc vec3AddValue(v: Vector3, value: float): Vector3 {.exportpy: "vec3_add_value".} =
+  rm.addValue(v, value)
 
-proc vec2Sub(a, b: Vector2): Vector2 {.exportpy: "vec2_sub".} =
-  result.x = a.x - b.x
-  result.y = a.y - b.y
-proc vec3Sub(a, b: Vector3): Vector3 {.exportpy: "vec3_sub".} =
-  result.x = a.x - b.x
-  result.y = a.y - b.y
-  result.z = a.z - b.z
+proc vec2Subtract(v1, v2: Vector2): Vector2 {.exportpy: "vec2_subtract".} =
+  rm.subtract(v1, v2)
+proc vec2SubtractValue(v: Vector2, value: float): Vector2 {.exportpy: "vec2_subtract_value".} =
+  rm.subtractValue(v, value)
+proc vec3Subtract(v1, v2: Vector3): Vector3 {.exportpy: "vec3_subtract".} =
+  rm.subtract(v1, v2)
+proc vec3SubtractValue(v: Vector3, value: float): Vector3 {.exportpy: "vec3_subtract_value".} =
+  rm.subtractValue(v, value)
 
-proc vec2Mult(a, b: Vector2): Vector2 {.exportpy: "vec2_mult".} =
-  result.x = a.x * b.x
-  result.y = a.y * b.y
-proc vec3Mult(a, b: Vector3): Vector3 {.exportpy: "vec3_mult".} =
-  result.x = a.x * b.x
-  result.y = a.y * b.y
-  result.z = a.z * b.z
+proc vec2Multiply(v1, v2: Vector2): Vector2 {.exportpy: "vec2_multiply".} =
+  rm.multiply(v1, v2)
+proc vec2MultiplyValue(v: Vector2, value: float): Vector2 {.exportpy: "vec2_multiply_value".} =
+  rm.scale(v, value)
+proc vec3Multiply(v1, v2: Vector3): Vector3 {.exportpy: "vec3_multiply".} =
+  rm.multiply(v1, v2)
+proc vec3MultiplyValue(v: Vector3, value: float): Vector3 {.exportpy: "vec3_multiply_value".} =
+  rm.scale(v, value)
 
-proc vec2Div(a, b: Vector2): Vector2 {.exportpy: "vec2_div".} =
-  result.x = a.x / b.x
-  result.y = a.y / b.y
-proc vec3Div(a, b: Vector3): Vector3 {.exportpy: "vec3_div".} =
-  result.x = a.x / b.x
-  result.y = a.y / b.y
-  result.z = a.z / b.z
+proc vec2Divide(v1, v2: Vector2): Vector2 {.exportpy: "vec2_divide".} =
+  rm.divide(v1, v2)
+proc vec3Divide(v1, v2: Vector3): Vector3 {.exportpy: "vec3_divide".} =
+  rm.divide(v1, v2)
 
-proc vec2MagSq(a: Vector2): float32 {.exportpy: "vec2_magSq".} =
-  (a.x * a.x) + (a.y * a.y)
-proc vec3MagSq(a: Vector3): float32 {.exportpy: "vec3_magSq".} =
-  (a.x * a.x) + (a.y * a.y) + (a.z * a.z)
+proc vec2Length(v: Vector2): float {.exportpy: "vec2_length".} =
+  rm.length(v)
+proc vec3Length(v: Vector3): float {.exportpy: "vec3_length".} =
+  rm.length(v)
 
-proc vec2Mag(a: Vector2): float32 {.exportpy: "vec2_mag".} =
-  sqrt(a.vec2MagSq())
-proc vec3Mag(a: Vector3): float32 {.exportpy: "vec3_mag".} =
-  sqrt(a.vec3MagSq())
+proc vec2LengthSqr(v: Vector2): float {.exportpy: "vec2_length_sqr".} =
+  rm.lengthSqr(v)
+proc vec3LengthSqr(v: Vector3): float {.exportpy: "vec3_length_sqr".} =
+  rm.lengthSqr(v)
 
-proc vec2Distance(a, b: Vector2): float32 {.exportpy: "vec2_distance".} =
-  vec2Mag(vec2Sub(a, b))
-proc vec3Distance(a, b: Vector3): float32 {.exportpy: "vec3_distance".} =
-  vec3Mag(vec3Sub(a, b))
+proc vec2Distance(v1, v2: Vector2): float {.exportpy: "vec2_distance".} =
+  rm.distance(v1, v2)
+proc vec3Distance(v1, v2: Vector3): float {.exportpy: "vec3_distance".} =
+  rm.distance(v1, v2)
 
-proc vec2Closest(a: Vector2, b: varargs[Vector2]): Vector2 {.exportpy: "vec2_closest".} =
+proc vec2Closest(v: Vector2, vectorList: varargs[Vector2]): Vector2 {.exportpy: "vec2_closest".} =
   var closestValue = float32.high
-  for v in b:
-    let dist = a.vec2Distance(v)
+  for vec in vectorList:
+    let dist = v.vec2Distance(vec)
     if dist < closestValue:
       result = v
       closestValue = dist
-proc vec3Closest(a: Vector3, b: varargs[Vector3]): Vector3 {.exportpy: "vec3_closest".} =
+proc vec3Closest(v: Vector3, vectorList: varargs[Vector3]): Vector3 {.exportpy: "vec3_closest".} =
   var closestValue = float32.high
-  for v in b:
-    let dist = a.vec3Distance(v)
-    if a.vec3Distance(v) < closestValue:
+  for vec in vectorList:
+    let dist = v.vec3Distance(vec)
+    if dist < closestValue:
       result = v
       closestValue = dist

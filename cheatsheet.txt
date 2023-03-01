@@ -156,24 +156,30 @@ gui_fade(alpha: float)
 Vector
 ################################################################################################################
 vec2(x, y: float = 0): Vector2
-vec2_add(a, b: Vector2): Vector2
-vec2_del(a, b: Vector2): Vector2
-vec2_mult(a, b: Vector2): Vector2
-vec2_div(a, b: Vector2): Vector2
-vec2_mag(a, b: Vector2): float
-vec2_magSq(a, b: Vector2): float
-vec2_distance(a, b: Vector2): float
-vec2_closest(a: Vector2, b: Vector2 array): Vector2
+vec2_add(v1, v2: Vector2): Vector2
+vec2_add_value(v: Vector2, value: float): Vector2
+vec2_subtract(v1, v2: Vector2): Vector2
+vec2_subtract_value(v: Vector2, value: float): Vector2
+vec2_multiply(v1, v2: Vector2): Vector2
+vec2_multiply_value(v: Vector2, value: float): Vector2
+vec2_divide(v1, v2: Vector2): Vector2
+vec2_length(v: Vector2): float
+vec2_length_sqr(v: Vector2): float
+vec2_distance(v1, v2: Vector2): float
+vec2_closest(v: Vector2, vectorList: Vector2 array)
 
 vec3(x, y, z: float = 0): Vector3
-vec3_add(a, b: Vector3): Vector3
-vec3_sub(a, b: Vector3): Vector3
-vec3_mult(a, b: Vector3): Vector3
-vec3_div(a, b: Vector3): Vector3
-vec3_mag(a, b: Vector3): float
-vec3_magSq(a, b: Vector3): float
-vec3_distance(a, b: Vector3): float
-vec3_closest(a: Vec2, b: Vector3 array): Vector3
+vec3_add(v1, v2: Vector3): Vector3
+vec3_add_value(v: Vector3, value: float): Vector3
+vec3_subtract(v1, v2: Vector3): Vector3
+vec3_subtract_value(v: Vector3, value: float): Vector3
+vec3_multiply(v1, v2: Vector3): Vector3
+vec3_multiply_value(v: Vector3, value: float): Vector3
+vec3_divide(v1, v2: Vector3): Vector3
+vec3_length(v: Vector3): float
+vec3_length_sqr(v: Vector3): float
+vec3_distance(v: Vector3): float
+vec3_closest(v: Vector3, vectorList: Vector3 array)
 
 ################################################################################################################
 Pixel Scanning
