@@ -70,8 +70,9 @@ def main():
 
     if AMMO_HACK:
         ammoScan = pm.aob_scan_module(proc, "linux_64_client", "83 00 FF 48 8B 43")
-        pm.page_protection(proc, ammoScan[0], 7)
-        pm.w_bytes(proc, ammoScan[0], [0x90, 0x90, 0x90])
+        if ammoScan:
+            pm.page_protection(proc, ammoScan[0], 7)
+            pm.w_bytes(proc, ammoScan[0], [0x90, 0x90, 0x90])
 
     pm.overlay_init(target="AssaultCube", fps=144)
     while pm.overlay_loop():
