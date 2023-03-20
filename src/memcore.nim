@@ -333,7 +333,7 @@ proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress
     try:
       for i in countup(0, patt.len-1, 2):
         result.add(patt[i..i+1])
-    except:
+    except CatchableError:
       raise newException(Exception, "Invalid pattern")
 
   proc patternToInts(pattern: seq[string]): seq[int] =
@@ -415,7 +415,7 @@ proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress
           result.add(wildCardByte)
         else:
           result.add(parseHexInt(hex).byte)
-    except:
+    except CatchableError:
       raise newException(Exception, "Invalid pattern")
 
   let bytePattern = patternToBytes(pattern)
