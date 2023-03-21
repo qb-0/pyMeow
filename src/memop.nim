@@ -29,7 +29,7 @@ proc readString(process: Process, address: ByteAddress, size: int = 30): string 
 
 proc bytesToString(process: Process, address: ByteAddress, size: int): string {.exportpy: "bytes_to_string".} =
   let s = process.readSeq(address, size, char)
-  s.join("").convert("utf-8", "utf-16")
+  s.join("").convert("utf-8", "utf-16").strip()
 
 proc readInt(process: Process, address: ByteAddress): int32 {.exportpy: "r_int".} = 
   process.read(address, int32)
