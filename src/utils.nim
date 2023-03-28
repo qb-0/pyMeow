@@ -5,7 +5,8 @@ import
 pyExportModule("pyMeow")
 
 when defined(linux):
-  import x11/xlib
+  import 
+    osproc, strscans, x11/xlib
 elif defined(windows):
   import winim
 
@@ -105,3 +106,31 @@ proc compareColorPCT*(color1, color2: rl.Color): float {.exportpy: "compare_colo
     g = abs(color1.g.int - color2.g.int).float / 255
     b = abs(color1.b.int - color2.b.int).float / 255
   result = 100 - ((r + g + b) / 3 * 100)
+
+proc getWindowTitle(processId: int): string {.exportpy: "get_window_title".} =
+  when defined(windows):
+    var winHandle = GetWindow(GetTopWindow(0), GW_HWNDNEXT)
+    while winHandle != FALSE:
+      if IsWindowVisible(winHandle):
+        var winProcessId: DWORD
+        GetWindowThreadProcessId(winHandle, winProcessId.addr)
+        if winProcessId == processId:
+          let winLength = GetWindowTextLength(winHandle)
+          var winTitle = newWString(winLength)
+          GetWindowText(winHandle, winTitle, winLength + 1)
+          return nullTerminated($$winTitle)
+      winHandle = GetNextWindow(winHandle, GW_HWNDNEXT)
+  elif defined(linux):
+    let
+      p = startProcess("wmctrl", "", ["-l", "-p"], options={poUsePath, poStdErrToStdOut})
+      (lines, exitCode) = p.readLines()
+    
+    if exitCode == 0:
+      for l in lines:
+        let (r, _, _, pid, _, title) = l.scanTuple("$h $s$i $s$i $s$+ $s$+")
+        if r and pid != 0:
+          if pid == processId:
+            return title
+      raise newException(Exception, "No Window found. PID: " & $processId)
+    else:
+      raise newException(Exception, "wmctrl failed (installed 'wmctrl'?)")
