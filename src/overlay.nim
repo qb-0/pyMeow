@@ -14,6 +14,7 @@ when defined(linux):
 elif defined(windows):
   var globalExitKey = 0x23
   import winim
+  SetProcessDPIAware()
 
 proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "get_window_info".} =
   when defined(linux):
