@@ -107,6 +107,15 @@ proc compareColorPCT*(color1, color2: rl.Color): float {.exportpy: "compare_colo
     b = abs(color1.b.int - color2.b.int).float / 255
   result = 100 - ((r + g + b) / 3 * 100)
 
+proc getMonitorCount: int {.exportpy: "get_monitor_count".} =
+  rl.getMonitorCount()
+
+proc getMonitorName(monitor: cint = 0): string {.exportpy: "get_monitor_name".} =
+  $rl.getMonitorName(monitor)
+
+proc getMonitorRefreshRate(monitor: cint = 0): int {.exportpy: "get_monitor_refresh_rate".} =
+  rl.getMonitorRefreshRate(monitor)
+
 proc getWindowTitle(processId: int): string {.exportpy: "get_window_title".} =
   when defined(windows):
     var winHandle = GetWindow(GetTopWindow(0), GW_HWNDNEXT)

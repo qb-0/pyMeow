@@ -214,6 +214,9 @@ Misc / Utilities
 get_display_resolution(): (int, int)
 get_window_info(name: string): (x, y, width, height: int)
 get_window_title(processId: int): string
+get_monitor_refresh_rate(monitor: int = 0): int
+get_monitor_count(): int
+get_monitor_name(monitor: int = 0): string
 new_color(r, g, b, a: uint8): Color
 new_color_hex(hexValue: uint): Color
 get_color(colorName: string)
