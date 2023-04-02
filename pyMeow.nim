@@ -11,4 +11,5 @@ import src/[
   gui,
   vec,
   pixel,
+  sound,
 ]

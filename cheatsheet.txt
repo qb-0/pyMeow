@@ -195,6 +195,20 @@ pixel_save_to_file(x, y, width, height: float, fileName: string)
 pixel_search_colors(x, y, width, height: float, colors: Color array, similarity: float): Pixel (iterator)
 
 ################################################################################################################
+Sound
+################################################################################################################
+load_sound(fileName: string): soundId
+unload_sound(soundId: int)
+play_sound(soundId: int)
+pause_sound(soundId: int)
+resume_sound(soundId: int)
+stop_sound(soundId: int)
+set_sound_volume(soundId: int)
+is_sound_playing(soundId: int)
+play_multisound(soundId: int)
+stop_multisound()
+
+################################################################################################################
 Misc / Utilities
 ################################################################################################################
 get_display_resolution(): (int, int)
