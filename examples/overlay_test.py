@@ -3,8 +3,8 @@ from random import randint
 
 
 def main():
-    fps = 60
-    pm.overlay_init(fps=fps)
+    pm.overlay_init()
+    pm.set_fps(pm.get_monitor_refresh_rate())
     pm.toggle_mouse()
     pm.gui_fade(0.9)
     radius = 50
