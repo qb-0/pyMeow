@@ -219,7 +219,7 @@ get_monitor_count(): int
 get_monitor_name(monitor: int = 0): string
 new_color(r, g, b, a: uint8): Color
 new_color_hex(hexValue: uint): Color
-get_color(colorName: string)
+get_color(colorName: string): Color
 compare_color_pct(color1, color2: Color): float
 fade_color(color: Color, alpha: float): Color
 world_to_screen(matrix: float array (16), pos: Vector3, algo: int = 0): Vector2
