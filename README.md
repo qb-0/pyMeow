@@ -24,6 +24,10 @@ git clone "https://github.com/qb-0/pyMeow"
 cd pyMeow && nim c pyMeow
 ```
 
+## ::dollar: Donations<br>
+If you enjoy pyMeow and want to make a small donation, then feel free to buy me a beer:
+https://www.buymeacoffee.com/quebee
+
 ## :globe_with_meridians: Projects<br>
 #### [pyMeow SWBF2](https://github.com/qb-0/pyMeowSWBF2) by [qb](https://github.com/qb-0)
 > Configurable cross platform Starwars Battlefront 2 ESP
