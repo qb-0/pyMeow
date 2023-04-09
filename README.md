@@ -25,7 +25,7 @@ cd pyMeow && nim c pyMeow
 ```
 
 ## :dollar: Donations<br>
-If you enjoy pyMeow and want to make a small donation, then feel free to buy me a beer. Thank you!
+If you enjoy pyMeow and want to make a small donation, then feel free to buy me a :beer:. Thank you!
 https://www.buymeabeer.com/quebee
 
 ## :globe_with_meridians: Projects<br>
