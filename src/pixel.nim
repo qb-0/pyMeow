@@ -53,20 +53,17 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
     SelectObject(hDest, hbDesktop)
     BitBlt(hDest, 0, 0, width.int, height.int, hdc, x.int, y.int, SRCCOPY)
 
-    var bmp: BITMAP
-    GetObject(hbDesktop, sizeof(BITMAP), bmp.addr)
-
     var 
-      size = bmp.bmWidth * bmp.bmHeight * (bmp.bmBitsPixel.int div 8)
+      size = (width * height * 4).int
       pBits = newSeq[uint8](size)
 
     GetBitmapBits(hbDesktop, size, cast[LPVOID](pBits[0].addr))
     DeleteObject(hbDesktop)
     DeleteDC(hDest)
     ReleaseDC(0, hdc)
-    for y in 0..<bmp.bmHeight:
-      for x in 0..<bmp.bmWidth:
-        var i = (y * bmp.bmWidth + x) * (bmp.bmBitsPixel.int div 8)
+    for y in 0..<height.int:
+      for x in 0..<width.int:
+        var i = (y * width.int + x) * 4
         yield Pixel(
             x: x,
             y: y,
