@@ -54,20 +54,30 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
 
     var hbDesktop = CreateCompatibleBitmap(hdc, width.int, height.int)
     SelectObject(hDest, hbDesktop)
-    BitBlt(hDest, 0, 0, width.int, height.int, hdc, x.int, y.int, SRCCOPY)  
+    BitBlt(hDest, 0, 0, width.int, height.int, hdc, x.int, y.int, SRCCOPY)
     defer: DeleteObject(hbDesktop)
 
-    var p: Pixel
-    p.color.a = 255
-    for x in 0..<width.int:
-      for y in 0..<height.int:
-        var xp = GetPixel(hDest, x, y)
-        p.x = x
-        p.y = y
-        p.color.r = GetRValue(xp)
-        p.color.g = GetGValue(xp)
-        p.color.b = GetBValue(xp)
-        yield p
+    var bmp: BITMAP
+    GetObject(hbDesktop, sizeof(BITMAP), bmp.addr)
+
+    var 
+      size = bmp.bmWidth * bmp.bmHeight * (bmp.bmBitsPixel.int div 8)
+      pBits = newSeq[uint8](size)
+
+    GetBitmapBits(hbDesktop, size, cast[LPVOID](pBits[0].addr))
+    for y in 0..<bmp.bmHeight:
+      for x in 0..<bmp.bmWidth:
+        var i = (y * bmp.bmWidth + x) * (bmp.bmBitsPixel.int div 8)
+        yield Pixel(
+            x: x,
+            y: y,
+            color: rl.Color(
+              a: 255,
+              b: pBits[i],
+              g: pBits[i + 1],
+              r: pBits[i + 2],
+            )
+          )
 
 iterator pixelEnumScreen: Pixel {.exportpy: "pixel_enum_screen".} =
   let res = getDisplayResolution()
