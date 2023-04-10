@@ -13,12 +13,9 @@ type Pixel = object
 
 when defined(linux):
   import x11/[x, xlib, xutil]
-  var
-    disp: PDisplay
+  var disp: PDisplay
 elif defined(windows):
   import winim
-  var
-    hdc, hDest: HDC
 
 iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_enum_region".} =
   when defined(linux):
@@ -48,14 +45,13 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
         yield p
 
   elif defined(windows):
-    if hdc == 0:
+    var
       hdc = GetDC(0)
       hDest = CreateCompatibleDC(hdc)
 
     var hbDesktop = CreateCompatibleBitmap(hdc, width.int, height.int)
     SelectObject(hDest, hbDesktop)
     BitBlt(hDest, 0, 0, width.int, height.int, hdc, x.int, y.int, SRCCOPY)
-    defer: DeleteObject(hbDesktop)
 
     var bmp: BITMAP
     GetObject(hbDesktop, sizeof(BITMAP), bmp.addr)
@@ -65,6 +61,9 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
       pBits = newSeq[uint8](size)
 
     GetBitmapBits(hbDesktop, size, cast[LPVOID](pBits[0].addr))
+    DeleteObject(hbDesktop)
+    DeleteDC(hDest)
+    ReleaseDC(0, hdc)
     for y in 0..<bmp.bmHeight:
       for x in 0..<bmp.bmWidth:
         var i = (y * bmp.bmWidth + x) * (bmp.bmBitsPixel.int div 8)
