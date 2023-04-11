@@ -87,17 +87,8 @@ proc beginDrawing {.exportpy: "begin_drawing".} =
 proc endDrawing {.exportpy: "end_drawing".} =
   rl.endDrawing()
 
-proc getFPS: int {.exportpy: "get_fps".} =
-  rl.getFPS()
-
 proc setFPS(fps: int) {.exportpy: "set_fps".} =
   rl.setTargetFPS(fps)
-
-proc getScreenHeight: int {.exportpy: "get_screen_height".} =
-  rl.getScreenHeight()
-
-proc getScreenWidth: int {.exportpy: "get_screen_width".} =
-  rl.getScreenWidth()
 
 proc setWindowPosition(x, y: int) {.exportpy: "set_window_position".} =
   rl.setWindowPosition(x, y)
@@ -112,14 +103,26 @@ proc setWindowFlag(flag: int) {.exportpy: "set_window_flag".} =
     return
   rl.setWindowState(f)
 
-proc getWindowPosition: Vector2 {.exportpy: "get_window_position".} =
-  rl.getWindowPosition()
-
 proc setWindowSize(width, height: int) {.exportpy: "set_window_size".} =
   rl.setWindowSize(width, height)
 
 proc setWindowTitle(title: string) {.exportpy: "set_window_title".} =
   rl.setWindowTitle(title)
+
+proc getFPS: int {.exportpy: "get_fps".} =
+  rl.getFPS()
+
+proc getScreenHeight: int {.exportpy: "get_screen_height".} =
+  rl.getScreenHeight()
+
+proc getScreenWidth: int {.exportpy: "get_screen_width".} =
+  rl.getScreenWidth()
+
+proc getWindowPosition: Vector2 {.exportpy: "get_window_position".} =
+  rl.getWindowPosition()
+
+proc getWindowHandle(): int {.exportpy: "get_window_handle".} =
+  cast[int](rl.getWindowHandle())
 
 proc takeScreenshot(fileName: string) {.exportpy: "take_screenshot".} =
   rl.takeScreenshot(fileName)
