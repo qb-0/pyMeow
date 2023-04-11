@@ -105,6 +105,13 @@ proc setWindowPosition(x, y: int) {.exportpy: "set_window_position".} =
 proc setWindowIcon(filePath: string) {.exportpy: "set_window_icon".} =
   rl.setWindowIcon(rl.loadImage(filePath))
 
+proc setWindowFlag(flag: int) {.exportpy: "set_window_flag".} =
+  let f = flag.cuint
+  if rl.isWindowState(f):
+    rl.clearWindowState(f)
+    return
+  rl.setWindowState(f)
+
 proc getWindowPosition: Vector2 {.exportpy: "get_window_position".} =
   rl.getWindowPosition()
 
@@ -123,5 +130,5 @@ proc overlayClose {.exportpy: "overlay_close".} =
 proc toggleMouse {.exportpy: "toggle_mouse".} =
   if isWindowState(WINDOW_MOUSE_PASSTHROUGH):
     clearWindowState(WINDOW_MOUSE_PASSTHROUGH)
-  else:
-    setWindowState(WINDOW_MOUSE_PASSTHROUGH)
+    return
+  setWindowState(WINDOW_MOUSE_PASSTHROUGH)
