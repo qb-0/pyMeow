@@ -26,8 +26,7 @@ cd pyMeow && nim c pyMeow
 
 ## :dollar: Donations<br>
 If you enjoy pyMeow and want to make a small donation, then feel free to buy me a :beer:. Thank you!
-https://www.buymeabeer.com/quebee
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="quebee" data-color="#5F7FFF" data-emoji="🍺"  data-font="Cookie" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
+[<img alt="alt_text" src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" />](https://www.buymeacoffee.com/quebee)
 
 ## :globe_with_meridians: Projects<br>
 #### [pyMeow SWBF2](https://github.com/qb-0/pyMeowSWBF2) by [qb](https://github.com/qb-0)
