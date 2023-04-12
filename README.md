@@ -26,7 +26,7 @@ cd pyMeow && nim c pyMeow
 
 ## :dollar: Donations<br>
 If you enjoy pyMeow and want to make a small donation, then feel free to buy me a :beer:. Thank you!
-[<img alt="alt_text" width="250" height="40" src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" />](https://www.buymeacoffee.com/quebee)
+https://www.buymeabeer.com/quebee
 
 ## :globe_with_meridians: Projects<br>
 #### [pyMeow SWBF2](https://github.com/qb-0/pyMeowSWBF2) by [qb](https://github.com/qb-0)
