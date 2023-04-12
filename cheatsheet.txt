@@ -42,7 +42,7 @@ r_uints(process: Process, address: int, size: int): int array
 r_uint64(process: Process, address: int): int
 r_uints64(process: Process, address: int, size: int): int array
 r_int16(process: Process, address: int): int16
-r_ints16(process: Process, address: int): int16 array
+r_ints16(process: Process, address: int, size: int): int16 array
 r_int64(process: Process, address: int): int64
 r_ints64(process: Process, address: int, size: int): int64 array
 r_float(process: Process, address: int): float
@@ -168,7 +168,7 @@ vec2_divide(v1, v2: Vector2): Vector2
 vec2_length(v: Vector2): float
 vec2_length_sqr(v: Vector2): float
 vec2_distance(v1, v2: Vector2): float
-vec2_closest(v: Vector2, vectorList: Vector2 array)
+vec2_closest(v: Vector2, vectorList: Vector2 array): Vector2
 
 vec3(x, y, z: float = 0): Vector3
 vec3_add(v1, v2: Vector3): Vector3
@@ -181,7 +181,7 @@ vec3_divide(v1, v2: Vector3): Vector3
 vec3_length(v: Vector3): float
 vec3_length_sqr(v: Vector3): float
 vec3_distance(v: Vector3): float
-vec3_closest(v: Vector3, vectorList: Vector3 array)
+vec3_closest(v: Vector3, vectorList: Vector3 array): Vector3
 
 ################################################################################################################
 Pixel Scanning
