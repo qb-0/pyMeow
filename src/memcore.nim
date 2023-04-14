@@ -135,23 +135,27 @@ proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
   raise newException(Exception, fmt"Process '{pid}' not found")
 
 proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
-  var sPid: int
+  let 
+    pyMod = pyBuiltinsModule()
+    pyInt = pyMod.getAttr("int")
+    pyStr = pyMod.str
+    objT = pyMod.type(process)
 
-  try:
+  var sPid: int
+  if objT == pyInt:
     sPid = process.to(int)
     if not pidExists(sPid):
       raise newException(Exception, fmt"Process ID '{sPid} does not exist")
-  except ValueError:
-    try:
-      let processName = process.to(string)
-      for p in enumProcesses():
-        if processName in p.name:
-          sPid = p.pid
-          break
-      if sPid == 0:
-        raise newException(Exception, fmt"Process '{processName}' not found")
-    except ValueError:
-      raise newException(Exception, "Process ID or Process Name required")
+  elif objT == pyStr:
+    let processName = process.to(string)
+    for p in enumProcesses():
+      if processName in p.name:
+        sPid = p.pid
+        break
+    if sPid == 0:
+      raise newException(Exception, fmt"Process '{processName}' not found")
+  else:
+    raise newException(Exception, "Process ID or Process Name required")
 
   checkRoot()
   result.debug = debug
