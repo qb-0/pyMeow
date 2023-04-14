@@ -134,22 +134,24 @@ proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
       return process.name
   raise newException(Exception, fmt"Process '{pid}' not found")
 
-proc openProcess(pid: int = 0, processName: string = "", debug: bool = false): Process {.exportpy: "open_process".} =
+proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
   var sPid: int
 
-  if pid == 0 and processName == "":
-    raise newException(Exception, "Process ID or Process Name required")
-  elif processName != "":
-    for p in enumProcesses():
-      if processName in p.name:
-        sPid = p.pid
-        break
-    if sPid == 0:
-      raise newException(Exception, fmt"Process '{processName}' not found")
-  elif pid != 0:
-    if not pidExists(pid):
-      raise newException(Exception, fmt"Process ID '{pid} does not exist")
-    sPid = pid
+  try:
+    sPid = process.to(int)
+    if not pidExists(sPid):
+      raise newException(Exception, fmt"Process ID '{sPid} does not exist")
+  except ValueError:
+    try:
+      let processName = process.to(string)
+      for p in enumProcesses():
+        if processName in p.name:
+          sPid = p.pid
+          break
+      if sPid == 0:
+        raise newException(Exception, fmt"Process '{processName}' not found")
+    except ValueError:
+      raise newException(Exception, "Process ID or Process Name required")
 
   checkRoot()
   result.debug = debug
@@ -159,7 +161,7 @@ proc openProcess(pid: int = 0, processName: string = "", debug: bool = false): P
   when defined(windows):
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
     if result.handle == FALSE:
-      raise newException(Exception, fmt"Unable to open Process [Pid: {pid}] {getErrorStr()}")
+      raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
   
 proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):

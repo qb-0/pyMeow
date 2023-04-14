@@ -2,7 +2,7 @@ import sys
 import pyMeow as pm
 
 try:
-    mem = pm.open_process(processName="linux_64_client")
+    mem = pm.open_process("linux_64_client")
     base = pm.get_module(mem, "linux_64_client")["base"]
     pm.overlay_init(target="Cube 2: Sauerbraten", fps=200)
     local_entity = None

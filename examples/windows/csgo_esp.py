@@ -54,9 +54,9 @@ def main():
     except:
         sys.exit("Unable to fetch Hazedumper's Offsets")
 
-    csgo_proc = pm.open_process(processName="csgo.exe")
+    csgo_proc = pm.open_process("csgo.exe")
     game_module = pm.get_module(csgo_proc, "client.dll")["base"]
-    pm.overlay_init(fps=144)
+    pm.overlay_init("Counter-Strike: Global Offensive - Direct3D 9", fps=144)
 
     while pm.overlay_loop():
         try:

@@ -58,7 +58,7 @@ class Entity:
 
 
 def main():
-    proc = pm.open_process(processName="linux_64_client", debug=DEBUG)
+    proc = pm.open_process("linux_64_client", debug=DEBUG)
     base = pm.get_module(proc, "linux_64_client")["base"]
     entity_list = pm.r_int(proc, base + Pointer.entity_list)
 

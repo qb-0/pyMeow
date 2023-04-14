@@ -4,7 +4,7 @@ import sys
 import pyMeow as pm
 
 try:
-    proc = pm.open_process(processName="ac_client.exe")
+    proc = pm.open_process("ac_client.exe")
     base = pm.get_module(proc, "ac_client.exe")["base"]
 except Exception as e:
     sys.exit(e)

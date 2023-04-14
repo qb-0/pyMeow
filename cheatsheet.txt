@@ -19,7 +19,7 @@ pid_exists(pid: int): bool
 process_exists(processName: string): bool
 get_process_id(processName: string): int
 get_process_name(pid: int): string
-open_process(pid: int = 0, processName: string = "", debug: bool = false): Process
+open_process(process: string|int, debug: bool = false): Process
 close_process(process: Process)
 enum_modules(process: Process): Module (iterator)
 get_module(process: Process, moduleName: string): Module
