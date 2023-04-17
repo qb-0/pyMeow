@@ -112,7 +112,6 @@ def main():
     while pm.overlay_loop():
         pm.begin_drawing()
         pm.draw_fps(10, 10)
-
         player_count = pm.r_int(proc, base + Pointer.player_count)
         if player_count > 1:
             ent_buffer = pm.r_ints(
