@@ -108,7 +108,7 @@ class Entity:
 
 
 def main():
-    pm.overlay_init(target="AssaultCube", fps=144)
+    pm.overlay_init(target="AssaultCube", fps=144, trackTarget=True)
     while pm.overlay_loop():
         pm.begin_drawing()
         pm.draw_fps(10, 10)

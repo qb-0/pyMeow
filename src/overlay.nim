@@ -7,14 +7,20 @@ from utils import getDisplayResolution
 
 pyExportModule("pyMeow")
 
-# exitKey: 'END'
 when defined(linux):
-  var globalExitKey = 0xFF57
   import strutils, osproc
 elif defined(windows):
-  var globalExitKey = 0x23
   import winim
   SetProcessDPIAware()
+
+type OverlayOptions = object
+  exitKey: int
+  target: string
+  trackTarget: bool
+  targetX, targetY: int
+  targetWidth, targetHeight: int
+
+var overlayOptions: OverlayOptions
 
 proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "get_window_info".} =
   when defined(linux):
@@ -52,7 +58,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "g
     result.width = rect.right
     result.height = rect.bottom
 
-proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1) {.exportpy: "overlay_init"} =
+proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1, trackTarget: bool = false) {.exportpy: "overlay_init"} =
   let res = getDisplayResolution()
   setTraceLogLevel(logLevel)
   setTargetFPS(fps.cint)
@@ -68,17 +74,35 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
 
   if target != "Full":
     let winInfo = getWindowInfo(target)
+    overlayOptions.targetX = winInfo.x
+    overlayOptions.targetY = winInfo.y
+    overlayOptions.targetWidth = winInfo.width
+    overlayOptions.targetHeight = winInfo.height
     setWindowSize(winInfo.width, winInfo.height)
     setWindowPosition(winInfo.x, winInfo.y)
 
   if exitKey != -1:
-    globalExitKey = exitKey
+    overlayOptions.exitKey = exitKey
+  else:
+    when defined(windows):
+      overlayOptions.exitKey = 0x23
+    elif defined(linux):
+      overlayOptions.exitKey = 0xFF57
   setExitKey(KeyboardKey.NULL)
+
+  overlayOptions.target = target
+  overlayOptions.trackTarget = trackTarget
 
 proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   clearBackground(Blank)
-  if keyPressed(globalExitKey):
+  if keyPressed(overlayOptions.exitKey):
     rl.closeWindow()
+  if overlayOptions.trackTarget:
+    let winInfo = getWindowInfo(overlayOptions.target)
+    if winInfo.x != overlayOptions.targetX or winInfo.y != overlayOptions.targetY:
+      rl.setWindowPosition(winInfo.x, winInfo.y)
+    if winInfo.width != overlayOptions.targetWidth or winInfo.height != overlayOptions.targetHeight:
+      rl.setWindowSize(winInfo.width, winInfo.height)
   not windowShouldClose()
 
 proc beginDrawing {.exportpy: "begin_drawing".} =
