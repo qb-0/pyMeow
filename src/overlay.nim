@@ -80,6 +80,8 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
     overlayOptions.targetHeight = winInfo.height
     setWindowSize(winInfo.width, winInfo.height)
     setWindowPosition(winInfo.x, winInfo.y)
+  overlayOptions.target = target
+  overlayOptions.trackTarget = trackTarget
 
   if exitKey != -1:
     overlayOptions.exitKey = exitKey
@@ -89,9 +91,6 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
     elif defined(linux):
       overlayOptions.exitKey = 0xFF57
   setExitKey(KeyboardKey.NULL)
-
-  overlayOptions.target = target
-  overlayOptions.trackTarget = trackTarget
 
 proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   clearBackground(Blank)
