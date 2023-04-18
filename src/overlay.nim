@@ -99,8 +99,12 @@ proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   if overlayOptions.trackTarget:
     let winInfo = getWindowInfo(overlayOptions.target)
     if winInfo.x != overlayOptions.targetX or winInfo.y != overlayOptions.targetY:
+      overlayOptions.targetX = winInfo.x
+      overlayOptions.targetY = winInfo.y
       rl.setWindowPosition(winInfo.x, winInfo.y)
     if winInfo.width != overlayOptions.targetWidth or winInfo.height != overlayOptions.targetHeight:
+      overlayOptions.targetWidth = winInfo.width
+      overlayOptions.targetHeight = winInfo.height
       rl.setWindowSize(winInfo.width, winInfo.height)
   not windowShouldClose()
 
