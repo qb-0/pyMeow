@@ -194,23 +194,22 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
       yield modTable[name]
 
   elif defined(windows):
-    template yieldModule =
-      module.name = nullTerminated($$mEntry.szModule)
-      module.base = cast[ByteAddress](mEntry.modBaseAddr)
-      module.size = mEntry.modBaseSize
-      module.`end` = module.base + module.size
-      yield module
-
     var
-      hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE or TH32CS_SNAPMODULE32, process.pid.DWORD)
-      mEntry = MODULEENTRY32(dwSize: sizeof(MODULEENTRY32).cint)
       module: Module
+      modules = newSeq[HMODULE](1024)
+      moduleInfo: MODULEINFO
 
-    defer: CloseHandle(hSnapShot)
-    if Module32First(hSnapShot, mEntry.addr) == TRUE:
-      yieldModule()
-      while Module32Next(hSnapShot, mEntry.addr) != FALSE:
-        yieldModule()
+    EnumProcessModulesEx(process.handle, modules[0].addr, modules.len.DWORD, nil, LIST_MODULES_ALL)
+    for m in modules:
+      GetModuleInformation(process.handle, m, moduleInfo.addr, sizeof(moduleInfo).DWORD)
+      if not moduleInfo.lpBaseOfDll.isNil():
+        var modName: array[1024, char]
+        GetModuleBaseNameA(process.handle, m, modName[0].addr, sizeof(modName).DWORD)
+        module.name = nullTerminated($$modName)
+        module.base = cast[ByteAddress](moduleInfo.lpBaseOfDll)
+        module.size = moduleInfo.SizeOfImage
+        module.`end` = module.base + module.size
+        yield module
 
 proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_module".} =
   checkRoot()
