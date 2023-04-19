@@ -20,7 +20,7 @@ type OverlayOptions = object
   targetX, targetY: int
   targetWidth, targetHeight: int
 
-var overlayOptions: OverlayOptions
+var overlayOpts: OverlayOptions
 
 proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "get_window_info".} =
   when defined(linux):
@@ -74,37 +74,37 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
 
   if target != "Full":
     let winInfo = getWindowInfo(target)
-    overlayOptions.targetX = winInfo.x
-    overlayOptions.targetY = winInfo.y
-    overlayOptions.targetWidth = winInfo.width
-    overlayOptions.targetHeight = winInfo.height
+    overlayOpts.targetX = winInfo.x
+    overlayOpts.targetY = winInfo.y
+    overlayOpts.targetWidth = winInfo.width
+    overlayOpts.targetHeight = winInfo.height
     setWindowSize(winInfo.width, winInfo.height)
     setWindowPosition(winInfo.x, winInfo.y)
-  overlayOptions.target = target
-  overlayOptions.trackTarget = trackTarget
+  overlayOpts.target = target
+  overlayOpts.trackTarget = trackTarget
 
   if exitKey != -1:
-    overlayOptions.exitKey = exitKey
+    overlayOpts.exitKey = exitKey
   else:
     when defined(windows):
-      overlayOptions.exitKey = 0x23
+      overlayOpts.exitKey = 0x23
     elif defined(linux):
-      overlayOptions.exitKey = 0xFF57
+      overlayOpts.exitKey = 0xFF57
   setExitKey(KeyboardKey.NULL)
 
 proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   clearBackground(Blank)
-  if keyPressed(overlayOptions.exitKey):
+  if keyPressed(overlayOpts.exitKey):
     rl.closeWindow()
-  if overlayOptions.trackTarget:
-    let winInfo = getWindowInfo(overlayOptions.target)
-    if winInfo.x != overlayOptions.targetX or winInfo.y != overlayOptions.targetY:
-      overlayOptions.targetX = winInfo.x
-      overlayOptions.targetY = winInfo.y
+  if overlayOpts.trackTarget:
+    let winInfo = getWindowInfo(overlayOpts.target)
+    if winInfo.x != overlayOpts.targetX or winInfo.y != overlayOpts.targetY:
+      overlayOpts.targetX = winInfo.x
+      overlayOpts.targetY = winInfo.y
       rl.setWindowPosition(winInfo.x, winInfo.y)
-    if winInfo.width != overlayOptions.targetWidth or winInfo.height != overlayOptions.targetHeight:
-      overlayOptions.targetWidth = winInfo.width
-      overlayOptions.targetHeight = winInfo.height
+    if winInfo.width != overlayOpts.targetWidth or winInfo.height != overlayOpts.targetHeight:
+      overlayOpts.targetWidth = winInfo.width
+      overlayOpts.targetHeight = winInfo.height
       rl.setWindowSize(winInfo.width, winInfo.height)
   not windowShouldClose()
 
