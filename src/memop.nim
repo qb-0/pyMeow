@@ -1,7 +1,8 @@
 import 
   encodings, strutils, 
   nimraylib_now/raylib,
-  nimpy, memcore
+  nimpy, nimpy/raw_buffers, 
+  nimpy/py_types, memcore
 
 pyExportModule("pyMeow")
 
@@ -88,6 +89,14 @@ proc readVec3(process: Process, address: ByteAddress): Vector3 {.exportpy: "r_ve
 proc readBool(process: Process, address: ByteAddress): bool {.exportpy: "r_bool".} = 
   process.read(address, byte).bool
 
+proc readCType(process: Process, address: ByteAddress, ctype: PyObject): PPyObject {.exportpy: "r_ctype".} =
+  var pyBuf: RawPyBuffer
+  ctype.getBuffer(pyBuf, PyBUF_SIMPLE)
+  var memBuf = process.readSeq(address, pyBuf.len, byte)
+  moveMem(pyBuf.buf, memBuf[0].addr, memBuf.len)
+  result = pyBuf.obj
+  pyBuf.release()
+
 proc writeString(process: Process, address: ByteAddress, data: string) {.exportpy: "w_string".} =
   process.writeArray(address, data.cstring.toOpenArrayByte(0, data.high))
 
@@ -153,3 +162,11 @@ proc writeVec3(process: Process, address: ByteAddress, data: Vector3) {.exportpy
 
 proc writeBool(process: Process, address: ByteAddress, data: bool) {.exportpy: "w_bool".} = 
   process.write(address, data.byte)
+
+proc writeCType(process: Process, address: ByteAddress, data: PyObject) {.exportpy: "w_ctype".} =
+  var pyBuf: RawPyBuffer
+  data.getBuffer(pyBuf, PyBUF_SIMPLE)
+  var memBuf = newSeq[byte](pyBuf.len)
+  copyMem(memBuf[0].addr, pyBuf.buf, pyBuf.len)
+  process.writeArray(address, memBuf)
+  pyBuf.release()

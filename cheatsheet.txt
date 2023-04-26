@@ -54,6 +54,7 @@ r_bytes(process: Process, address: int, size: int): byte array
 r_vec2(process: Process, address: int): Vector2
 r_vec3(process: Process, address: int): Vector3
 r_bool(process: Process, address: int): bool
+r_ctype(process: Process, address: int, ctype: ctype): ctype
 
 w_string(process: Process, address: int, data: string)
 w_int(process: Process, address: int, data: int)
@@ -75,6 +76,7 @@ w_bytes(process: Process, address: int, data: byte array)
 w_vec2(process: Process, address: int, data: Vector2)
 w_vec3(process: Process, address: int, data: Vector3)
 w_bool(process: Process, address: int, data: bool)
+w_ctype(process: Process, address: int, data: ctype)
 
 ################################################################################################################
 Overlay
