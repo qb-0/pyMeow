@@ -50,7 +50,7 @@ elif defined(windows):
   import winim
 
   proc keyPressed*(vKey: int32): bool {.exportpy: "key_pressed".} =
-    GetAsyncKeyState(vKey).bool
+    GetAsyncKeyState(vKey) < 0
 
   proc pressKey(vKey: int) {.exportpy: "press_key".} =
     var input: INPUT
