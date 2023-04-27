@@ -43,19 +43,19 @@ def main():
 
     while True:
         try:
-            local_player = pm.r_int(csgo_proc, client + Offsets.dwLocalPlayer)
+            local_player = pm.r(csgo_proc, client + Offsets.dwLocalPlayer, "int")
         except:
             continue
 
         if local_player:
-                ent_addrs = pm.r_ints(csgo_proc, client + Offsets.dwEntityList, 128)[0::4]
+                ent_addrs = pm.r(csgo_proc, client + Offsets.dwEntityList, "int", 128)[0::4]
                 for ent in ent_addrs:
                     if ent and ent != local_player:
                         glow_addr = (
-                            pm.r_uint(csgo_proc, client + Offsets.dwGlowObjectManager)
-                            + pm.r_int(csgo_proc, ent + Offsets.m_iGlowIndex) * 0x38
+                            pm.r(csgo_proc, client + Offsets.dwGlowObjectManager, "uint")
+                            + pm.r(csgo_proc, ent + Offsets.m_iGlowIndex, "int") * 0x38
                         )
-                        team = pm.r_int(csgo_proc, ent + Offsets.m_iTeamNum)
+                        team = pm.r(csgo_proc, ent + Offsets.m_iTeamNum, "int")
                         c = Colors.cyan if team != 2 else Colors.orange
                         glow_struct = pm.r_ctype(csgo_proc, glow_addr, GlowStruct())
                         glow_struct.r = c["r"]
