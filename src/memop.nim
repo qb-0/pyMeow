@@ -96,6 +96,33 @@ proc readCType(process: Process, address: ByteAddress, ctype: PyObject): PPyObje
   moveMem(pyBuf.buf, memBuf[0].addr, memBuf.len)
   result = pyBuf.obj
 
+proc read(process: Process, address: ByteAddress, `type`: string, size: int = 1): PPyObject {.exportpy: "r".} =
+  let 
+    o = size == 1
+    tl = `type`.toLower()
+
+  template r(t: typedesc) =
+    if o:
+      return nimValueToPy(process.read(address, t))
+    return nimValueToPy(process.readSeq(address, size, t))
+
+  case tl:
+    of "int", "int32": r(int32)
+    of "int16": r(int16)
+    of "int64": r(int64)
+    of "uint", "uint32": r(uint32)
+    of "uint64": r(uint64)
+    of "float": r(float32)
+    of "float64": r(float64)
+    of "byte": r(byte)
+    of "vec2": r(Vector2)
+    of "vec3": r(Vector3)
+    of "bool": r(bool)
+    of "str", "string":
+      return nimValueToPy(process.readString(address, if size == 1: 30 else: size))
+    else:
+      raise newException(IOError, "Unknown data type: " & tl)
+
 proc writeString(process: Process, address: ByteAddress, data: string) {.exportpy: "w_string".} =
   process.writeArray(address, data.cstring.toOpenArrayByte(0, data.high))
 
@@ -168,3 +195,38 @@ proc writeCType(process: Process, address: ByteAddress, data: PyObject) {.export
   var memBuf = newSeq[byte](pyBuf.len)
   copyMem(memBuf[0].addr, pyBuf.buf, pyBuf.len)
   process.writeArray(address, memBuf)
+
+proc write(process: Process, address: ByteAddress, data: PPyObject, `type`: string) {.exportpy: "w".} =
+  let 
+    pyMod = pyBuiltinsModule()
+    l = pyMod.list == pyMod.type(data)
+    tl = `type`.toLower()
+
+  template w(t: typedesc) =
+    if l:
+      var buf: seq[t]
+      pyValueToNim(data, buf)
+      process.writeArray(address, buf)
+    else:
+      var buf: t
+      pyValueToNim(data, buf)
+      process.write(address, buf)
+
+  case tl:
+    of "int", "int32": w(int32)
+    of "int16": w(int16)
+    of "int64": w(int64)
+    of "uint", "uint32": w(uint32)
+    of "uint64": w(uint64)
+    of "float": w(float32)
+    of "float64": w(float64)
+    of "byte": w(byte)
+    of "vec2": w(Vector2)
+    of "vec3": w(Vector3)
+    of "bool": w(bool)
+    of "str", "string":
+      var buf: string
+      pyValueToNim(data, buf)
+      process.writeString(address, buf)
+    else:
+      raise newException(IOError, "Unknown data type: " & tl)

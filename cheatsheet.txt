@@ -34,6 +34,7 @@ pointer_chain_64(process: Process, base: int, offsets: int array): int
 page_protection(process: Process, address: ByteAddress, newProtection: int): int
 allocate_memory(process: Process, size: int, protection: int = 0): int
 
+r(process: Process, address: int, type: string, size: int = 1): any
 r_string(process: Process, address: int, size: int = 30): string
 r_int(process: Process, address: int): int
 r_ints(process: Process, address: int, size: int): int array
@@ -56,6 +57,7 @@ r_vec3(process: Process, address: int): Vector3
 r_bool(process: Process, address: int): bool
 r_ctype(process: Process, address: int, ctype: ctype): ctype
 
+w(process: Process, address: ByteAddress, data: any, type: string)
 w_string(process: Process, address: int, data: string)
 w_int(process: Process, address: int, data: int)
 w_ints(process: Process, address: int, data: int array)
