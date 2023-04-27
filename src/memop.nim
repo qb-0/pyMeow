@@ -95,7 +95,6 @@ proc readCType(process: Process, address: ByteAddress, ctype: PyObject): PPyObje
   var memBuf = process.readSeq(address, pyBuf.len, byte)
   moveMem(pyBuf.buf, memBuf[0].addr, memBuf.len)
   result = pyBuf.obj
-  pyBuf.release()
 
 proc writeString(process: Process, address: ByteAddress, data: string) {.exportpy: "w_string".} =
   process.writeArray(address, data.cstring.toOpenArrayByte(0, data.high))
@@ -169,4 +168,3 @@ proc writeCType(process: Process, address: ByteAddress, data: PyObject) {.export
   var memBuf = newSeq[byte](pyBuf.len)
   copyMem(memBuf[0].addr, pyBuf.buf, pyBuf.len)
   process.writeArray(address, memBuf)
-  pyBuf.release()
