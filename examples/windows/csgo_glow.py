@@ -1,6 +1,11 @@
 import sys
 import pyMeow as pm
 from requests import get
+from ctypes import *
+
+
+class Offsets:
+    pass
 
 
 class Colors:
@@ -8,39 +13,59 @@ class Colors:
     cyan = pm.get_color("cyan")
 
 
-class Offsets:
-    pass
+class GlowStruct(Structure):
+    _fields_ = [
+        ("", 8 * c_byte),
+        ("r", c_float),
+        ("g", c_float),
+        ("b", c_float),
+        ("a", c_float),
+        ("", 16 * c_byte),
+        ("renderOccluded", c_bool),
+        ("renderUnoccluded", c_bool)
+    ]
 
 
-try:
-    # Credits to https://github.com/frk1/hazedumper
-    haze = get(
-        "https://raw.githubusercontent.com/frk1/hazedumper/master/csgo.json"
-    ).json()
-
-    [setattr(Offsets, k, v) for k, v in haze["signatures"].items()]
-    [setattr(Offsets, k, v) for k, v in haze["netvars"].items()]
-except:
-    sys.exit("Unable to fetch Hazedumper's Offsets")
-
-csgo_proc = pm.open_process("csgo.exe")
-client = pm.get_module(csgo_proc, "client.dll")["base"]
-
-while True:
+def main():
     try:
-        local_player = pm.r_int(csgo_proc, client + Offsets.dwLocalPlayer)
-    except:
-        continue
+        # Credits to https://github.com/frk1/hazedumper
+        haze = get(
+            "https://raw.githubusercontent.com/frk1/hazedumper/master/csgo.json"
+        ).json()
 
-    if local_player:
-            ent_addrs = pm.r_ints(csgo_proc, client + Offsets.dwEntityList, 128)[0::4]
-            for ent in ent_addrs:
-                if ent and ent != local_player:
-                    glow_addr = (
-                        pm.r_uint(csgo_proc, client + Offsets.dwGlowObjectManager)
-                        + pm.r_int(csgo_proc, ent + Offsets.m_iGlowIndex) * 0x38
-                    )
-                    team = pm.r_int(csgo_proc, ent + Offsets.m_iTeamNum)
-                    c = Colors.cyan if team != 2 else Colors.orange
-                    pm.w_floats(csgo_proc, glow_addr + 8, list(c.values()))
-                    pm.w_bytes(csgo_proc, glow_addr + 0x28, [1, 0])
+        [setattr(Offsets, k, v) for k, v in haze["signatures"].items()]
+        [setattr(Offsets, k, v) for k, v in haze["netvars"].items()]
+    except:
+        sys.exit("Unable to fetch Hazedumper's Offsets")
+
+    csgo_proc = pm.open_process("csgo.exe")
+    client = pm.get_module(csgo_proc, "client.dll")["base"]
+
+    while True:
+        try:
+            local_player = pm.r_int(csgo_proc, client + Offsets.dwLocalPlayer)
+        except:
+            continue
+
+        if local_player:
+                ent_addrs = pm.r_ints(csgo_proc, client + Offsets.dwEntityList, 128)[0::4]
+                for ent in ent_addrs:
+                    if ent and ent != local_player:
+                        glow_addr = (
+                            pm.r_uint(csgo_proc, client + Offsets.dwGlowObjectManager)
+                            + pm.r_int(csgo_proc, ent + Offsets.m_iGlowIndex) * 0x38
+                        )
+                        team = pm.r_int(csgo_proc, ent + Offsets.m_iTeamNum)
+                        c = Colors.cyan if team != 2 else Colors.orange
+                        glow_struct = pm.r_ctype(csgo_proc, glow_addr, GlowStruct())
+                        glow_struct.r = c["r"]
+                        glow_struct.g = c["g"]
+                        glow_struct.b = c["b"]
+                        glow_struct.a = c["a"]
+                        glow_struct.renderOccluded = True
+                        glow_struct.renderUnoccluded = False
+                        pm.w_ctype(csgo_proc, glow_addr, glow_struct)
+
+
+if __name__ == "__main__":
+    main()
