@@ -119,7 +119,7 @@ proc read(process: Process, address: ByteAddress, `type`: string, size: int = 1)
     of "vec3": r(Vector3)
     of "bool": r(bool)
     of "str", "string":
-      return nimValueToPy(process.readString(address, if size == 1: 30 else: size))
+      return nimValueToPy(process.readString(address, if o: 30 else: size))
     else:
       raise newException(IOError, "Unknown data type: " & tl)
 
