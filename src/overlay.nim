@@ -24,6 +24,7 @@ var overlayOpts: OverlayOptions
 
 proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "get_window_info".} =
   when defined(linux):
+    # TODO: Use a X11 solution. `trackTarget` currently causes issues.
     let 
       p = startProcess("xwininfo", "", ["-name", name], options={poUsePath, poStdErrToStdOut})
       (lines, exitCode) = p.readLines()
