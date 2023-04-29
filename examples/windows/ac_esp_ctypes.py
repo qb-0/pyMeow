@@ -22,6 +22,10 @@ class Entity(Structure):
         ("team", c_int)
     ]
 
+    @property
+    def pos_dict(self):
+        return dict(x=self.pos.x, y=self.pos.y, z=self.pos.z)
+
 
 class Pointer:
     player_count = 0x18AC0C
@@ -54,7 +58,7 @@ def main():
                 ent = pm.r_ctype(proc, ent_addr, Entity())
                 if ent.health > 0:
                     try:
-                        wts = pm.world_to_screen(v_matrix, {"x": ent.pos.x, "y": ent.pos.y, "z": ent.pos.z})
+                        wts = pm.world_to_screen(v_matrix, ent.pos_dict)
                     except:
                         continue
 
