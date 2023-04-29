@@ -92,9 +92,8 @@ proc readBool(process: Process, address: ByteAddress): bool {.exportpy: "r_bool"
 proc readCType(process: Process, address: ByteAddress, ctype: PyObject): PPyObject {.exportpy: "r_ctype".} =
   var pyBuf: RawPyBuffer
   ctype.getBuffer(pyBuf, PyBUF_SIMPLE)
-  var memBuf = process.readSeq(address, pyBuf.len, byte)
-  moveMem(pyBuf.buf, memBuf[0].addr, memBuf.len)
-  result = pyBuf.obj
+  process.readPointer(address, pyBuf.buf, pyBuf.len)
+  pyBuf.obj
 
 proc read(process: Process, address: ByteAddress, `type`: string, size: int = 1): PPyObject {.exportpy: "r".} =
   let 
@@ -192,9 +191,7 @@ proc writeBool(process: Process, address: ByteAddress, data: bool) {.exportpy: "
 proc writeCType(process: Process, address: ByteAddress, data: PyObject) {.exportpy: "w_ctype".} =
   var pyBuf: RawPyBuffer
   data.getBuffer(pyBuf, PyBUF_SIMPLE)
-  var memBuf = newSeq[byte](pyBuf.len)
-  copyMem(memBuf[0].addr, pyBuf.buf, pyBuf.len)
-  process.writeArray(address, memBuf)
+  process.writePointer(address, pyBuf.buf, pyBuf.len)
 
 proc write(process: Process, address: ByteAddress, data: PPyObject, `type`: string) {.exportpy: "w".} =
   let 

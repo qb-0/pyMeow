@@ -239,6 +239,27 @@ iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "
       curAddr += result.size
       yield result
 
+proc readPointer*(process: Process, address: ByteAddress, dst: pointer, size: int) =
+  when defined(linux):
+    var ioSrc, ioDst: IOVec
+
+    ioDst.iov_base = dst
+    ioDst.iov_len = size.uint
+    ioSrc.iov_base = cast[pointer](address)
+    ioSrc.iov_len = size.uint
+    if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
+      memoryErr("Read", address)
+  elif defined(windows):
+    if ReadProcessMemory(
+      process.handle, cast[pointer](address), dst, size, nil
+    ) == FALSE:
+      memoryErr("Read", address)
+
+    if process.debug:
+      var buf = newSeq[byte](size)
+      copyMem(buf[0].addr, dst, size)
+      echo "[R] [seq[byte]] 0x", address.toHex(), " -> ", $buf
+
 proc read*(process: Process, address: ByteAddress, t: typedesc): t =
   when defined(linux):
     var
@@ -259,6 +280,27 @@ proc read*(process: Process, address: ByteAddress, t: typedesc): t =
 
   if process.debug:
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
+
+proc writePointer*(process: Process, address: ByteAddress, data: pointer, size: int) =
+  when defined(linux):
+    var ioSrc, ioDst: IOVec
+
+    ioSrc.iov_base = data
+    ioSrc.iov_len = size.uint
+    ioDst.iov_base = cast[pointer](address)
+    ioDst.iov_len = size.uint
+    if process_vm_writev(process.pid, ioSrc.addr, 1, ioDst.addr, 1, 0) == -1:
+      memoryErr("Write", address)
+  elif defined(windows):
+    if WriteProcessMemory(
+      process.handle, cast[pointer](address), data, size, nil
+    ) == FALSE:
+      memoryErr("Write", address)
+
+  if process.debug:
+    var buf = newSeq[byte](size)
+    copyMem(buf[0].addr, data, size)
+    echo "[W] [seq[byte]] 0x", address.toHex(), " -> ", $buf
 
 proc write*(process: Process, address: ByteAddress, data: auto) =
   when defined(linux):
