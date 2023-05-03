@@ -23,8 +23,8 @@ class Entity(Structure):
     ]
 
     @property
-    def pos_dict(self):
-        return dict(x=self.pos.x, y=self.pos.y, z=self.pos.z)
+    def pos_vec(self):
+        return pm.vec3(self.pos.x, self.pos.y, self.pos.z)
 
 
 class Pointer:
@@ -58,7 +58,7 @@ def main():
                 ent = pm.r_ctype(proc, ent_addr, Entity())
                 if ent.health > 0:
                     try:
-                        wts = pm.world_to_screen(v_matrix, ent.pos_dict)
+                        wts = pm.world_to_screen(v_matrix, ent.pos_vec)
                     except:
                         continue
 
