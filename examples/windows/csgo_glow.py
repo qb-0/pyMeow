@@ -48,23 +48,23 @@ def main():
             continue
 
         if local_player:
-                ent_addrs = pm.r(csgo_proc, client + Offsets.dwEntityList, "int", 128)[0::4]
-                for ent in ent_addrs:
-                    if ent and ent != local_player:
-                        glow_addr = (
-                            pm.r(csgo_proc, client + Offsets.dwGlowObjectManager, "uint")
-                            + pm.r(csgo_proc, ent + Offsets.m_iGlowIndex, "int") * 0x38
-                        )
-                        team = pm.r(csgo_proc, ent + Offsets.m_iTeamNum, "int")
-                        c = Colors.cyan if team != 2 else Colors.orange
-                        glow_struct = pm.r_ctype(csgo_proc, glow_addr, GlowStruct())
-                        glow_struct.r = c["r"]
-                        glow_struct.g = c["g"]
-                        glow_struct.b = c["b"]
-                        glow_struct.a = c["a"]
-                        glow_struct.renderOccluded = True
-                        glow_struct.renderUnoccluded = False
-                        pm.w_ctype(csgo_proc, glow_addr, glow_struct)
+            ent_addrs = pm.r(csgo_proc, client + Offsets.dwEntityList, "int", 128)[0::4]
+            for ent in ent_addrs:
+                if ent and ent != local_player:
+                    glow_addr = (
+                        pm.r(csgo_proc, client + Offsets.dwGlowObjectManager, "uint")
+                        + pm.r(csgo_proc, ent + Offsets.m_iGlowIndex, "int") * 0x38
+                    )
+                    team = pm.r(csgo_proc, ent + Offsets.m_iTeamNum, "int")
+                    c = Colors.cyan if team != 2 else Colors.orange
+                    glow_struct = pm.r_ctype(csgo_proc, glow_addr, GlowStruct())
+                    glow_struct.r = c["r"]
+                    glow_struct.g = c["g"]
+                    glow_struct.b = c["b"]
+                    glow_struct.a = c["a"]
+                    glow_struct.renderOccluded = True
+                    glow_struct.renderUnoccluded = False
+                    pm.w_ctype(csgo_proc, glow_addr, glow_struct)
 
 
 if __name__ == "__main__":
