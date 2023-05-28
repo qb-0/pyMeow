@@ -135,13 +135,14 @@ proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
   raise newException(Exception, fmt"Process '{pid}' not found")
 
 proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
+  const maxPath = 4096
   when defined(linux):
-    var path = newString(256)
-    discard readlink(fmt"/proc/{process.pid}/exe".cstring, path.cstring, 256)
+    var path = newString(maxPath)
+    discard readlink(fmt"/proc/{process.pid}/exe".cstring, path.cstring, maxPath)
     path.strip()
   elif defined(windows):
-    var path = newSeq[WCHAR](256)
-    GetModuleFileNameEx(process.handle, 0, path[0].addr, 256)
+    var path = newSeq[WCHAR](maxPath)
+    GetModuleFileNameEx(process.handle, 0, path[0].addr, maxPath)
     nullTerminated($$path)
 
 proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
