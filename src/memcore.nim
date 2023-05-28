@@ -134,6 +134,16 @@ proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
       return process.name
   raise newException(Exception, fmt"Process '{pid}' not found")
 
+proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
+  when defined(linux):
+    var path = newString(256)
+    discard readlink(fmt"/proc/{process.pid}/exe".cstring, path.cstring, 256)
+    path.strip()
+  elif defined(windows):
+    var path = newSeq[WCHAR](256)
+    GetModuleFileNameEx(process.handle, 0, path[0].addr, 256)
+    nullTerminated($$path)
+
 proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
   let 
     pyMod = pyBuiltinsModule()
