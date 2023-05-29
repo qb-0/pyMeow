@@ -53,17 +53,17 @@ proc checkRoot =
     if getuid() != 0:
       raise newException(IOError, "Root access required!")
 
-proc getErrorStr: string =
+proc getOSError: tuple[code: int, error: string] {.exportpy: "get_os_error".} =
   when defined(linux):
-    let
-      errCode = errno
-      errMsg = strerror(errCode)
+    (errno.int, $strerror(errno))
   elif defined(windows):
-    var 
-      errCode = osLastError()
-      errMsg = osErrorMsg(errCode)
+    var errMsg = osErrorMsg(osLastError())
     stripLineEnd(errMsg)
-  result = fmt"[Error: {errCode} - {errMsg}]"
+    (osLastError().int, errMsg)
+
+proc getErrorStr: string =
+  let err = getOSError()
+  result = fmt"[Error: {err.code} - {err.error}]"
 
 proc memoryErr(m: string, address: ByteAddress) {.inline.} =
   raise newException(
