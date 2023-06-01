@@ -142,3 +142,6 @@ proc sliderBar(posX, posY, width, height: float, textLeft, textRight: string, va
 
 proc loadStyle(fileName: string) {.exportpy: "gui_load_style".} =
   rg.loadStyle(fileName)
+
+proc setState(state: int) {.exportpy: "gui_set_state".} =
+  rg.setState(state)

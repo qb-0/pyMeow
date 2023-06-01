@@ -159,6 +159,7 @@ gui_slider(posX, posY, width, height: float, textLeft, textRight: string, value,
 gui_slider_bar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float)
 gui_load_style(fileName: string)
 gui_fade(alpha: float)
+gui_set_state(state: int)
 
 ################################################################################################################
 Vector
