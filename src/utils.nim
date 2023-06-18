@@ -94,9 +94,9 @@ proc getDisplayResolution*: (int, int) {.exportpy: "get_display_resolution".} =
   when defined(linux):
     let
       disp = XOpenDisplay(nil)
-      scrn = DefaultScreenOfDisplay(disp)
+      scrn = XScreenOfDisplay(disp, 0)
     defer: discard XCloseDisplay(disp)
-    (scrn.width.int, scrn.height.int)
+    (WidthOfScreen(scrn).int, HeightOfScreen(scrn).int)
   elif defined(windows):
     (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)
 
