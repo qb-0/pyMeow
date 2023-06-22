@@ -512,6 +512,9 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteA
       for i, a in result:
         result[i] += rangeStart
 
+proc aobScanBytes(pattern: string, byteBuffer: seq[byte], single: bool = true, algorithm: int = 0): seq[ByteAddress] {.exportpy: "aob_scan_bytes".} =
+  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+
 proc pageProtection(process: Process, address: ByteAddress, newProtection: int32): int32 {.exportpy: "page_protection".} =
   when defined(linux):
     ptrace.pageProtection(process.pid, address, newProtection)

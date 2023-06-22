@@ -30,6 +30,7 @@ get_os_error(): (int, string)
 
 aob_scan_module(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): int array
 aob_scan_range(process: Process, pattern: string, rangeStart, rangeEnd: int, relative: bool = false, single: bool = true, algorithm: int = 0): int array
+aob_scan_bytes(pattern: string, byteBuffer: byte array, single: bool = true, algorithm: int = 0): int array
 pointer_chain_32(process: Process, base: int, offsets: int array): int
 pointer_chain_64(process: Process, base: int, offsets: int array): int
 
