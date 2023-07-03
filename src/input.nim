@@ -58,14 +58,17 @@ elif defined(windows):
     input.ki.wVk = vKey.uint16
     SendInput(1, input.addr, sizeof(input).int32)
 
-  proc mouseMove(x, y: int32) {.exportpy: "mouse_move".} =
-    var input: INPUT
-    input.mi = MOUSE_INPUT(
-      dwFlags: MOUSEEVENTF_MOVE, 
-      dx: x.int32,
-      dy: y.int32,
-    )
-    SendInput(1, input.addr, sizeof(input).int32)
+  proc mouseMove(x, y: int, relative: bool = false) {.exportpy: "mouse_move".} =
+    var
+      xm = x
+      ym = y
+
+    if relative:
+      var p: POINT
+      discard GetCursorPos(p.addr)
+      xm = x + p.x
+      ym = y + p.y
+    SetCursorPos(xm.int32, ym.int32)
 
   proc mouseClick {.exportpy: "mouse_click".} =
     var 
