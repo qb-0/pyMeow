@@ -33,3 +33,6 @@ https://www.buymeabeer.com/quebee
 > Configurable cross platform Starwars Battlefront 2 ESP
 
 <img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/screenshot.png" alt="alt text" width="350" height="250"><img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/menu.png" alt="alt text" width="350" height="250">
+
+#### [VakScript](https://github.com/vakdev/VakScript) by [vakdev](https://github.com/vakdev)
+> Spaceglider for League of Legends
