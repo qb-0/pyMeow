@@ -81,6 +81,8 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
     overlayOpts.targetHeight = winInfo.height
     setWindowSize(winInfo.width, winInfo.height)
     setWindowPosition(winInfo.x, winInfo.y)
+  elif trackTarget:
+    raise newException(Exception, "Target tracking is not supported in Fullscreen mode")
   overlayOpts.target = target
   overlayOpts.trackTarget = trackTarget
 
