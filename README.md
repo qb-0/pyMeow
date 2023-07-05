@@ -35,4 +35,5 @@ https://www.buymeabeer.com/quebee
 <img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/screenshot.png" alt="alt text" width="350" height="250"><img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/menu.png" alt="alt text" width="350" height="250">
 
 #### [VakScript](https://github.com/vakdev/VakScript) by [vakdev](https://github.com/vakdev)
-> Spaceglider for League of Legends
+> Spaceglider for League of Legends 
+<img src="https://cdn.discordapp.com/attachments/1111881908205400155/1125916023518928986/Capturar_2023_07_04_16_02_48_158.png" alt="alt text" width="350" height="250">
