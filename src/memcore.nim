@@ -408,21 +408,28 @@ proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress
           result.add(parseHexInt(hex))
 
   proc getIndexMatchOrder(pattern: seq[string]): seq[int] =
-    let middleIndex = (pattern.len div 2) - 1
-    var midHexByteIndex, lastHexByteIndex: int
+      if pattern.len > 2:
+        let middleIndex = (pattern.len div 2) - 1
+        var midHexByteIndex, lastHexByteIndex: int
+        
+        for i, hb in pattern:
+          if hb != doubleWildCard:
+            if not (wildCard in hb):
+              if i <= middleIndex or midHexByteIndex == 0:
+                midHexByteIndex = i
+              lastHexByteIndex = i
+            result.add(i)
 
-    for i, hb in pattern:
-      if hb != doubleWildCard:
-        if not (wildCard in hb):
-          if i <= middleIndex or midHexByteIndex == 0:
-            midHexByteIndex = i
-          lastHexByteIndex = i
-        result.add(i)
-
-    discard result.pop()
-    result.delete(result.find(midHexByteIndex))
-    result.insert(midHexByteIndex, 1)
-    result.insert(lastHexByteIndex, 0)
+        if lastHexByteIndex == 0:
+          lastHexByteIndex = pattern.len - 1      
+        discard result.pop()
+        result.delete(result.find(midHexByteIndex))
+        result.insert(midHexByteIndex, 1)
+        result.insert(lastHexByteIndex, 0)
+      else:
+        for i, hb in pattern:
+          if hb != doubleWildCard:
+            result.add(i)
 
   let
     hexPattern = splitPattern(pattern)
