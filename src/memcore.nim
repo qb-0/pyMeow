@@ -39,14 +39,14 @@ type
 
   Module = object
     name: string
-    base: ByteAddress
-    `end`: ByteAddress
-    size: int
+    base: uint
+    `end`: uint
+    size: uint
 
   Page = object
-    start: ByteAddress
-    `end`: ByteAddress
-    size: int
+    start: uint
+    `end`: uint
+    size: uint
 
 proc checkRoot =
   when defined(linux):
@@ -65,7 +65,7 @@ proc getErrorStr: string =
   let err = getOSError()
   result = fmt"[Error: {err.code} - {err.error}]"
 
-proc memoryErr(m: string, address: ByteAddress) {.inline.} =
+proc memoryErr(m: string, address: uint) {.inline.} =
   raise newException(
     AccessViolationDefect,
     fmt"{m} failed [Address: 0x{address.toHex()}] {getErrorStr()}"
@@ -190,7 +190,7 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
       let s = l.split("/")
       if s.len > 1:
         var 
-          pageStart, pageEnd: ByteAddress
+          pageStart, pageEnd: uint
           modName = s[^1]
         discard scanf(l, "$h-$h", pageStart, pageEnd)
         if modName notin modTable:
@@ -207,8 +207,8 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
   elif defined(windows):
     template yieldModule =
       module.name = nullTerminated($$mEntry.szModule)
-      module.base = cast[ByteAddress](mEntry.modBaseAddr)
-      module.size = mEntry.modBaseSize
+      module.base = cast[uint](mEntry.modBaseAddr)
+      module.size = mEntry.modBaseSize.uint
       module.`end` = module.base + module.size
       yield module
 
@@ -234,7 +234,7 @@ iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "
   var result: Page
   when defined(linux):
     checkRoot()
-    var pageStart, pageEnd: ByteAddress
+    var pageStart, pageEnd: uint
     for l in lines(fmt"/proc/{process.pid}/maps"):
       if module.name in l and scanf(l, "$h-$h", result.start, result.`end`):
         result.size = pageEnd - pageStart
@@ -245,12 +245,12 @@ iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "
       curAddr = module.base
     while VirtualQueryEx(process.handle, cast[LPCVOID](curAddr), mbi.addr, sizeof(mbi).SIZE_T) != 0 and curAddr != module.`end`:
       result.start = curAddr
-      result.`end` = result.start + mbi.RegionSize.int
-      result.size = mbi.RegionSize.int
+      result.`end` = result.start + mbi.RegionSize.uint
+      result.size = mbi.RegionSize.uint
       curAddr += result.size
       yield result
 
-proc readPointer*(process: Process, address: ByteAddress, dst: pointer, size: int) =
+proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
   when defined(linux):
     var ioSrc, ioDst: IOVec
 
@@ -271,7 +271,7 @@ proc readPointer*(process: Process, address: ByteAddress, dst: pointer, size: in
       copyMem(buf[0].addr, dst, size)
       echo "[R] [seq[byte]] 0x", address.toHex(), " -> ", $buf
 
-proc read*(process: Process, address: ByteAddress, t: typedesc): t =
+proc read*(process: Process, address: uint, t: typedesc): t =
   when defined(linux):
     var
       ioSrc, ioDst: IOVec
@@ -292,7 +292,7 @@ proc read*(process: Process, address: ByteAddress, t: typedesc): t =
   if process.debug:
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
-proc writePointer*(process: Process, address: ByteAddress, data: pointer, size: int) =
+proc writePointer*(process: Process, address: uint, data: pointer, size: int) =
   when defined(linux):
     var ioSrc, ioDst: IOVec
 
@@ -313,7 +313,7 @@ proc writePointer*(process: Process, address: ByteAddress, data: pointer, size: 
     copyMem(buf[0].addr, data, size)
     echo "[W] [seq[byte]] 0x", address.toHex(), " -> ", $buf
 
-proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = byte): seq[t] =
+proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t] =
   result = newSeq[t](size)
   when defined(linux):
     var 
@@ -328,14 +328,14 @@ proc readSeq*(process: Process, address: ByteAddress, size: int, t: typedesc = b
       memoryErr("readSeq", address)
   elif defined(windows):
     if ReadProcessMemory(
-      process.handle, cast[pointer](address), result[0].addr, size * sizeof(t), nil
+      process.handle, cast[pointer](address), result[0].addr, size.int * sizeof(t), nil
     ) == FALSE:
       memoryErr("readSeq", address)
 
   if process.debug:
     echo "[R] [", type(result), "] 0x", address.toHex(), " -> ", result
 
-proc write*(process: Process, address: ByteAddress, data: auto) =
+proc write*(process: Process, address: uint, data: auto) =
   when defined(linux):
     var
       ioSrc, ioDst: IOVec
@@ -357,7 +357,7 @@ proc write*(process: Process, address: ByteAddress, data: auto) =
   if process.debug:
     echo "[W] [", type(data), "] 0x", address.toHex(), " -> ", data
 
-proc writeArray*[T](process: Process, address: ByteAddress, data: openArray[T]): int {.discardable.} =
+proc writeArray*[T](process: Process, address: uint, data: openArray[T]): int {.discardable.} =
   when defined(linux):
     var
       ioSrc, ioDst: IOVec
@@ -378,7 +378,7 @@ proc writeArray*[T](process: Process, address: ByteAddress, data: openArray[T]):
   if process.debug:
     echo "[W] [", type(data), "] 0x", address.toHex(), " -> ", data
 
-proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
+proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
   # Credits to Iago Beuller
   const
     wildCard = '?'
@@ -466,11 +466,11 @@ proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress
           break
 
     if found:
-      result.add(i)
+      result.add(i.uint)
       if single:
         return
 
-proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress] =
+proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
   const
     wildCard = "??"
     wildCardByte = 200.byte # Not safe
@@ -493,12 +493,12 @@ proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[ByteAddress
       if byteBuffer[curIndex + sigIndex] != s and s != wildCardByte:
         break
       elif sigIndex == bytePattern.len-1:
-        result.add(curIndex)
+        result.add(curIndex.uint)
         if single:
           return
         break
 
-proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[ByteAddress] {.exportpy: "aob_scan_module".} =
+proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_module".} =
   let 
     module = getModule(process, moduleName)
     # TODO: Reading a whole module is a bad idea. Read pages instead.
@@ -510,7 +510,7 @@ proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool
       for i, a in result:
         result[i] += module.base
 
-proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteAddress, relative: bool = false, single: bool = true, algorithm: int = 0): seq[ByteAddress] {.exportpy: "aob_scan_range".} =
+proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: uint, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_range".} =
   if rangeStart >= rangeEnd:
     raise newException(Exception, "Invalid range (rangeStart > rangeEnd)")
 
@@ -522,10 +522,10 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: ByteA
       for i, a in result:
         result[i] += rangeStart
 
-proc aobScanBytes(pattern: string, byteBuffer: seq[byte], single: bool = true, algorithm: int = 0): seq[ByteAddress] {.exportpy: "aob_scan_bytes".} =
+proc aobScanBytes(pattern: string, byteBuffer: seq[byte], single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_bytes".} =
   result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
 
-proc pageProtection(process: Process, address: ByteAddress, newProtection: int32): int32 {.exportpy: "page_protection".} =
+proc pageProtection(process: Process, address: uint, newProtection: int32): int32 {.exportpy: "page_protection".} =
   when defined(linux):
     ptrace.pageProtection(process.pid, address, newProtection)
   elif defined(windows):
@@ -533,7 +533,7 @@ proc pageProtection(process: Process, address: ByteAddress, newProtection: int32
     discard VirtualQueryEx(process.handle, cast[LPCVOID](address), mbi.addr, sizeof(mbi).SIZE_T)
     discard VirtualProtectEx(process.handle, cast[LPCVOID](address), mbi.RegionSize, newProtection, result.addr)
 
-proc allocateMemory(process: Process, size: int, protection: int32 = 0): ByteAddress {.exportpy: "allocate_memory".} =
+proc allocateMemory(process: Process, size: int, protection: int32 = 0): uint {.exportpy: "allocate_memory".} =
   when defined(linux):
     var prot = PROT_READ or PROT_WRITE or PROT_EXEC
     if protection != 0:
@@ -543,4 +543,4 @@ proc allocateMemory(process: Process, size: int, protection: int32 = 0): ByteAdd
     var prot = PAGE_EXECUTE_READWRITE
     if protection != 0:
       prot = protection
-    cast[ByteAddress](VirtualAllocEx(process.handle, nil, size, MEM_COMMIT or MEM_RESERVE, prot.int32))
+    cast[uint](VirtualAllocEx(process.handle, nil, size, MEM_COMMIT or MEM_RESERVE, prot.int32))

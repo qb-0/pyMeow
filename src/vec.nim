@@ -3,9 +3,9 @@ import
 
 pyExportModule("pyMeow")
 
-proc vec2(x, y: float = 0): Vector2 {.exportpy: "vec2".} =
+proc vec2(x, y: float): Vector2 {.exportpy: "vec2".} =
   Vector2(x: x, y: y)
-proc vec3(x, y, z: float = 0): Vector3 {.exportpy: "vec3".} =
+proc vec3(x, y, z: float): Vector3 {.exportpy: "vec3".} =
   Vector3(x: x, y: y, z: z)
 
 proc vec2Add(v1, v2: Vector2): Vector2 {.exportpy: "vec2_add".} =
