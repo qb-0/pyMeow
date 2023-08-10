@@ -13,10 +13,10 @@ var
   curSoundId = -1
   soundTable: Table[int, SoundObj]
 
-proc initSound {.exportpy: "init_sound".} =
+proc soundInit {.exportpy: "sound_init".} =
   rl.initAudioDevice()
 
-proc deinitSound {.exportpy: "deinit_sound".} =
+proc soundDeinit {.exportpy: "sound_deinit".} =
   rl.closeAudioDevice()
 
 proc loadSound(fileName: string): int {.exportpy: "load_sound".} =
