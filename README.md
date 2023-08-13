@@ -38,6 +38,6 @@ https://www.buymeabeer.com/quebee
 > Spaceglider for League of Legends 
 <img src="https://cdn.discordapp.com/attachments/1111881908205400155/1125916023518928986/Capturar_2023_07_04_16_02_48_158.png" alt="alt text" width="450" height="250">
 
-#### [SuperSimpleMH](https://github.com/vakdev/VakScript) by [XanthanGumm](https://github.com/XanthanGumm)
+#### [SuperSimpleMH](https://github.com/XanthanGumm/SuperSimpleMH) by [XanthanGumm](https://github.com/XanthanGumm)
 > Diablo 2 Resurrected map directions. A tool which direct to key points in the game map.
 <img src="https://github.com/XanthanGumm/SuperSimpleMH/blob/master/LowerKurast.png" alt="alt text" width="450" height="250">
