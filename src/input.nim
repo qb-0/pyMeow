@@ -38,7 +38,7 @@ when defined(linux):
     discard XTestFakeButtonEvent(display, key, 1, 0)
     discard XFlush(display)
 
-  proc mouseUp(button: string = "right") {.exportpy: "mouse_up".} =
+  proc mouseUp(button: string = "left") {.exportpy: "mouse_up".} =
     var key: cuint = case button:
       of "left": 1
       of "middle": 2
