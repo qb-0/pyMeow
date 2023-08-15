@@ -10,33 +10,49 @@ when defined(linux):
     display = XOpenDisplay(nil)
     root = XRootWindow(display, 0)
 
-  proc keyPressed*(key: int): bool {.exportpy: "key_pressed".} =
+  proc keyPressed(key: int): bool {.exportpy: "key_pressed".} =
     var keys: array[0..31, char]
     discard XQueryKeymap(display, keys)
     let keycode = XKeysymToKeycode(display, key.culong)
     (ord(keys[keycode.int div 8]) and (1 shl (keycode.int mod 8))) != 0
 
-  proc pressKey*(key: int, hold: bool = false) {.exportpy: "press_key".} =
+  proc pressKey(key: int, hold: bool = false) {.exportpy: "press_key".} =
     let keycode = XKeysymToKeycode(display, key.KeySym)
     discard XTestFakeKeyEvent(display, keycode.cuint, 1, CurrentTime)
     if not hold:
       discard XTestFakeKeyEvent(display, keycode.cuint, 0, CurrentTime)
 
-  proc mouseMove*(x, y: cint, relative: bool = false) {.exportpy: "mouse_move".} =
+  proc mouseMove(x, y: cint, relative: bool = false) {.exportpy: "mouse_move".} =
     if relative:
       discard XTestFakeRelativeMotionEvent(display, x, y, CurrentTime)
     else:
       discard XTestFakeMotionEvent(display, -1, x, y, CurrentTime)
     discard XFlush(display)
 
-  proc mouseClick* {.exportpy: "mouse_click"} =
-    discard XTestFakeButtonEvent(display, 1, 1, 0)
-    discard XFlush(display)
-    sleep(2)
-    discard XTestFakeButtonEvent(display, 1, 0, 0)
+  proc mouseDown(button: string = "left") {.exportpy: "mouse_down".} =
+    var key = case button:
+      of "left": 1
+      of "middle": 2
+      of "right": 3
+      else: 1
+    discard XTestFakeButtonEvent(display, key, 1, 0)
     discard XFlush(display)
 
-  proc mousePosition*: Vector2 {.exportpy: "mouse_position".} =
+  proc mouseUp(button: string = "right") {.exportpy: "mouse_up".} =
+    var key = case button:
+      of "left": 1
+      of "middle": 2
+      of "right": 3
+      else: 1
+    discard XTestFakeButtonEvent(display, key, 0, 0)
+    discard XFlush(display)
+
+  proc mouseClick(button: string = "left") {.exportpy: "mouse_click"} =
+    mouseDown(button)
+    sleep(3)
+    mouseUp(button)
+
+  proc mousePosition: Vector2 {.exportpy: "mouse_position".} =
     var 
       qRoot, qChild: Window
       qRootX, qRootY, qChildX, qChildY: cint
@@ -70,15 +86,32 @@ elif defined(windows):
       ym = y + p.y
     SetCursorPos(xm.int32, ym.int32)
 
-  proc mouseClick {.exportpy: "mouse_click".} =
+  proc mouseDown(button: string = "left") {.exportpy: "mouse_down".} =
     var 
       down: INPUT
+      key = case button:
+        of "left": MOUSEEVENTF_LEFTDOWN
+        of "middle": MOUSEEVENTF_MIDDLEDOWN
+        of "right": MOUSEEVENTF_RIGHTDOWN
+        else: MOUSEEVENTF_LEFTDOWN
+    down.mi = MOUSE_INPUT(dwFlags: key)
+    SendInput(1, down.addr, sizeof(down))
+
+  proc mouseUp(button: string = "left") {.exportpy: "mouse_up".} =
+    var 
       release: INPUT
-    down.mi = MOUSE_INPUT(dwFlags: MOUSEEVENTF_LEFTDOWN)
-    release.mi = MOUSE_INPUT(dwFlags: MOUSEEVENTF_LEFTUP)
-    SendInput(1, down.addr, sizeof(down).int32)
+      key = case button:
+        of "left": MOUSEEVENTF_LEFTUP
+        of "middle": MOUSEEVENTF_MIDDLEUP
+        of "right": MOUSEEVENTF_RIGHTUP
+        else: MOUSEEVENTF_LEFTUP
+    release.mi = MOUSE_INPUT(dwFlags: key)
+    SendInput(1, release.addr, sizeof(release))
+
+  proc mouseClick(button: string = "left") {.exportpy: "mouse_click".} =
+    mouseDown(button)
     sleep(3)
-    SendInput(1, release.addr, sizeof(release).int32)
+    mouseUp(button)
 
   proc mousePosition*: Vector2 {.exportpy: "mouse_position".} =
     var point: POINT

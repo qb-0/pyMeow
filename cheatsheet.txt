@@ -238,7 +238,9 @@ world_to_screen(matrix: float array (16), pos: Vector3, algo: int = 0): Vector2
 key_pressed(key: int): bool
 press_key(key: int)
 mouse_move(x, y: int, relative: bool = fase)
-mouse_click()
+mouse_down(button: string = "left)
+mouse_up(button: string = "left")
+mouse_click(button: string = "left")
 mouse_position(): (x, y)
 measure_text(text: string, fontSize: int): int
 measure_font(fontId: int, text: string, fontSize, spacing: float): Vector2
