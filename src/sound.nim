@@ -46,7 +46,7 @@ proc playMultiSound(soundId: int) {.exportpy: "play_multisound".} =
 proc stopMultiSound() {.exportpy: "stop_multisound".} =
   rl.stopSoundMulti()
 
-proc setSoundVolume(soundId: int, volume: int): bool {.exportpy: "set_sound_volume".} =
+proc setSoundVolume(soundId: int, volume: int) {.exportpy: "set_sound_volume".} =
   rl.setSoundVolume(soundTable[soundId].sound, volume.float / 100.0)
 
 proc isSoundPlaying(soundId: int): bool {.exportpy: "is_sound_playing".} =
