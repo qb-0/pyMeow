@@ -44,8 +44,8 @@ type
     size: uint
 
   Page = object
-    start: uint
-    `end`: uint
+    start: int
+    `end`: int
     size: uint
 
 proc checkRoot =
@@ -190,15 +190,15 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
       let s = l.split("/")
       if s.len > 1:
         var 
-          pageStart, pageEnd: uint
+          pageStart, pageEnd: int
           modName = s[^1]
         discard scanf(l, "$h-$h", pageStart, pageEnd)
         if modName notin modTable:
           modTable[modName] = Module(name: modName)
-          modTable[modName].base = pageStart
-          modTable[modName].size = pageEnd - modTable[modName].base
+          modTable[modName].base = pageStart.uint
+          modTable[modName].size = pageEnd.uint - modTable[modName].base
         else:
-          modTable[modName].size = pageEnd - modTable[modName].base
+          modTable[modName].size = pageEnd.uint - modTable[modName].base
     
     for name, module in modTable:
       modTable[name].`end` = module.base + module.size
@@ -234,10 +234,10 @@ iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "
   var result: Page
   when defined(linux):
     checkRoot()
-    var pageStart, pageEnd: uint
+    var pageStart, pageEnd: int
     for l in lines(fmt"/proc/{process.pid}/maps"):
       if module.name in l and scanf(l, "$h-$h", result.start, result.`end`):
-        result.size = pageEnd - pageStart
+        result.size = (pageEnd - pageStart).uint
         yield result
   elif defined(windows):
     var
@@ -318,7 +318,7 @@ proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t]
   when defined(linux):
     var 
       ioSrc, ioDst: IOVec
-      bsize = (size * sizeof(t)).uint
+      bsize = size * sizeof(t).uint
 
     ioDst.iov_base = result[0].addr
     ioDst.iov_len = bsize
@@ -527,7 +527,7 @@ proc aobScanBytes(pattern: string, byteBuffer: seq[byte], single: bool = true, a
 
 proc pageProtection(process: Process, address: uint, newProtection: int32): int32 {.exportpy: "page_protection".} =
   when defined(linux):
-    ptrace.pageProtection(process.pid, address, newProtection)
+    ptrace.pageProtection(process.pid, address.int, newProtection)
   elif defined(windows):
     var mbi = MEMORY_BASIC_INFORMATION()
     discard VirtualQueryEx(process.handle, cast[LPCVOID](address), mbi.addr, sizeof(mbi).SIZE_T)

@@ -457,13 +457,13 @@ proc injectSyscall(pid: int, syscall: int, arg0, arg1, arg2, arg3, arg4, arg5: p
   ptrace(PTRACE_DETACH, pid, nil, nil)
 
 proc pageProtection*(pid, src, protection: int) =
-  var pageStart, pageEnd: ByteAddress
+  var pageStart, pageEnd: int
   for l in lines(fmt"/proc/{pid}/maps"):
     discard scanf(l, "$h-$h", pageStart, pageEnd)
     if src > pageStart and src < pageEnd:
       break
   injectSyscall(pid, SYS_mprotect, cast[pointer](pageStart), cast[pointer](pageEnd), cast[pointer](protection), nil, nil, nil)
 
-proc allocateMemory*(pid, size, protection: int): ByteAddress =
+proc allocateMemory*(pid, size, protection: int): uint =
   let ret = injectSyscall(pid, SYS_mmap, nil, cast[pointer](size), cast[pointer](protection), cast[pointer](MAP_ANONYMOUS or MAP_PRIVATE), cast[pointer](-1), nil)
-  cast[ByteAddress](ret)
+  cast[uint](ret)

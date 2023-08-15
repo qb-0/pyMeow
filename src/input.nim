@@ -10,7 +10,7 @@ when defined(linux):
     display = XOpenDisplay(nil)
     root = XRootWindow(display, 0)
 
-  proc keyPressed(key: int): bool {.exportpy: "key_pressed".} =
+  proc keyPressed*(key: int): bool {.exportpy: "key_pressed".} =
     var keys: array[0..31, char]
     discard XQueryKeymap(display, keys)
     let keycode = XKeysymToKeycode(display, key.culong)
@@ -30,7 +30,7 @@ when defined(linux):
     discard XFlush(display)
 
   proc mouseDown(button: string = "left") {.exportpy: "mouse_down".} =
-    var key = case button:
+    var key: cuint = case button:
       of "left": 1
       of "middle": 2
       of "right": 3
@@ -39,7 +39,7 @@ when defined(linux):
     discard XFlush(display)
 
   proc mouseUp(button: string = "right") {.exportpy: "mouse_up".} =
-    var key = case button:
+    var key: cuint = case button:
       of "left": 1
       of "middle": 2
       of "right": 3
@@ -52,7 +52,7 @@ when defined(linux):
     sleep(3)
     mouseUp(button)
 
-  proc mousePosition: Vector2 {.exportpy: "mouse_position".} =
+  proc mousePosition*: Vector2 {.exportpy: "mouse_position".} =
     var 
       qRoot, qChild: Window
       qRootX, qRootY, qChildX, qChildY: cint
