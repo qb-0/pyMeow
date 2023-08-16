@@ -44,8 +44,8 @@ type
     size: uint
 
   Page = object
-    start: int
-    `end`: int
+    start: uint
+    `end`: uint
     size: uint
 
 proc checkRoot =
