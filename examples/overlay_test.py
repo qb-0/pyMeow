@@ -14,11 +14,8 @@ def main():
     speed = 5
     max_speed = 100
     ball_left, ball_down = False, False
-    circle_color = pm.get_color("black")
-
-    stars = list()
-    for _ in range(300):
-        stars.append(pm.vec2(randint(0, width), randint(0, height)))
+    circle_color = pm.get_color("#000000")
+    stars = [pm.vec2(randint(0, width), randint(0, height)) for _ in range(300)]
 
     while pm.overlay_loop():
         if ball_left:
@@ -44,9 +41,9 @@ def main():
                 y -= speed
 
         pm.begin_drawing()
-        [pm.draw_pixel(vec["x"], vec["y"], pm.get_color("white")) for vec in stars]
+        [pm.draw_pixel(vec["x"], vec["y"], pm.get_color("#ffffff")) for vec in stars]
         pm.draw_circle(x, y, radius, circle_color)
-        pm.draw_fps(width // 2, height // 2)
+        pm.draw_fps(width / 2, height / 2)
 
         if pm.gui_button(0, 0, 100, 50, "Increase speed"):
             if speed != max_speed:
@@ -71,9 +68,10 @@ def main():
             pm.set_fps(fps)
 
         pm.gui_progress_bar(350, 10, 200, 30, "Speed: ", str(speed), speed, 0, max_speed)
-        radius = pm.gui_slider(350, 60, 200, 30, "Radius", f"{radius}", radius, 0, 150)
-        pm.draw_text("Exit with 'END'", 50, 100, 25, pm.get_color("white"))
+        radius = pm.gui_slider(350, 60, 200, 30, "Radius", str(radius), radius, 0, 150)
+        pm.draw_text("Exit with 'END'", 50, 100, 25, pm.get_color("#ffffff"))
         pm.end_drawing()
+
 
 if __name__ == "__main__":
     main()
