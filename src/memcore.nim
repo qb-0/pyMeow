@@ -236,7 +236,9 @@ iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "
     checkRoot()
     var pageStart, pageEnd: int
     for l in lines(fmt"/proc/{process.pid}/maps"):
-      if module.name in l and scanf(l, "$h-$h", result.start, result.`end`):
+      if module.name in l and scanf(l, "$h-$h", pageStart, pageEnd):
+        result.start = pageStart.uint
+        result.`end` = pageEnd.uint
         result.size = (pageEnd - pageStart).uint
         yield result
   elif defined(windows):
