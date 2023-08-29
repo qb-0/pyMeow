@@ -154,6 +154,9 @@ proc setWindowSize(width, height: int) {.exportpy: "set_window_size".} =
 proc setWindowTitle(title: string) {.exportpy: "set_window_title".} =
   rl.setWindowTitle(title)
 
+proc setLogLevel(level: int) {.exportpy: "set_log_level".} =
+  rl.setTraceLogLevel(level)
+
 proc takeScreenshot(fileName: string) {.exportpy: "take_screenshot".} =
   rl.takeScreenshot(fileName)
 
