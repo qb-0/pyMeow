@@ -18,12 +18,6 @@ proc pointerChain64(process: Process, base: uint, offsets: openArray[uint]): uin
     result = process.read(result + offset, uint64)
   result = result + offsets[^1]
 
-proc pointerChain(process: Process, baseAddr: uint, offsets: openArray[uint], size: int = 8): uint {.exportpy: "pointer_chain".} =
-  result = if size == 8: process.read(baseAddr, uint64) else: process.read(baseAddr, uint32) 
-  for o in offsets[0..^2]:
-    result = if size == 8: process.read(result + o, uint64) else: process.read(result + o, uint32)
-  result = result + offsets[^1]
-
 proc readString(process: Process, address: uint, size: uint = 30): string {.exportpy: "r_string".} =
   let s = process.readSeq(address, size, char)
   $cast[cstring](s[0].unsafeAddr)
