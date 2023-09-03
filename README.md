@@ -41,6 +41,6 @@ https://www.buymeabeer.com/quebee
 > Diablo 2 Resurrected map directions. A tool which direct to key points in the game map.
 <img src="https://github.com/XanthanGumm/SuperSimpleMH/blob/master/LowerKurast.png" alt="alt text" width="450" height="250">
 
-#### [pyMeow Pixel Aimbot](https://github.com/XanthanGumm/SuperSimpleMH) by [qb](https://github.com/qb-0)
+#### [pyMeow Pixel Aimbot](https://github.com/qb-0/pyMeow-PixelBot) by [qb](https://github.com/qb-0)
 > Simple configurable Pixel Aimbot
 <img src="https://github.com/qb-0/pyMeow-PixelBot/blob/master/screenshot.png" alt="alt text" width="450" height="250">
