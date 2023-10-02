@@ -1,27 +1,15 @@
 import pyMeow as pm
 
 
-# Thanks to https://github.com/a2x/cs2-dumper
-Offsets = {
-    "client_dll": {
-        "dwEntityList": 24688792,
-        "dwViewMatrix": 25663216
-    },
-    "CCSPlayerController": {
-        "m_iPawnHealth": 2056,
-        "m_hPlayerPawn": 2044,
-    },
-    "CBasePlayerController": {
-        "m_iszPlayerName": 1552,
-    },
-    "C_BaseEntity": {
-        "m_iTeamNum": 959,
-        "m_pGameSceneNode": 784,
-    },
-    "C_BasePlayerPawn": {
-        "m_vOldOrigin": 4628,
-    }
-}
+class Offsets:
+    # Thanks to https://github.com/a2x/cs2-dumper
+    dwEntityList = 24688792
+    dwViewMatrix = 25663216
+    m_iPawnHealth = 2056
+    m_hPlayerPawn = 2044
+    m_iszPlayerName = 1552
+    m_iTeamNum = 959
+    m_vOldOrigin = 4628
 
 
 class Colors:
@@ -39,19 +27,19 @@ class Entity:
 
     @property
     def name(self):
-        return pm.r_string(self.proc, self.ptr + Offsets["CBasePlayerController"]["m_iszPlayerName"])
+        return pm.r_string(self.proc, self.ptr + Offsets.m_iszPlayerName)
 
     @property
     def health(self):
-        return pm.r_int(self.proc, self.ptr + Offsets["CCSPlayerController"]["m_iPawnHealth"])
+        return pm.r_int(self.proc, self.ptr + Offsets.m_iPawnHealth)
 
     @property
     def team(self):
-        return pm.r_int(self.proc, self.pawn_ptr + Offsets["C_BaseEntity"]["m_iTeamNum"])
+        return pm.r_int(self.proc, self.pawn_ptr + Offsets.m_iTeamNum)
 
     @property
     def pos(self):
-        return pm.r_vec3(self.proc, self.pawn_ptr + Offsets["C_BasePlayerPawn"]["m_vOldOrigin"])
+        return pm.r_vec3(self.proc, self.pawn_ptr + Offsets.m_vOldOrigin)
 
 
 class CS2Esp:
@@ -60,12 +48,12 @@ class CS2Esp:
         self.mod = pm.get_module(self.proc, "client.dll")["base"]
 
     def it_entities(self):
-        ent_list = pm.r_int64(self.proc, self.mod + Offsets["client_dll"]["dwEntityList"])
+        ent_list = pm.r_int64(self.proc, self.mod + Offsets.dwEntityList)
         for i in range(2, 65):
             try:
                 entry_ptr = pm.r_int64(self.proc, ent_list + (8 * (i & 0x7FFF) >> 9) + 16)
                 controller_ptr = pm.r_int64(self.proc, entry_ptr + 120 * (i & 0x1FF))
-                controller_pawn_ptr = pm.r_int64(self.proc, controller_ptr + Offsets["CCSPlayerController"]["m_hPlayerPawn"])
+                controller_pawn_ptr = pm.r_int64(self.proc, controller_ptr + Offsets.m_hPlayerPawn)
                 list_entry_ptr = pm.r_int64(self.proc, ent_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 16)
                 pawn_ptr = pm.r_int64(self.proc, list_entry_ptr + 120 * (controller_pawn_ptr & 0x1FF))
             except:
@@ -76,7 +64,7 @@ class CS2Esp:
     def run(self):
         pm.overlay_init("Counter-Strike 2", fps=144)
         while pm.overlay_loop():
-            view_matrix = pm.r_floats(self.proc, self.mod + Offsets["client_dll"]["dwViewMatrix"], 16)
+            view_matrix = pm.r_floats(self.proc, self.mod + Offsets.dwViewMatrix, 16)
             pm.begin_drawing()
             pm.draw_fps(0, 0)
             for ent in self.it_entities():
