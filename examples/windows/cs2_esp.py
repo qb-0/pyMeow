@@ -10,6 +10,8 @@ class Offsets:
     m_iszPlayerName = 1552
     m_iTeamNum = 959
     m_vOldOrigin = 4628
+    m_pGameSceneNode = 784
+    m_pBoneArray = 480 
 
 
 class Colors:
@@ -24,6 +26,7 @@ class Entity:
         self.pawn_ptr = pawn_ptr
         self.proc = proc
         self.pos2d = None
+        self.head_pos2d = None
 
     @property
     def name(self):
@@ -41,6 +44,10 @@ class Entity:
     def pos(self):
         return pm.r_vec3(self.proc, self.pawn_ptr + Offsets.m_vOldOrigin)
 
+    def bone_pos(self, bone):
+        game_scene = pm.r_int64(self.proc, self.pawn_ptr + Offsets.m_pGameSceneNode)
+        bone_array_ptr = pm.r_int64(self.proc, game_scene + Offsets.m_pBoneArray)
+        return pm.r_vec3(self.proc, bone_array_ptr + bone * 32)
 
 class CS2Esp:
     def __init__(self):
@@ -70,18 +77,39 @@ class CS2Esp:
             for ent in self.it_entities():
                 try:
                     ent.pos2d = pm.world_to_screen(view_matrix, ent.pos, 1)
-                except:
+                    ent.head_pos2d = pm.world_to_screen(view_matrix, ent.bone_pos(6), 1)
+                except Exception as e:
                     continue
 
                 if ent.health > 0:
                     color = Colors.cyan if ent.team != 2 else Colors.orange
+                    head = ent.pos2d["y"] - ent.head_pos2d["y"]
+                    width = head / 2
+                    center = width / 2
+                    
                     # Snapline
                     pm.draw_line(
                         pm.get_screen_width() / 2,
                         pm.get_screen_height() / 2,
-                        ent.pos2d["x"],
-                        ent.pos2d["y"],
+                        ent.head_pos2d["x"],
+                        ent.head_pos2d["y"],
                         color,
+                    )
+                    # Box
+                    pm.draw_rectangle(
+                        ent.head_pos2d["x"] - center,
+                        ent.head_pos2d["y"] - center / 2,
+                        width,
+                        head + center / 2,
+                        pm.fade_color(color, 0.3),
+                    )
+                    pm.draw_rectangle_lines(
+                        ent.head_pos2d["x"] - center,
+                        ent.head_pos2d["y"] - center / 2,
+                        width,
+                        head + center / 2,
+                        color,
+                        1.2,
                     )
                     # Info
                     txt = f"{ent.name} ({ent.health}%)"
