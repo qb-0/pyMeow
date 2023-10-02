@@ -92,7 +92,6 @@ class CS2Esp:
                         15,
                         Colors.white,
                     )
-
             pm.end_drawing()
 
 if __name__ == "__main__":
