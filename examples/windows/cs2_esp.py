@@ -49,6 +49,7 @@ class Entity:
         bone_array_ptr = pm.r_int64(self.proc, game_scene + Offsets.m_pBoneArray)
         return pm.r_vec3(self.proc, bone_array_ptr + bone * 32)
 
+
 class CS2Esp:
     def __init__(self):
         self.proc = pm.open_process("cs2.exe")
