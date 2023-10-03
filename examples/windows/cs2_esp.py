@@ -3,8 +3,8 @@ import pyMeow as pm
 
 class Offsets:
     # Thanks to https://github.com/a2x/cs2-dumper
-    dwEntityList = 24688792
-    dwViewMatrix = 25663216
+    dwEntityList = 24697032
+    dwViewMatrix = 25671440
     m_iPawnHealth = 2056
     m_hPlayerPawn = 2044
     m_iszPlayerName = 1552
@@ -16,8 +16,10 @@ class Offsets:
 
 class Colors:
     orange = pm.get_color("orange")
+    black = pm.get_color("black")
     cyan = pm.get_color("cyan")
     white = pm.get_color("white")
+    grey = pm.fade_color(pm.get_color("#242625"), 0.9)
 
 
 class Entity:
@@ -48,6 +50,15 @@ class Entity:
         game_scene = pm.r_int64(self.proc, self.pawn_ptr + Offsets.m_pGameSceneNode)
         bone_array_ptr = pm.r_int64(self.proc, game_scene + Offsets.m_pBoneArray)
         return pm.r_vec3(self.proc, bone_array_ptr + bone * 32)
+    
+    def wts(self, view_matrix):
+        try:
+            self.pos2d = pm.world_to_screen(view_matrix, self.pos, 1)
+            self.head_pos2d = pm.world_to_screen(view_matrix, self.bone_pos(6), 1)
+        except:
+            return False
+        return True
+
 
 
 class CS2Esp:
@@ -76,13 +87,7 @@ class CS2Esp:
             pm.begin_drawing()
             pm.draw_fps(0, 0)
             for ent in self.it_entities():
-                try:
-                    ent.pos2d = pm.world_to_screen(view_matrix, ent.pos, 1)
-                    ent.head_pos2d = pm.world_to_screen(view_matrix, ent.bone_pos(6), 1)
-                except Exception as e:
-                    continue
-
-                if ent.health > 0:
+                if ent.wts(view_matrix) and ent.health > 0:
                     color = Colors.cyan if ent.team != 2 else Colors.orange
                     head = ent.pos2d["y"] - ent.head_pos2d["y"]
                     width = head / 2
@@ -92,8 +97,16 @@ class CS2Esp:
                     pm.draw_line(
                         pm.get_screen_width() / 2,
                         pm.get_screen_height() / 2,
-                        ent.head_pos2d["x"],
-                        ent.head_pos2d["y"],
+                        ent.head_pos2d["x"] - center,
+                        ent.head_pos2d["y"] - center / 2,
+                        Colors.black,
+                        3
+                    )
+                    pm.draw_line(
+                        pm.get_screen_width() / 2,
+                        pm.get_screen_height() / 2,
+                        ent.head_pos2d["x"] - center,
+                        ent.head_pos2d["y"] - center / 2,
                         color,
                     )
                     # Box
@@ -102,7 +115,7 @@ class CS2Esp:
                         ent.head_pos2d["y"] - center / 2,
                         width,
                         head + center / 2,
-                        pm.fade_color(color, 0.3),
+                        Colors.grey,
                     )
                     pm.draw_rectangle_lines(
                         ent.head_pos2d["x"] - center,
@@ -116,7 +129,7 @@ class CS2Esp:
                     txt = f"{ent.name} ({ent.health}%)"
                     pm.draw_text(
                         txt,
-                        ent.pos2d["x"] - pm.measure_text(txt, 15) // 2,
+                        ent.head_pos2d["x"] - pm.measure_text(txt, 15) // 2,
                         ent.pos2d["y"],
                         15,
                         Colors.white,
