@@ -60,7 +60,6 @@ class Entity:
         return True
 
 
-
 class CS2Esp:
     def __init__(self):
         self.proc = pm.open_process("cs2.exe")
