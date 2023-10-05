@@ -3,8 +3,8 @@ import pyMeow as pm
 
 class Offsets:
     # Thanks to https://github.com/a2x/cs2-dumper
-    dwEntityList = 24697032
-    dwViewMatrix = 25671440
+    dwEntityList = 24697064
+    dwViewMatrix = 25671472
     m_iPawnHealth = 2056
     m_hPlayerPawn = 2044
     m_iszPlayerName = 1552
