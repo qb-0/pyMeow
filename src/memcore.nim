@@ -227,7 +227,6 @@ proc moduleExists(process: Process, moduleName: string): bool {.exportpy: "modul
   moduleName in mapIt(toSeq(enumModules(process)), it.name)
 
 proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_module".} =
-  checkRoot()
   for module in enumModules(process):
     if moduleName == module.name:
       return module
