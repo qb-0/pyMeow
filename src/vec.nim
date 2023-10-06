@@ -60,12 +60,12 @@ proc vec2Closest(v: Vector2, vectorList: varargs[Vector2]): Vector2 {.exportpy: 
   for vec in vectorList:
     let dist = v.vec2Distance(vec)
     if dist < closestValue:
-      result = v
+      result = vec
       closestValue = dist
 proc vec3Closest(v: Vector3, vectorList: varargs[Vector3]): Vector3 {.exportpy: "vec3_closest".} =
   var closestValue = float32.high
   for vec in vectorList:
     let dist = v.vec3Distance(vec)
     if dist < closestValue:
-      result = v
+      result = vec
       closestValue = dist
