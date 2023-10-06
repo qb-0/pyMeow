@@ -223,6 +223,9 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
       while Module32Next(hSnapShot, mEntry.addr) != FALSE:
         yieldModule()
 
+proc moduleExists(process: Process, moduleName: string): bool {.exportpy: "module_exists".} =
+  moduleName in mapIt(toSeq(enumModules(process)), it.name)
+
 proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_module".} =
   checkRoot()
   for module in enumModules(process):
