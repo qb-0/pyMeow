@@ -3,8 +3,9 @@ import pyMeow as pm
 
 class Offsets:
     # Thanks to https://github.com/a2x/cs2-dumper
-    dwEntityList = 24697064
-    dwViewMatrix = 25671472
+    dwEntityList = None
+    dwViewMatrix = None
+    dwLocalPlayerController = None
     m_iPawnHealth = 2056
     m_hPlayerPawn = 2044
     m_iszPlayerName = 1552
@@ -65,12 +66,25 @@ class CS2Esp:
         self.proc = pm.open_process("cs2.exe")
         self.mod = pm.get_module(self.proc, "client.dll")["base"]
 
+        Offsets.dwEntityList = self.rip_relative("client.dll", "488B0D????????48897C24??8BFAC1EB")
+        Offsets.dwViewMatrix = self.rip_relative("client.dll", "488D0D????????48C1E006")
+        Offsets.dwLocalPlayerController = self.rip_relative("client.dll", "488B05????????4885C0744F")
+
+    def rip_relative(self, module, pattern):
+        base = pm.get_module(self.proc, module)["base"]
+        scan, = pm.aob_scan_module(self.proc, module, pattern, single=True, relative=True)
+        ref = pm.r_int(self.proc, base + scan + 0x3)
+        return scan + 0x7 + ref
+
     def it_entities(self):
         ent_list = pm.r_int64(self.proc, self.mod + Offsets.dwEntityList)
-        for i in range(2, 65):
+        local = pm.r_int64(self.proc, self.mod + Offsets.dwLocalPlayerController)
+        for i in range(1, 65):
             try:
                 entry_ptr = pm.r_int64(self.proc, ent_list + (8 * (i & 0x7FFF) >> 9) + 16)
                 controller_ptr = pm.r_int64(self.proc, entry_ptr + 120 * (i & 0x1FF))
+                if controller_ptr == local:
+                    continue
                 controller_pawn_ptr = pm.r_int64(self.proc, controller_ptr + Offsets.m_hPlayerPawn)
                 list_entry_ptr = pm.r_int64(self.proc, ent_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 16)
                 pawn_ptr = pm.r_int64(self.proc, list_entry_ptr + 120 * (controller_pawn_ptr & 0x1FF))
