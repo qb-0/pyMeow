@@ -68,8 +68,7 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
   setConfigFlags(WINDOW_TRANSPARENT)
   setConfigFlags(WINDOW_TOPMOST)
   when defined(windows): 
-    # Multisample seems to void the transparent framebuffer on most linux distro's.
-    # Needs more tests
+    # Multisampling seems to void the transparent framebuffer on most linux linux distributions.
     setConfigFlags(MSAA_4X_HINT)
   initWindow(res[0] - 1, res[1] - 1, title)
 
