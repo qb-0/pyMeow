@@ -24,7 +24,7 @@ git clone "https://github.com/qb-0/pyMeow"
 cd pyMeow && nim c pyMeow
 ```
 
-## :globe_with_meridians: Projects<br>
+## :globe_with_meridians: Projects
 #### [pyMeow SWBF2](https://github.com/qb-0/pyMeowSWBF2) by [qb](https://github.com/qb-0)
 > Configurable cross platform Starwars Battlefront 2 ESP
 <img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/screenshot.png" alt="alt text" width="450" height="250">
@@ -41,6 +41,6 @@ cd pyMeow && nim c pyMeow
 > Simple configurable Pixel Aimbot
 <img src="https://github.com/qb-0/pyMeow-PixelBot/blob/master/screenshot.png" alt="alt text" width="450" height="250">
 
-## :dollar: Donations<br>
+## :dollar: Donations
 If you enjoy pyMeow and want to make a small donation, then feel free to buy me a :beer:. Thank you!
 https://www.buymeabeer.com/quebee
