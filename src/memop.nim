@@ -32,6 +32,12 @@ proc readInt(process: Process, address: uint): int32 {.exportpy: "r_int".} =
 proc readInts(process: Process, address, size: uint): seq[int32] {.exportpy: "r_ints".} = 
   process.readSeq(address, size, int32)
 
+proc readInt8(process: Process, address: uint): int8 {.exportpy: "r_int8".} = 
+  process.read(address, int8)
+
+proc readInts8(process: Process, address, size: uint): seq[int8] {.exportpy: "r_ints8".} = 
+  process.readSeq(address, size, int8)
+
 proc readInt16(process: Process, address: uint): int16 {.exportpy: "r_int16".} = 
   process.read(address, int16)
 
@@ -101,6 +107,7 @@ proc read(process: Process, address: uint, `type`: string, size: uint = 1): PPyO
 
   case tl:
     of "int", "int32": r(int32)
+    of "int8": r(int8)
     of "int16": r(int16)
     of "int64": r(int64)
     of "uint", "uint32": r(uint32)
@@ -129,6 +136,12 @@ proc writeInt(process: Process, address: uint, data: int32) {.exportpy: "w_int".
   writeData
 
 proc writeInts(process: Process, address: uint, data: openArray[int32]) {.exportpy: "w_ints".} = 
+  writeDatas
+
+proc writeInt8(process: Process, address: uint, data: int8) {.exportpy: "w_int8".} = 
+  writeData
+
+proc writeInts8(process: Process, address: uint, data: openArray[int8]) {.exportpy: "w_ints8".} = 
   writeDatas
 
 proc writeInt16(process: Process, address: uint, data: int16) {.exportpy: "w_int16".} = 
@@ -205,6 +218,7 @@ proc write(process: Process, address: uint, data: PPyObject, `type`: string) {.e
 
   case tl:
     of "int", "int32": w(int32)
+    of "int8": w(int8)
     of "int16": w(int16)
     of "int64": w(int64)
     of "uint", "uint32": w(uint32)

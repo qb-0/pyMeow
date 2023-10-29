@@ -42,12 +42,14 @@ r(process: Process, address: int, type: string, size: int = 1): any
 r_string(process: Process, address: int, size: int = 30): string
 r_int(process: Process, address: int): int
 r_ints(process: Process, address: int, size: int): int array
+r_int8(process: Process, address: int): int8
+r_ints8(process: Process, address: int, size: int): int8 array
+r_int16(process: Process, address: int): int16
+r_ints16(process: Process, address: int, size: int): int16 array
 r_uint(process: Process, address: int): int
 r_uints(process: Process, address: int, size: int): int array
 r_uint64(process: Process, address: int): int
 r_uints64(process: Process, address: int, size: int): int array
-r_int16(process: Process, address: int): int16
-r_ints16(process: Process, address: int, size: int): int16 array
 r_int64(process: Process, address: int): int64
 r_ints64(process: Process, address: int, size: int): int64 array
 r_float(process: Process, address: int): float
@@ -65,6 +67,8 @@ w(process: Process, address: ByteAddress, data: any, type: string)
 w_string(process: Process, address: int, data: string)
 w_int(process: Process, address: int, data: int)
 w_ints(process: Process, address: int, data: int array)
+w_int8(process: Process, address: int, data: int)
+w_ints8(process: Process, address: int, data: int array)
 w_int16(process: Process, address: int, data: int)
 w_ints16(process: Process, address: int, data: int array)
 w_int64(process: Process, address: int, data: int)
