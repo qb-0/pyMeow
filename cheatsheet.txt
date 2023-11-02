@@ -1,5 +1,5 @@
 ################################################################################################################
-Memory
+## Memory
 ################################################################################################################
 Process
   name: string
@@ -89,7 +89,7 @@ w_bool(process: Process, address: int, data: bool)
 w_ctype(process: Process, address: int, data: ctype)
 
 ################################################################################################################
-Overlay
+## Overlay
 ################################################################################################################
 overlay_init(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1, trackTarget: bool = false)
 overlay_loop(): bool
@@ -109,7 +109,7 @@ set_window_flag(flag: int)
 get_window_handle(): int
 
 ################################################################################################################
-Shapes / Drawing
+## Shapes / Drawing
 ################################################################################################################
 begin_drawing()
 end_drawing()
@@ -141,7 +141,7 @@ load_font(fileName: string, fontId: int)
 draw_font(fontId: int, text: string, posX, posY, fontSize, spacing: float, tint: Color)
 
 ################################################################################################################
-Graphical User Interface (GUI)
+## Graphical User Interface (GUI)
 ################################################################################################################
 gui_window_box(posX, posY, width, height: float, title: string): bool
 gui_group_box(posX, posY, width, height: float, text: string)
@@ -169,7 +169,7 @@ gui_fade(alpha: float)
 gui_set_state(state: int)
 
 ################################################################################################################
-Vector
+## Vector
 ################################################################################################################
 vec2(x, y: float = 0): Vector2
 vec2_add(v1, v2: Vector2): Vector2
@@ -198,7 +198,7 @@ vec3_distance(v: Vector3): float
 vec3_closest(v: Vector3, vectorList: Vector3 array): Vector3
 
 ################################################################################################################
-Pixel Scanning
+## Pixel Scanning
 ################################################################################################################
 Pixel
   x, y: int
@@ -211,7 +211,7 @@ pixel_save_to_file(x, y, width, height: float, fileName: string)
 pixel_search_colors(x, y, width, height: float, colors: Color array, similarity: float): Pixel (iterator)
 
 ################################################################################################################
-Sound
+## Sound
 ################################################################################################################
 sound_init()
 sound_deinit()
@@ -227,7 +227,7 @@ play_multisound(soundId: int)
 stop_multisound()
 
 ################################################################################################################
-Misc / Utilities
+## Misc / Utilities
 ################################################################################################################
 get_display_resolution(): (int, int)
 get_window_info(name: string): (x, y, width, height: int)
@@ -243,8 +243,8 @@ fade_color(color: Color, alpha: float): Color
 world_to_screen(matrix: float array (16), pos: Vector3, algo: int = 0): Vector2
 key_pressed(key: int): bool
 press_key(key: int)
-mouse_move(x, y: int, relative: bool = fase)
-mouse_down(button: string = "left)
+mouse_move(x, y: int, relative: bool = false)
+mouse_down(button: string = "left")
 mouse_up(button: string = "left")
 mouse_click(button: string = "left")
 mouse_position(): (x, y)
