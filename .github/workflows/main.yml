@@ -1,0 +1,56 @@
+name: Build and Package pyMeow
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine
+
+    - name: Install Nim language
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          choco install nim
+        else
+          curl https://nim-lang.org/choosenim/init.sh -sSf | sh
+          export PATH=$HOME/.nimble/bin:$PATH
+        fi
+
+    - name: Build nimlib
+      run: |
+        nimble build -d:release --passL:"-static" -o:pyMeow.so pyMeow.nim
+        nimble build -d:release --passL:"-static" -o:pyMeow.pyd pyMeow.nim
+
+    - name: Move nimlib to pyMeow folder
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          mv src/pyMeow.pyd pyMeow/pyMeow
+        else
+          mv src/pyMeow.so pyMeow/pyMeow
+        fi
+
+    - name: Build python package
+      run: |
+        python setup.py sdist bdist_wheel
+
+    - name: Publish python package
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
