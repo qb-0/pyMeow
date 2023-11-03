@@ -19,9 +19,12 @@ jobs:
       with:
         version: stable
 
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev
+
     - name: Install Nim dependencies
       run: nimble install -y nimpy nimraylib_now x11 winim
-
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
