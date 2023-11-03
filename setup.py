@@ -1,9 +1,8 @@
 from setuptools import setup
-ver = open("../VERSION", "r").read()
-ver.close()
+
 setup(
-    name = 'PyMeow',
-    version = ver,
+    name = 'pyMeow',
+    version = '1.53.36',
     packages = ['pyMeow'],
     url = 'https://github.com/qb-0/pyMeow',
     license = 'MIT',

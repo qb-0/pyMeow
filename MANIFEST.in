@@ -1,0 +1,3 @@
+recursive-include pyMeow *.pyd
+recursive-include pyMeow *.so
+recursive-include pyMeow *.pyi
