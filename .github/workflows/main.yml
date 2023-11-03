@@ -6,50 +6,50 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Setup Nim
+      uses: jiro4989/setup-nim-action@v1
+      with:
+        nim-version: 'stable'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build nimlib
+      run: nimble build -Y
+
+    - name: Test nimlib
+      run: nimble test -Y
 
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
         python-version: '3.9'
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-
-    - name: Install Nim language (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        choco install nim
-
-    - name: Install Nim language (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
-        echo "PATH=$HOME/.nimble/bin:$PATH" >> $GITHUB_ENV
-
-    - name: Build nimlib
-      run: |
-        if [ "${{ runner.os }}" = "Windows" ]; then
-          nimble build -d:release --passL:"-static" -o:pyMeow.pyd pyMeow.nim
-        else
-          source $HOME/.nimble/bin/nimble
-          nimble build -d:release --passL:"-static" -o:pyMeow.so pyMeow.nim
-        fi
-
-    - name: Move nimlib to pyMeow folder
-      run: |
-        if [ "${{ runner.os }}" = "Windows" ]; then
-          Move-Item src\pyMeow.pyd pyMeow\pyMeow\
-        else
-          mv src/pyMeow.so pyMeow/pyMeow/
-        fi
+        pip install setuptools wheel
 
     - name: Build python package
       run: |
         python setup.py sdist bdist_wheel
+
+    - name: Move nimlib into the pyMeow folder (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Move-Item src\pyMeow.dll pyMeow\pyMeow\pyMeow.pyd
+
+    - name: Move nimlib into the pyMeow folder (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        mv src/pyMeow.so pyMeow/pyMeow/pyMeow.so
+
+    - name: Publish python package to Test PyPI
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      run: |
+        pip install twine
+        python -m twine upload --repository testpypi dist/*
