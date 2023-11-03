@@ -1,36 +1,3 @@
-
-class Vector2(NamedTuple):
-    x: float
-    y: float
-    
-class Vector3(NamedTuple):
-    x: float
-    y: float
-    z: float
-    
-class Process(NamedTuple):
-    name: str
-    pid: int
-    debug: bool
-    handle: int
-    
-class Color(NamedTuple):
-    r: int
-    g: int
-    b: int
-    a: int
-    
-class Pixel(NamedTuple):
-    x: int
-    y: int
-    color: Color
-    
-class Module(NamedTuple):
-    name: str
-    base: int
-    end: int
-    size: int
-
 def w_byte(*args, **kwargs) -> None:
 
     """
@@ -119,6 +86,37 @@ def r_string(*args, **kwargs):
     :return:
     """
     ...
+class Vector2(NamedTuple):
+    x: float
+    y: float
+    
+class Vector3(NamedTuple):
+    x: float
+    y: float
+    z: float
+    
+class Process(NamedTuple):
+    name: str
+    pid: int
+    debug: bool
+    handle: int
+    
+class Color(NamedTuple):
+    r: int
+    g: int
+    b: int
+    a: int
+    
+class Pixel(NamedTuple):
+    x: int
+    y: int
+    color: Color
+    
+class Module(NamedTuple):
+    name: str
+    base: int
+    end: int
+    size: int
 def enum_processes() -> Iterable[Process]: ...
 def pid_exists(pid: int) -> bool: ...
 def process_exists(processName: str) -> bool: ...

@@ -130,7 +130,10 @@ replace_dict = {
 
 
 def convert(input_file: str, output_file: str) -> None:
-    with open(input_file, 'r') as f, open(output_file, 'w') as f2:
+    with open(input_file, 'r') as f, open(output_file, 'w') as f2, open("../needs_integration.py", 'r+') as f3:
+        _needs_integration = f3.readlines()
+        for line in _needs_integration:
+            f2.write(line)
         f2.write(classes)
         for line in f:
             if "##" in line or not "(" in line or "when defined" in line:
@@ -159,4 +162,4 @@ def convert(input_file: str, output_file: str) -> None:
 
 
 if __name__ == "__main__":
-    convert(cc_path, "../python/pyMeow/pyMeow.pyi")
+    convert(cc_path, "../pyMeow/pyMeow.pyi")
