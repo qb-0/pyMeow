@@ -42,12 +42,12 @@ jobs:
     - name: Move nimlib to pyMeow folder (Windows)
       if: runner.os == 'Windows'
       run: |
-        Move-Item src\pyMeow.pyd pyMeow\pyMeow\
+        Move-Item pyMeow.pyd pyMeow\pyMeow.pyd
 
     - name: Move nimlib to pyMeow folder (Linux)
       if: runner.os == 'Linux'
       run: |
-        mv src/pyMeow.so pyMeow\pyMeow\
+        mv pyMeow.so pyMeow/pyMeow.so
 
     - name: Build python package
       run: |
