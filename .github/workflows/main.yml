@@ -10,10 +10,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: '3.9'
 
@@ -22,35 +22,37 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
 
-    - name: Install Nim language
+    - name: Install Nim language (Windows)
+      if: runner.os == 'Windows'
       run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          choco install nim
-        else
-          curl https://nim-lang.org/choosenim/init.sh -sSf | sh
-          export PATH=$HOME/.nimble/bin:$PATH
-        fi
+        choco install nim
 
-    - name: Build nimlib
+    - name: Install Nim language (Linux)
+      if: runner.os == 'Linux'
       run: |
-        nimble build -d:release --passL:"-static" -o:pyMeow.so pyMeow.nim
+        curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
+        echo "export PATH=$HOME/.nimble/bin:$PATH" >> $GITHUB_ENV
+
+    - name: Build nimlib (Windows)
+      if: runner.os == 'Windows'
+      run: |
         nimble build -d:release --passL:"-static" -o:pyMeow.pyd pyMeow.nim
 
-    - name: Move nimlib to pyMeow folder
+    - name: Build nimlib (Linux)
+      if: runner.os == 'Linux'
       run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          mv src/pyMeow.pyd pyMeow/pyMeow
-        else
-          mv src/pyMeow.so pyMeow/pyMeow
-        fi
+        nimble build -d:release --passL:"-static" -o:pyMeow.so pyMeow.nim
+
+    - name: Move nimlib to pyMeow folder (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Move-Item src\pyMeow.pyd pyMeow\pyMeow\
+
+    - name: Move nimlib to pyMeow folder (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        mv src/pyMeow.so pyMeow/pyMeow/
 
     - name: Build python package
       run: |
         python setup.py sdist bdist_wheel
-
-    # - name: Publish python package
-    #   if: startsWith(github.ref, 'refs/tags/')
-    #   uses: pypa/gh-action-pypi-publish@v1.4.2
-    #   with:
-    #     user: __token__
-    #     password: ${{ secrets.PYPI_API_TOKEN }}
