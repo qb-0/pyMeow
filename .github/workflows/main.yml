@@ -31,27 +31,24 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
-        echo "export PATH=$HOME/.nimble/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=$HOME/.nimble/bin:$PATH" >> $GITHUB_ENV
 
-    - name: Build nimlib (Windows)
-      if: runner.os == 'Windows'
+    - name: Build nimlib
       run: |
-        nimble build -d:release --passL:"-static" -o:pyMeow.pyd pyMeow.nim
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          nimble build -d:release --passL:"-static" -o:pyMeow.pyd pyMeow.nim
+        else
+          source $HOME/.nimble/bin/nimble
+          nimble build -d:release --passL:"-static" -o:pyMeow.so pyMeow.nim
+        fi
 
-    - name: Build nimlib (Linux)
-      if: runner.os == 'Linux'
+    - name: Move nimlib to pyMeow folder
       run: |
-        nimble build -d:release --passL:"-static" -o:pyMeow.so pyMeow.nim
-
-    - name: Move nimlib to pyMeow folder (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        Move-Item src\pyMeow.pyd pyMeow\pyMeow\
-
-    - name: Move nimlib to pyMeow folder (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        mv src/pyMeow.so pyMeow/pyMeow/
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          Move-Item src\pyMeow.pyd pyMeow\pyMeow\
+        else
+          mv src/pyMeow.so pyMeow/pyMeow/
+        fi
 
     - name: Build python package
       run: |
