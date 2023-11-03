@@ -9,7 +9,6 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macOS-latest
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -19,6 +18,9 @@ jobs:
       uses: iffy/install-nim@v4.5.0
       with:
         version: stable
+
+    - name: Install Nim dependencies
+      run: nimble install -y nimpy nimraylib_now x11 winim
 
     - name: Set up Python
       uses: actions/setup-python@v3
@@ -44,11 +46,7 @@ jobs:
       run: |
         mv src/pyMeow.so pyMeow\pyMeow\
 
-    - name: Move nimlib to pyMeow folder (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        mv src/pyMeow.so pyMeow\pyMeow\
-
     - name: Build python package
       run: |
         python setup.py sdist bdist_wheel
+
