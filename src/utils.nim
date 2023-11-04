@@ -6,7 +6,7 @@ pyExportModule("pyMeow")
 
 when defined(linux):
   import 
-    osproc, strscans, x11/xlib
+    osproc, strscans, x11/[xlib, xinerama]
 elif defined(windows):
   import winim
 
@@ -92,11 +92,11 @@ proc checkCollisionCircles(pos1X, pos1Y, radius1, pos2X, pos2Y, radius2: float):
 
 proc getDisplayResolution*: (int, int) {.exportpy: "get_display_resolution".} =
   when defined(linux):
-    let
-      disp = XOpenDisplay(nil)
-      scrn = XScreenOfDisplay(disp, 0)
+    let disp = XOpenDisplay(nil)
     defer: discard XCloseDisplay(disp)
-    (WidthOfScreen(scrn).int, HeightOfScreen(scrn).int)
+    var mCount: cint
+    let pxInfo = XineramaQueryScreens(disp, mCount.addr)[]
+    (pxInfo.width.int, pxInfo.height.int)
   elif defined(windows):
     (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)
 
