@@ -71,7 +71,6 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
     # Multisampling seems to void the transparent framebuffer on most linux linux distributions.
     setConfigFlags(MSAA_4X_HINT)
   initWindow(res[0] - 1, res[1] - 1, title)
-  setWindowMonitor(0)
 
   if target != "Full":
     let winInfo = getWindowInfo(target)
