@@ -83,6 +83,8 @@ iterator pixelEnumScreen: Pixel {.exportpy: "pixel_enum_screen".} =
 proc pixelAtMouse: Pixel {.exportpy: "pixel_at_mouse".} =
   let pos = mousePosition()
   result = pixelEnumRegion(pos.x, pos.y, 1, 1).toSeq()[0]
+  result.x = pos.x.int
+  result.y = pos.y.int
 
 proc pixelSaveToFile(x, y, width, height: float, fileName: string): bool {.exportpy: "pixel_save_to_file".} =
   rl.setTraceLogLevel(5)
