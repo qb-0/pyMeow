@@ -48,7 +48,7 @@ type
     `end`: uint
     size: uint
 
-proc checkRoot =
+template checkRoot =
   when defined(linux):
     if getuid() != 0:
       raise newException(IOError, "Root access required!")
@@ -121,14 +121,12 @@ proc processRunning(process: Process): bool {.exportpy: "process_running".} =
     return exitCode == STILL_ACTIVE
 
 proc getProcessId(processName: string): int {.exportpy: "get_process_id".} =
-  checkRoot()
   for process in enumProcesses():
     if process.name in processName:
       return process.pid
   raise newException(Exception, fmt"Process '{processName}' not found")
 
 proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
-  checkRoot()
   for process in enumProcesses():
     if process.pid == pid:
       return process.name
