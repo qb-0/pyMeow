@@ -6,8 +6,8 @@
   Currently just x64 processes are supported
 ]#
 
-import 
-  posix, strformat, 
+import
+  posix, strformat,
   strscans, strutils
 
 {.pragma: sys, importc, header: "sys/syscall.h".}
@@ -426,7 +426,7 @@ type
     gs: pointer
 
 proc injectSyscall(pid: int, syscall: int, arg0, arg1, arg2, arg3, arg4, arg5: pointer): pointer {.discardable.} =
-  var 
+  var
     status: cint
     regs, oldRegs: Registers
     injectionAddr: pointer

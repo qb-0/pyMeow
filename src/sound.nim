@@ -1,4 +1,4 @@
-import 
+import
   nimpy, tables,
   nimraylib_now as rl
 

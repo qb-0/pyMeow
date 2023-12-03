@@ -1,4 +1,4 @@
-import 
+import
   os, strformat, sequtils,
   strutils, nimpy
 
@@ -7,25 +7,25 @@ pyExportModule("pyMeow")
 when defined(windows):
   import winim
 elif defined(linux):
-  import 
+  import
     posix, strscans, tables,
     ptrace
 
   proc process_vm_readv(
-    pid: int, 
-    localIov: ptr IOVec, 
-    liovcnt: culong, 
-    remoteIov: ptr IOVec, 
-    riovcnt: culong, 
+    pid: int,
+    localIov: ptr IOVec,
+    liovcnt: culong,
+    remoteIov: ptr IOVec,
+    riovcnt: culong,
     flags: culong
   ): cint {.importc, header: "<sys/uio.h>", discardable.}
 
   proc process_vm_writev(
-      pid: int, 
-      localIov: ptr IOVec, 
-      liovcnt: culong, 
-      remoteIov: ptr IOVec, 
-      riovcnt: culong, 
+      pid: int,
+      localIov: ptr IOVec,
+      liovcnt: culong,
+      remoteIov: ptr IOVec,
+      riovcnt: culong,
       flags: culong
   ): cint {.importc, header: "<sys/uio.h>", discardable.}
 
@@ -93,7 +93,7 @@ iterator enumProcesses: Process {.exportpy: "enum_processes".} =
         p.name = readFile(fmt"/proc/{pid}/comm").strip()
         yield p
   elif defined(windows):
-    var 
+    var
       pe: PROCESSENTRY32
       hResult: WINBOOL
     let hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
@@ -144,7 +144,7 @@ proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
     nullTerminated($$path)
 
 proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
-  let 
+  let
     pyMod = pyBuiltinsModule()
     pyInt = pyMod.getAttr("int")
     pyStr = pyMod.str
@@ -175,7 +175,7 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
     if result.handle == FALSE:
       raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
-  
+
 proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):
     CloseHandle(process.handle)
@@ -187,7 +187,7 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
     for l in lines(fmt"/proc/{process.pid}/maps"):
       let s = l.split("/")
       if s.len > 1:
-        var 
+        var
           pageStart, pageEnd: int
           modName = s[^1]
         discard scanf(l, "$h-$h", pageStart, pageEnd)
@@ -197,7 +197,7 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
           modTable[modName].size = pageEnd.uint - modTable[modName].base
         else:
           modTable[modName].size = pageEnd.uint - modTable[modName].base
-    
+
     for name, module in modTable:
       modTable[name].`end` = module.base + module.size
       yield modTable[name]
@@ -318,7 +318,7 @@ proc writePointer*(process: Process, address: uint, data: pointer, size: int) =
 proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t] =
   result = newSeq[t](size)
   when defined(linux):
-    var 
+    var
       ioSrc, ioDst: IOVec
       bsize = size * sizeof(t).uint
 
@@ -376,7 +376,7 @@ proc writeArray*[T](process: Process, address: uint, data: openArray[T]): int {.
       process.handle, cast[pointer](address), data.unsafeAddr, sizeof(T) * data.len, nil
     ) == FALSE:
       memoryErr("WriteArray", address)
-  
+
   if process.debug:
     echo "[W] [", type(data), "] 0x", address.toHex(), " -> ", data
 
@@ -427,7 +427,7 @@ proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
           discard result.pop()
         else:
           result.delete(result.find(lastHexByteIndex))
-          
+
         result.delete(result.find(midHexByteIndex))
         result.insert(midHexByteIndex, 1)
         result.insert(lastHexByteIndex, 0)
@@ -501,11 +501,11 @@ proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
         break
 
 proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_module".} =
-  let 
+  let
     module = getModule(process, moduleName)
     # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
-  
+
   result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:
@@ -517,7 +517,7 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: uint,
     raise newException(Exception, "Invalid range (rangeStart > rangeEnd)")
 
   let byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
-  
+
   result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:

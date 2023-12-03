@@ -95,7 +95,7 @@ proc textBox(posX, posY, width, height: float, text: string, id: int): string {.
       text: text & newString(width.int),
     )
   if rg.textBox(getRec, textBoxTable[id].text.cstring, 250, textBoxTable[id].editMode):
-    textBoxTable[id].editMode = not textBoxTable[id].editMode    
+    textBoxTable[id].editMode = not textBoxTable[id].editMode
   $textBoxTable[id].text.cstring
 
 proc progressBar(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_progress_bar".} =

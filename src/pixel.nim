@@ -22,7 +22,7 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
     if disp.isNil:
       disp = XOpenDisplay(nil)
 
-    let 
+    let
       root = XRootWindow(disp, 0)
       shot = XGetImage(
         disp, root,
@@ -53,7 +53,7 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
     SelectObject(hDest, hbDesktop)
     BitBlt(hDest, 0, 0, width.int, height.int, hdc, x.int, y.int, SRCCOPY)
 
-    var 
+    var
       size = (width * height * 4).int
       pBits = newSeq[uint8](size)
 

@@ -1,11 +1,11 @@
-import 
-  colors, nimpy, 
+import
+  colors, nimpy,
   nimraylib_now/raylib as rl
 
 pyExportModule("pyMeow")
 
 when defined(linux):
-  import 
+  import
     osproc, strscans, x11/[xlib, xinerama]
 elif defined(windows):
   import winim
@@ -55,7 +55,7 @@ proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Ve
     clip.z = pos.x * matrix[12] + pos.y * matrix[13] + pos.z * matrix[14] + matrix[15]
     clip.x = pos.x * matrix[0] + pos.y * matrix[1] + pos.z * matrix[2] + matrix[3]
     clip.y = pos.x * matrix[4] + pos.y * matrix[5] + pos.z * matrix[6] + matrix[7]
-  
+
   if clip.z < 0.2:
     raise newException(Exception, "2D Position out of bounds")
 
@@ -133,7 +133,7 @@ proc getWindowTitle(processId: int): string {.exportpy: "get_window_title".} =
     let
       p = startProcess("wmctrl", "", ["-l", "-p"], options={poUsePath, poStdErrToStdOut})
       (lines, exitCode) = p.readLines()
-    
+
     if exitCode == 0:
       for l in lines:
         let (r, _, _, pid, _, title) = l.scanTuple("$h $s$i $s$i $s$+ $s$+")

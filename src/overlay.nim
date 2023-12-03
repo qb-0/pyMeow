@@ -25,7 +25,7 @@ var overlayOpts: OverlayOptions
 proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "get_window_info".} =
   when defined(linux):
     # TODO: Use a X11 solution. `trackTarget` currently causes issues.
-    let 
+    let
       p = startProcess("xwininfo", "", ["-name", name], options={poUsePath, poStdErrToStdOut})
       (lines, exitCode) = p.readLines()
 
@@ -46,7 +46,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "g
     else:
       raise newException(Exception, "XWinInfo failed (installed 'xwininfo'?)")
   elif defined(windows):
-    var 
+    var
       rect: RECT
       winInfo: WINDOWINFO
     let hwnd = FindWindowA(nil, name)
@@ -67,7 +67,7 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
   setConfigFlags(WINDOW_MOUSE_PASSTHROUGH)
   setConfigFlags(WINDOW_TRANSPARENT)
   setConfigFlags(WINDOW_TOPMOST)
-  when defined(windows): 
+  when defined(windows):
     # Multisampling seems to void the transparent framebuffer on most linux linux distributions.
     setConfigFlags(MSAA_4X_HINT)
   initWindow(res[0] - 1, res[1] - 1, title)

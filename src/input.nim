@@ -1,4 +1,4 @@
-import 
+import
   os, nimpy, nimraylib_now
 
 pyExportModule("pyMeow")
@@ -6,7 +6,7 @@ pyExportModule("pyMeow")
 when defined(linux):
   import x11/[x, xlib, xtst]
 
-  var 
+  var
     display = XOpenDisplay(nil)
     root = XRootWindow(display, 0)
 
@@ -53,7 +53,7 @@ when defined(linux):
     mouseUp(button)
 
   proc mousePosition*: Vector2 {.exportpy: "mouse_position".} =
-    var 
+    var
       qRoot, qChild: Window
       qRootX, qRootY, qChildX, qChildY: cint
       qMask: cuint
@@ -87,7 +87,7 @@ elif defined(windows):
     SetCursorPos(xm.int32, ym.int32)
 
   proc mouseDown(button: string = "left") {.exportpy: "mouse_down".} =
-    var 
+    var
       down: INPUT
       key = case button:
         of "left": MOUSEEVENTF_LEFTDOWN
@@ -98,7 +98,7 @@ elif defined(windows):
     SendInput(1, down.addr, sizeof(down))
 
   proc mouseUp(button: string = "left") {.exportpy: "mouse_up".} =
-    var 
+    var
       release: INPUT
       key = case button:
         of "left": MOUSEEVENTF_LEFTUP

@@ -1,4 +1,4 @@
-import 
+import
   nimraylib_now as rl,
   nimpy, tables
 
@@ -37,7 +37,7 @@ proc drawCircleSector(centerX, centerY, radius, startAngle, endAngle: float, seg
 
 proc drawCircleSectorLines(centerX, centerY, radius, startAngle, endAngle: float, segments: int, color: Color) {.exportpy: "draw_circle_sector_lines".} =
   rl.drawCircleSectorLines(Vector2(x: centerX, y: centerY), radius, startAngle, endAngle, segments, color)
- 
+
 proc drawRing(centerX, centerY, segments, innerRadius, outerRadius, startAngle, endAngle: float, color: Color) {.exportpy: "draw_ring".} =
   rl.drawRing(Vector2(x: centerX, y: centerY), innerRadius, outerRadius, startAngle, endAngle, segments, color)
 
@@ -51,8 +51,8 @@ proc drawEllipseLines(centerX, centerY, radiusH, radiusV: float, color: Color) {
   rl.drawEllipseLines(centerX, centerY, radiusH, radiusV, color)
 
 proc drawRectangle(posX, posY, width, height: float, color: Color): Rectangle {.exportpy: "draw_rectangle".} =
-  result.x = posX 
-  result.y = posY 
+  result.x = posX
+  result.y = posY
   result.width = width
   result.height = height
   rl.drawRectangle(posX, posY, width, height, color)

@@ -1,4 +1,4 @@
-import 
+import
   nimpy, nimraylib_now, nimraylib_now/raymath as rm
 
 pyExportModule("pyMeow")
