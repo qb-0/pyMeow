@@ -16,6 +16,14 @@ proc newColor(r, g, b, a: uint8): rl.Color {.exportpy: "new_color".} =
 proc newColorHex(hexValue: uint): rl.Color {.exportpy: "new_color_hex".} =
   rl.getColor(hexValue.cuint)
 
+proc newColorFloat(r, g, b, a: float): rl.Color {.exportpy: "new_color_float".} =
+  rl.Color(
+    r: (r * 255).uint8,
+    g: (g * 255).uint8,
+    b: (b * 255).uint8,
+    a: (a * 255).uint8
+  )
+
 proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
   try:
     let c = parseColor(colorName).extractRGB()
