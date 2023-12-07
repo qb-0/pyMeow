@@ -546,3 +546,10 @@ proc allocateMemory(process: Process, size: int, protection: int32 = 0): uint {.
     if protection != 0:
       prot = protection
     cast[uint](VirtualAllocEx(process.handle, nil, size, MEM_COMMIT or MEM_RESERVE, prot.int32))
+
+proc freeMemory(process: Process, address: uint): bool {.exportpy: "free_memory".} =
+  # only windows is currently supported
+  when defined(linux):
+    echo "[free_memory] only windows is currently supported"
+  elif defined(windows):
+    VirtualFreeEx(process.handle, cast[LPVOID](address), 0, MEM_RELEASE) == TRUE
