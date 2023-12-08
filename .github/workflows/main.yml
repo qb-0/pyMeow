@@ -1,0 +1,55 @@
+name: Build and Package pyMeow
+
+on: 
+  workflow_dispatch:
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Nim
+      uses: iffy/install-nim@v4.5.0
+      with:
+        version: stable
+
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev
+
+    - name: Install Nim dependencies
+      run: nimble install -y nimpy nimraylib_now x11 winim
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel
+
+    - name: Compile nim project using nim.cfg
+      run: |
+        nim c pyMeow
+
+    - name: Move nimlib to pyMeow folder (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Move-Item pyMeow.pyd pyMeow\pyMeow.pyd
+
+    - name: Move nimlib to pyMeow folder (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        mv pyMeow.so pyMeow/pyMeow.so
+
+    - name: Build python package
+      run: |
+        python setup.py sdist bdist_wheel
+
