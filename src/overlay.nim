@@ -4,7 +4,7 @@ import
   input
 
 from utils import getDisplayResolution
-#Test
+
 pyExportModule("pyMeow")
 
 when defined(linux):
