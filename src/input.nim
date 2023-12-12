@@ -6,6 +6,9 @@ pyExportModule("pyMeow")
 when defined(linux):
   import x11/[x, xlib, xtst]
 
+  const 
+    buttonMask = [Button1Mask.cuint, Button2Mask, Button3Mask]
+
   var
     display = XOpenDisplay(nil)
     root = XRootWindow(display, 0)
@@ -15,6 +18,21 @@ when defined(linux):
     discard XQueryKeymap(display, keys)
     let keycode = XKeysymToKeycode(display, key.culong)
     (ord(keys[keycode.int div 8]) and (1 shl (keycode.int mod 8))) != 0
+
+  proc mousePressed*(button: string = "left"): bool {.exportpy: "mouse_pressed".} =
+    var
+      qRoot, qChild: Window
+      qRootX, qRootY: cint
+      qChildX, qChildY: cint
+      qMask: cuint
+      key: int = case button:
+        of "left": 0
+        of "middle": 1
+        of "right": 2
+        else: 0
+
+    discard XQueryPointer(display, root, qRoot.addr, qChild.addr, qRootX.addr, qRootY.addr, qChildX.addr, qChildY.addr, qMask.addr)
+    (qMask and buttonMask[key]).bool
 
   proc pressKey(key: int, hold: bool = false) {.exportpy: "press_key".} =
     let keycode = XKeysymToKeycode(display, key.KeySym)
@@ -67,6 +85,15 @@ elif defined(windows):
 
   proc keyPressed*(vKey: int32): bool {.exportpy: "key_pressed".} =
     GetAsyncKeyState(vKey) < 0
+
+  proc mousePressed*(button: string = "left"): bool {.exportpy: "mouse_pressed".} =
+    var key: int32 = case button:
+      of "left": 1
+      of "middle": 4
+      of "right": 2
+      else: 1
+
+    keyPressed(key)
 
   proc pressKey(vKey: int) {.exportpy: "press_key".} =
     var input: INPUT
