@@ -75,7 +75,6 @@ when defined(linux):
       qRoot, qChild: Window
       qRootX, qRootY, qChildX, qChildY: cint
       qMask: cuint
-
     discard XQueryPointer(display, root, qRoot.addr, qChild.addr, qRootX.addr, qRootY.addr, qChildX.addr, qChildY.addr, qMask.addr)
     result.x = qRootX.cfloat
     result.y = qRootY.cfloat
@@ -92,7 +91,6 @@ elif defined(windows):
       of "middle": 4
       of "right": 2
       else: 1
-
     keyPressed(key)
 
   proc pressKey(vKey: int) {.exportpy: "press_key".} =
@@ -105,7 +103,6 @@ elif defined(windows):
     var
       xm = x
       ym = y
-
     if relative:
       var p: POINT
       discard GetCursorPos(p.addr)
