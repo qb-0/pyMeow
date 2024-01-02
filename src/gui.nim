@@ -131,7 +131,8 @@ proc spinner(posX, posY, width, height: float, text: string, value, minValue, ma
       rec: getRec,
       value: value
     )
-  spinnerTable[id].editMode = rg.spinner(getRec, text, spinnerTable[id].value.addr, minValue, maxValue, spinnerTable[id].editMode)
+  if rg.spinner(getRec, text, spinnerTable[id].value.addr, minValue, maxValue, spinnerTable[id].editMode):
+    spinnerTable[id].editMode = not spinnerTable[id].editMode
   spinnerTable[id].value
 
 proc slider(posX, posY, width, height: float, textLeft, textRight: string, value, minValue, maxValue: float): float {.exportpy: "gui_slider".} =
