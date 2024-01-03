@@ -57,11 +57,11 @@ class CS2Esp:
         self.proc = pm.open_process("cs2.exe")
         self.mod = pm.get_module(self.proc, "client.dll")["base"]
 
-        offsetsName = ["dwViewMatrix", "dwEntityList", "dwLocalPlayerController", "dwLocalPlayerPawn", "dwForceJump"]
+        offsets_name = ["dwViewMatrix", "dwEntityList", "dwLocalPlayerController", "dwLocalPlayerPawn", "dwForceJump"]
         offsets = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/main/generated/offsets.json").json()
-        [setattr(Offsets, k, offsets["client_dll"]["data"][k]["value"]) for k in offsetsName]
+        [setattr(Offsets, k, offsets["client_dll"]["data"][k]["value"]) for k in offsets_name]
 
-        clientDllName = {
+        client_dll_name = {
             "m_iIDEntIndex": "C_CSPlayerPawnBase",
             "m_hPlayerPawn": "CCSPlayerController",
             "m_fFlags": "C_BaseEntity",
@@ -72,7 +72,7 @@ class CS2Esp:
             "m_pGameSceneNode": "C_BaseEntity",
         }
         clientDll = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/9a13b18e5bddb9bc59d5cd9a3693b39fd8d6849b/generated/client.dll.json").json()
-        [setattr(Offsets, k, clientDll[clientDllName[k]]["data"][k]["value"]) for k in clientDllName]
+        [setattr(Offsets, k, clientDll[client_dll_name[k]]["data"][k]["value"]) for k in client_dll_name]
 
     def it_entities(self):
         ent_list = pm.r_int64(self.proc, self.mod + Offsets.dwEntityList)
