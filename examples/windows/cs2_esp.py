@@ -1,18 +1,9 @@
+import requests
 import pyMeow as pm
 
 
 class Offsets:
-    # Thanks to https://github.com/a2x/cs2-dumper
-    dwEntityList = None
-    dwViewMatrix = None
-    dwLocalPlayerController = None
-    m_iPawnHealth = 2056
-    m_hPlayerPawn = 2044
-    m_iszPlayerName = 1552
-    m_iTeamNum = 959
-    m_vOldOrigin = 4628
-    m_pGameSceneNode = 784
-    m_pBoneArray = 480 
+    m_pBoneArray = 480
 
 
 class Colors:
@@ -37,7 +28,7 @@ class Entity:
 
     @property
     def health(self):
-        return pm.r_int(self.proc, self.ptr + Offsets.m_iPawnHealth)
+        return pm.r_int(self.proc, self.pawn_ptr + Offsets.m_iHealth)
 
     @property
     def team(self):
@@ -66,15 +57,22 @@ class CS2Esp:
         self.proc = pm.open_process("cs2.exe")
         self.mod = pm.get_module(self.proc, "client.dll")["base"]
 
-        Offsets.dwEntityList = self.rip_relative("client.dll", "488B0D????????48897C24??8BFAC1EB")
-        Offsets.dwViewMatrix = self.rip_relative("client.dll", "488D0D????????48C1E006")
-        Offsets.dwLocalPlayerController = self.rip_relative("client.dll", "488B05????????4885C0744F")
+        offsetsName = ["dwViewMatrix", "dwEntityList", "dwLocalPlayerController", "dwLocalPlayerPawn", "dwForceJump"]
+        offsets = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/main/generated/offsets.json").json()
+        [setattr(Offsets, k, offsets["client_dll"]["data"][k]["value"]) for k in offsetsName]
 
-    def rip_relative(self, module, pattern):
-        base = pm.get_module(self.proc, module)["base"]
-        scan, = pm.aob_scan_module(self.proc, module, pattern, single=True, relative=True)
-        ref = pm.r_int(self.proc, base + scan + 0x3)
-        return scan + 0x7 + ref
+        clientDllName = {
+            "m_iIDEntIndex": "C_CSPlayerPawnBase",
+            "m_hPlayerPawn": "CCSPlayerController",
+            "m_fFlags": "C_BaseEntity",
+            "m_iszPlayerName": "CBasePlayerController",
+            "m_iHealth": "C_BaseEntity",
+            "m_iTeamNum": "C_BaseEntity",
+            "m_vOldOrigin": "C_BasePlayerPawn",
+            "m_pGameSceneNode": "C_BaseEntity",
+        }
+        clientDll = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/9a13b18e5bddb9bc59d5cd9a3693b39fd8d6849b/generated/client.dll.json").json()
+        [setattr(Offsets, k, clientDll[clientDllName[k]]["data"][k]["value"]) for k in clientDllName]
 
     def it_entities(self):
         ent_list = pm.r_int64(self.proc, self.mod + Offsets.dwEntityList)
