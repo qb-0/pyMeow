@@ -50,11 +50,7 @@ proc measureText(text: string, fontSize: cint): int {.exportpy: "measure_text".}
 proc runTime: float64 {.exportpy: "run_time".} =
   rl.getTime()
 
-proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Vector2 {.exportpy: "world_to_screen".} =
-  var
-    clip: Vector3
-    ndc: Vector2
-
+template wtsCalc =
   if algo == 0:
     clip.z = pos.x * matrix[3] + pos.y * matrix[7] + pos.z * matrix[11] + matrix[15]
     clip.x = pos.x * matrix[0] + pos.y * matrix[4] + pos.z * matrix[8] + matrix[12]
@@ -64,13 +60,34 @@ proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Ve
     clip.x = pos.x * matrix[0] + pos.y * matrix[1] + pos.z * matrix[2] + matrix[3]
     clip.y = pos.x * matrix[4] + pos.y * matrix[5] + pos.z * matrix[6] + matrix[7]
 
+proc worldToScreen(matrix: array[0..15, float], pos: Vector3, algo: int = 0): Vector2 {.exportpy: "world_to_screen".} =
+  var
+    clip: Vector3
+    ndc: Vector2
+
+  wtsCalc()
   if clip.z < 0.2:
     raise newException(Exception, "2D Position out of bounds")
-
   ndc.x = clip.x / clip.z
   ndc.y = clip.y / clip.z
   result.x = (getScreenWidth() / 2 * ndc.x) + (ndc.x + getScreenWidth() / 2)
   result.y = -(getScreenHeight() / 2 * ndc.y) + (ndc.y + getScreenHeight() / 2)
+
+proc worldToScreenNoExc(matrix: array[0..15, float], pos: Vector3, algo: int = 0): tuple[bounds: bool, vec: Vector2] {.exportpy: "world_to_screen_noexc".} =
+  var
+    clip: Vector3
+    ndc: Vector2
+
+  wtsCalc()
+  result.bounds = true
+  ndc.x = clip.x / clip.z
+  ndc.y = clip.y / clip.z
+  result.vec.x = (getScreenWidth() / 2 * ndc.x) + (ndc.x + getScreenWidth() / 2)
+  result.vec.y = -(getScreenHeight() / 2 * ndc.y) + (ndc.y + getScreenHeight() / 2)
+  if clip.z < 0.2:
+    result.bounds = false
+    result.vec.x = getScreenWidth().float - result.vec.x
+    result.vec.y = getScreenHeight().float
 
 proc checkCollisionPointRec(pointX, pointY: float, rec: rl.Rectangle): bool {.exportpy: "check_collision_point_rec".} =
   rl.checkCollisionPointRec(Vector2(x: pointX, y: pointY), rec)

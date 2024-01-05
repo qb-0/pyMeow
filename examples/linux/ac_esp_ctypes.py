@@ -56,11 +56,8 @@ def main():
             ent_addr = pm.r(proc, entity_list + i * 8, "int")
             if ent_addr > 0:
                 ent = Entity()
-                try:
-                    ent = pm.r_ctype(proc, ent_addr, Entity())
-                    wts = pm.world_to_screen(v_matrix, ent.pos_vec)
-                except:
-                    continue
+                ent = pm.r_ctype(proc, ent_addr, Entity())
+                _, wts = pm.world_to_screen_noexc(v_matrix, ent.pos_vec)
 
                 if ent.health > 0:
                     pm.draw_text(ent.name, wts["x"], wts["y"], 12, Colors.white)
