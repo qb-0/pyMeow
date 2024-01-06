@@ -79,15 +79,11 @@ proc worldToScreenNoExc(matrix: array[0..15, float], pos: Vector3, algo: int = 0
     ndc: Vector2
 
   wtsCalc()
-  result.bounds = true
+  result.bounds = if clip.z < 0.2: false else: true
   ndc.x = clip.x / clip.z
   ndc.y = clip.y / clip.z
   result.vec.x = (getScreenWidth() / 2 * ndc.x) + (ndc.x + getScreenWidth() / 2)
   result.vec.y = -(getScreenHeight() / 2 * ndc.y) + (ndc.y + getScreenHeight() / 2)
-  if clip.z < 0.2:
-    result.bounds = false
-    result.vec.x = getScreenWidth().float - result.vec.x
-    result.vec.y = getScreenHeight().float
 
 proc checkCollisionPointRec(pointX, pointY: float, rec: rl.Rectangle): bool {.exportpy: "check_collision_point_rec".} =
   rl.checkCollisionPointRec(Vector2(x: pointX, y: pointY), rec)
