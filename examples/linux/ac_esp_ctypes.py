@@ -55,10 +55,13 @@ def main():
         for i in range(1, 32):
             ent_addr = pm.r(proc, entity_list + i * 8, "int")
             if ent_addr > 0:
-                ent = Entity()
-                ent = pm.r_ctype(proc, ent_addr, Entity())
-                _, wts = pm.world_to_screen_noexc(v_matrix, ent.pos_vec)
+                try:
+                    ent = Entity()
+                    ent = pm.r_ctype(proc, ent_addr, Entity())
+                except:
+                    continue
 
+                _, wts = pm.world_to_screen_noexc(v_matrix, ent.pos_vec)
                 if ent.health > 0:
                     pm.draw_text(ent.name, wts["x"], wts["y"], 12, Colors.white)
                     pm.draw_line(
