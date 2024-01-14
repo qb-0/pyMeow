@@ -164,3 +164,12 @@ proc getWindowTitle(processId: int): string {.exportpy: "get_window_title".} =
       raise newException(Exception, "No Window found. PID: " & $processId)
     else:
       raise newException(Exception, "wmctrl failed (installed 'wmctrl'?)")
+
+proc systemName: string {.exportpy: "system_name".} =
+  when defined(linux):
+    result = "linux"
+  elif defined(windows):
+    result = "windows"
+  else:
+    result = "unknown"
+  

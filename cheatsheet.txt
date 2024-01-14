@@ -231,6 +231,7 @@ stop_multisound()
 ################################################################################################################
 Misc / Utilities
 ################################################################################################################
+system_name(): string
 get_display_resolution(): (int, int)
 get_window_info(name: string): (x, y, width, height: int)
 get_window_title(processId: int): string
