@@ -1,5 +1,5 @@
 import
-  colors, nimpy,
+  colors {.all.}, nimpy,
   nimraylib_now/raylib as rl
 
 pyExportModule("pyMeow")
@@ -40,6 +40,17 @@ proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
       b: 0,
       a: 255,
     )
+
+iterator itColors: tuple[name: string, color: rl.Color] {.exportpy: "it_colors".} =
+  var result: tuple[name: string, color: rl.Color]
+  for k, v in colorNames.items():
+    result.name = k
+    let rgb = v.extractRGB()
+    result.color.r = rgb.r.uint8
+    result.color.g = rgb.g.uint8
+    result.color.b = rgb.b.uint8
+    result.color.a = 255
+    yield result
 
 proc fadeColor(color: rl.Color, alpha: float): rl.Color {.exportpy: "fade_color".} =
   rl.fade(color, alpha)
@@ -172,4 +183,3 @@ proc systemName: string {.exportpy: "system_name".} =
     result = "windows"
   else:
     result = "unknown"
-  
