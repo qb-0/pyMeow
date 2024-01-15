@@ -10,6 +10,10 @@ when defined(linux):
 elif defined(windows):
   import winim
 
+type itColor = object
+  name: string
+  rgb: rl.Color
+
 proc newColor(r, g, b, a: uint8): rl.Color {.exportpy: "new_color".} =
   rl.Color(r: r, g: g, b: b, a: a)
 
@@ -41,15 +45,15 @@ proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
       a: 255,
     )
 
-iterator itColors: tuple[name: string, color: rl.Color] {.exportpy: "it_colors".} =
-  var result: tuple[name: string, color: rl.Color]
+iterator itColors: itColor {.exportpy: "it_colors".} =
+  var result: itColor
   for k, v in colorNames.items():
     result.name = k
     let rgb = v.extractRGB()
-    result.color.r = rgb.r.uint8
-    result.color.g = rgb.g.uint8
-    result.color.b = rgb.b.uint8
-    result.color.a = 255
+    result.rgb.r = rgb.r.uint8
+    result.rgb.g = rgb.g.uint8
+    result.rgb.b = rgb.b.uint8
+    result.rgb.a = 255
     yield result
 
 proc fadeColor(color: rl.Color, alpha: float): rl.Color {.exportpy: "fade_color".} =
