@@ -1,5 +1,5 @@
 import
-  colors {.all.}, nimpy,
+  colors {.all.}, json, nimpy,
   nimraylib_now/raylib as rl
 
 pyExportModule("pyMeow")
@@ -9,10 +9,6 @@ when defined(linux):
     osproc, strscans, x11/[xlib, xinerama]
 elif defined(windows):
   import winim
-
-type itColor = object
-  name: string
-  rgb: rl.Color
 
 proc newColor(r, g, b, a: uint8): rl.Color {.exportpy: "new_color".} =
   rl.Color(r: r, g: g, b: b, a: a)
@@ -45,16 +41,17 @@ proc getColor(colorName: string): rl.Color {.exportpy: "get_color".} =
       a: 255,
     )
 
-iterator itColors: itColor {.exportpy: "it_colors".} =
-  var result: itColor
+proc allColors: JsonNode {.exportpy: "all_colors".} =
+  var cA = newJObject()
   for k, v in colorNames.items():
-    result.name = k
     let rgb = v.extractRGB()
-    result.rgb.r = rgb.r.uint8
-    result.rgb.g = rgb.g.uint8
-    result.rgb.b = rgb.b.uint8
-    result.rgb.a = 255
-    yield result
+    var c = newJObject()
+    c["r"] = newJInt(rgb.r)
+    c["g"] = newJInt(rgb.g)
+    c["b"] = newJInt(rgb.b)
+    c["a"] = newJInt(255)
+    cA[k] = c
+  return %* cA
 
 proc fadeColor(color: rl.Color, alpha: float): rl.Color {.exportpy: "fade_color".} =
   rl.fade(color, alpha)
