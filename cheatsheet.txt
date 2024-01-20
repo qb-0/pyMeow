@@ -242,7 +242,7 @@ new_color(r, g, b, a: uint8): Color
 new_color_hex(hexValue: uint): Color
 new_color_float(r, g, b, a: float): Color
 get_color(colorName: string): Color
-it_colors(): (string, Color) (iterator)
+all_colors(): color dict
 compare_color_pct(color1, color2: Color): float
 fade_color(color: Color, alpha: float): Color
 world_to_screen(matrix: float array (16), pos: Vector3, algo: int = 0): Vector2
