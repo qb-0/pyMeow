@@ -44,19 +44,21 @@ r_string(process: Process, address: int, size: int = 30): string
 r_int(process: Process, address: int): int
 r_ints(process: Process, address: int, size: int): int array
 r_int8(process: Process, address: int): int8
-r_ints8(process: Process, address: int, size: int): int8 array
+r_ints8(process: Process, address: int, size: int): int array
 r_int16(process: Process, address: int): int16
-r_ints16(process: Process, address: int, size: int): int16 array
+r_ints16(process: Process, address: int, size: int): int array
 r_uint(process: Process, address: int): int
 r_uints(process: Process, address: int, size: int): int array
+r_uint16(process: Process, address: int): int
+r_uints16(process: Process, address: int, size: int): int array
 r_uint64(process: Process, address: int): int
 r_uints64(process: Process, address: int, size: int): int array
 r_int64(process: Process, address: int): int64
-r_ints64(process: Process, address: int, size: int): int64 array
+r_ints64(process: Process, address: int, size: int): int array
 r_float(process: Process, address: int): float
 r_floats(process: Process, address: int, size: int): float array
 r_float64(process: Process, address: int): float64
-r_floats64(process: Process, address: int, size: int): float64 array
+r_floats64(process: Process, address: int, size: int): float array
 r_byte(process: Process, address: int): byte
 r_bytes(process: Process, address: int, size: int): byte array
 r_vec2(process: Process, address: int): Vector2
@@ -74,10 +76,12 @@ w_int16(process: Process, address: int, data: int)
 w_ints16(process: Process, address: int, data: int array)
 w_int64(process: Process, address: int, data: int)
 w_ints64(process: Process, address: int, data: int array)
-w_uint(process: Process, address: int, data: uint)
-w_uints(process: Process, address: int, data: uint array)
-w_uint64(process: Process, address: int, data: uint)
-w_uints64(process: Process, address: int, data: uint array)
+w_uint(process: Process, address: int, data: int)
+w_uints(process: Process, address: int, data: int array)
+w_uint16(process: Process, address: int, data: int)
+w_uints16(process: Process, address: int, data: int array)
+w_uint64(process: Process, address: int, data: int)
+w_uints64(process: Process, address: int, data: int array)
 w_float(process: Process, address: int, data: float)
 w_floats(process: Process, address: int, data: float array)
 w_float64(process: Process, address: int, data: float)

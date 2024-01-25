@@ -56,6 +56,12 @@ proc readUInt(process: Process, address: uint): uint32 {.exportpy: "r_uint".} =
 proc readUInts(process: Process, address, size: uint): seq[uint32] {.exportpy: "r_uints".} =
   process.readSeq(address, size, uint32)
 
+proc readUInt16(process: Process, address: uint): uint16 {.exportpy: "r_uint16".} =
+  process.read(address, uint16)
+
+proc readUInts16(process: Process, address, size: uint): seq[uint16] {.exportpy: "r_uints16".} =
+  process.readSeq(address, size, uint16)
+
 proc readUInt64(process: Process, address: uint): uint64 {.exportpy: "r_uint64".} =
   process.read(address, uint64)
 
@@ -111,6 +117,7 @@ proc read(process: Process, address: uint, `type`: string, size: uint = 1): PPyO
     of "int16": r(int16)
     of "int64": r(int64)
     of "uint", "uint32": r(uint32)
+    of "uint16": r(uint16)
     of "uint64": r(uint64)
     of "float": r(float32)
     of "float64": r(float64)
@@ -160,6 +167,12 @@ proc writeUInt(process: Process, address: uint, data: uint32) {.exportpy: "w_uin
   writeData
 
 proc writeUInts(process: Process, address: uint, data: openArray[uint32]) {.exportpy: "w_uints".} =
+  writeDatas
+
+proc writeUInt16(process: Process, address: uint, data: uint16) {.exportpy: "w_uint16".} =
+  writeData
+
+proc writeUInts16(process: Process, address: uint, data: openArray[uint16]) {.exportpy: "w_uints16".} =
   writeDatas
 
 proc writeUInt64(process: Process, address: uint, data: uint64) {.exportpy: "w_uint64".} =
@@ -222,6 +235,7 @@ proc write(process: Process, address: uint, data: PPyObject, `type`: string) {.e
     of "int16": w(int16)
     of "int64": w(int64)
     of "uint", "uint32": w(uint32)
+    of "uint16": w(uint16)
     of "uint64": w(uint64)
     of "float": w(float32)
     of "float64": w(float64)
