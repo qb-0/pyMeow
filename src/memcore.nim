@@ -533,7 +533,8 @@ proc pageProtection(process: Process, address: uint, newProtection: int32): int3
   elif defined(windows):
     var mbi = MEMORY_BASIC_INFORMATION()
     discard VirtualQueryEx(process.handle, cast[LPCVOID](address), mbi.addr, sizeof(mbi).SIZE_T)
-    discard VirtualProtectEx(process.handle, cast[LPCVOID](address), mbi.RegionSize, newProtection, result.addr)
+    if VirtualProtectEx(process.handle, cast[LPCVOID](address), mbi.RegionSize, newProtection, result.addr) != TRUE:
+      raise newException(Exception, fmt"page_protection failed: {getErrorStr()}")
 
 proc allocateMemory(process: Process, size: int, protection: int32 = 0): uint {.exportpy: "allocate_memory".} =
   when defined(linux):
