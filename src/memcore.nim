@@ -560,8 +560,6 @@ proc freeMemory(process: Process, address: uint): bool {.exportpy: "free_memory"
   elif defined(windows):
     VirtualFreeEx(process.handle, cast[LPVOID](address), 0, MEM_RELEASE) == TRUE
 
-
-
 proc getProcAddress*(modName, funcName: string): uint {.exportpy: "get_proc_address".} =
   ## Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
   when defined(linux):
@@ -570,7 +568,6 @@ proc getProcAddress*(modName, funcName: string): uint {.exportpy: "get_proc_addr
     var hModule = GetModuleHandleA(modName.LPCSTR)
     result = cast[uint](GetProcAddress(hModule, funcName.LPCSTR))
     CloseHandle(hModule)
-
 
 proc injectModule*(process: Process, modname: string): bool {.exportpy: "inject_module".} =
   when defined(linux):
