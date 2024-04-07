@@ -636,7 +636,7 @@ proc injectShellcode*(process: Process, shellcode: string): bool {.exportpy: "in
       discard WaitForSingleObject(hRemoteThread, 10000.DWORD)
     VirtualFreeEx(process.handle, shellcodeAddr, 0, MEM_RELEASE)
 
-proc createRemoteThread*(process: Process, startAddress: uint): bool {.exportpy: "create_remote_thread".} =
+proc createRemoteThread*(process: Process, startAddress: uint, params=NULL): bool {.exportpy: "create_remote_thread".} =
   ## Creates a thread that runs in the address space of another process.
   when defined(linux):
     echo "[create_remote_thread] only windows is currently supported"
@@ -646,7 +646,7 @@ proc createRemoteThread*(process: Process, startAddress: uint): bool {.exportpy:
         cast[LPSECURITY_ATTRIBUTES](NULL),
         0.SIZE_T,
         cast[LPTHREAD_START_ROUTINE](startAddress),
-        NULL,
+        params,
         cast[DWORD](NULL),
         cast[LPDWORD](NULL)
       )
