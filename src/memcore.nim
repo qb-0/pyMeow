@@ -1,6 +1,6 @@
 import
   os, strformat, sequtils,
-  strutils, nimpy, minhook
+  strutils, nimpy
 
 pyExportModule("pyMeow")
 
