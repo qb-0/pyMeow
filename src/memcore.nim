@@ -580,12 +580,18 @@ proc injectModule*(process: Process, modname: string): bool {.exportpy: "inject_
       result = VirtualAllocEx(hProcess, NULL, bufSize, MEM_COMMIT or MEM_RESERVE, protect)
       if WriteProcessMemory(hProcess, result, buf, bufSize, NULL) == 0:
         raise newException(OSError, "WriteProcessMemory error: " & $GetLastError())
-
+    proc archMatch(hProcess: HANDLE): bool =
+      var
+        isinjecteddll64bit: BOOL
+        istarget64bit: BOOL
+      discard IsWow64Process(GetCurrentProcess(), addr isinjecteddll64bit)
+      discard IsWow64Process(hProcess, addr istarget64bit)
+      return (isinjecteddll64bit == istarget64bit).bool
     let
       addrLoadLibraryA = getProcAddress("kernel32.dll", "LoadLibraryA")
       pathAddr = processWrite(process.handle, modname, PAGE_READWRITE)
-    if not is64bit(process):
-      raise newException(OSError, "Incompatible architecture (between injector and target process).")
+    if not archMatch(process.handle):
+      raise newException(OSError, fmt"The architecture of the DLL you are trying to inject is not compatible with the target process.")
     let hRemoteThread = CreateRemoteThread(
         process.handle,
         cast[LPSECURITY_ATTRIBUTES](NULL),
@@ -605,6 +611,7 @@ proc injectShellcode*(process: Process, shellcode: string): bool {.exportpy: "in
   ## Keeping this undocumented. Use at your own risk.
   when defined(linux):
     echo "[inject_shellcode] only windows is currently supported"
+    return false
   elif defined(windows):
     proc processWrite(hProcess: HANDLE, buffer: string, protect: DWORD): LPVOID =
       let
@@ -613,14 +620,22 @@ proc injectShellcode*(process: Process, shellcode: string): bool {.exportpy: "in
       result = VirtualAllocEx(hProcess, NULL, bufSize, MEM_COMMIT or MEM_RESERVE, protect)
       if WriteProcessMemory(hProcess, result, buf, bufSize, NULL) == 0:
         raise newException(OSError, "WriteProcessMemory error: " & $GetLastError())
+    proc archMatch(hProcess: HANDLE): bool =
+      var
+        isInjector64bit: BOOL
+        isTarget64bit: BOOL
+      discard IsWow64Process(GetCurrentProcess(), addr isInjector64bit)
+      discard IsWow64Process(hProcess, addr isTarget64bit)
+      return (isInjector64bit == isTarget64bit).bool
     let
       addrVirtualAlloc = getProcAddress("kernel32.dll", "VirtualAlloc")
       addrCreateThread = getProcAddress("kernel32.dll", "CreateThread")
       addrWaitForSingleObject = getProcAddress("kernel32.dll", "WaitForSingleObject")
       addrExitThread = getProcAddress("kernel32.dll", "ExitThread")
       shellcodeAddr = processWrite(process.handle, shellcode, PAGE_EXECUTE_READWRITE)
-    if not is64bit(process):
-      raise newException(OSError, "Incompatible architecture (between injector and target process).")
+
+    if not archMatch(process.handle):
+      raise newException(OSError, fmt"The architecture of the shellcode you are trying to inject is not compatible with the target process.")
     let hRemoteThread = CreateRemoteThread(
         process.handle,
         cast[LPSECURITY_ATTRIBUTES](NULL),
@@ -640,6 +655,7 @@ proc createRemoteThread*(process: Process, startAddress: uint, params: uint = 0)
   ## Creates a thread that runs in the address space of another process.
   when defined(linux):
     echo "[create_remote_thread] only windows is currently supported"
+    return false
   elif defined(windows):
     let hRemoteThread = CreateRemoteThread(
         process.handle,
@@ -654,3 +670,4 @@ proc createRemoteThread*(process: Process, startAddress: uint, params: uint = 0)
     if hRemoteThread != 0.HANDLE:
       result = true
       discard WaitForSingleObject(hRemoteThread, 10000.DWORD)
+
