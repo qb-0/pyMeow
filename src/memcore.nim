@@ -557,11 +557,11 @@ proc freeMemory(process: Process, address: uint): bool {.exportpy: "free_memory"
   elif defined(windows):
     VirtualFreeEx(process.handle, cast[LPVOID](address), 0, MEM_RELEASE) == TRUE
 
-proc getProcAddress(moduleName, functionName: string): uint {.exportpy: "get_proc_address".} =
+proc getProcAddress*(moduleName, functionName: string): uint {.exportpy: "get_proc_address".} =
   when defined(windows):
     cast[uint](GetProcAddress(GetModuleHandleA(moduleName.cstring), functionName.cstring))
 
-proc createRemoteThread(process: Process, startAddress: uint, param: uint): bool {.exportpy: "create_remote_thread".} =
+proc createRemoteThread*(process: Process, startAddress: uint, param: uint): bool {.exportpy: "create_remote_thread".} =
   when defined(windows):
     let hRemoteThread = CreateRemoteThread(
       process.handle,
@@ -578,7 +578,7 @@ proc createRemoteThread(process: Process, startAddress: uint, param: uint): bool
       discard WaitForSingleObject(hRemoteThread, INFINITE)
     VirtualFreeEx(process.handle, startAddress.addr, 0, MEM_RELEASE)
 
-proc inject_dll(process: Process, dllPath: string): bool {.exportpy: "inject_dll".} =
+proc inject_library*(process: Process, dllPath: string): bool {.exportpy: "inject_library".} =
   when defined(windows):
     let
       path = winstrConverterStringToPtrChar(dllPath & '\0')
@@ -587,7 +587,7 @@ proc inject_dll(process: Process, dllPath: string): bool {.exportpy: "inject_dll
       memoryErr("WriteProcessMemory", cast[uint](allocaddr))
     createRemoteThread(process, getProcAddress("kernel32.dll", "LoadLibraryA"), cast[uint](allocaddr))
 
-proc injectShellcode(process: Process, shellcode: string, params: uint =0): bool {.exportpy: "inject_shellcode".} =
+proc injectShellcode*(process: Process, shellcode: string, params: uint =0): bool {.exportpy: "inject_shellcode".} =
   when defined(windows):
     let shellcodeAddr = VirtualAllocEx(process.handle,nil,len(shellcode) + 1,MEM_COMMIT or MEM_RESERVE,PAGE_EXECUTE_READWRITE)
     if WriteProcessMemory(process.handle, shellcodeAddr, shellcode.cstring, len(shellcode) + 1, nil) == FALSE:
