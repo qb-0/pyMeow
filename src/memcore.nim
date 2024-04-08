@@ -1,6 +1,6 @@
 import
   os, strformat, sequtils,
-  strutils, nimpy
+  strutils, nimpy, minhook
 
 pyExportModule("pyMeow")
 
@@ -34,6 +34,7 @@ type
     name: string
     pid: int
     debug: bool
+    base: uint
     when defined(windows):
       handle: HANDLE
 
@@ -143,43 +144,6 @@ proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
     GetModuleFileNameEx(process.handle, 0, path[0].addr, maxPath)
     nullTerminated($$path)
 
-proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
-  let
-    pyMod = pyBuiltinsModule()
-    pyInt = pyMod.getAttr("int")
-    pyStr = pyMod.str
-    objT = pyMod.type(process)
-
-  var sPid: int
-  if objT == pyInt:
-    sPid = process.to(int)
-    if not pidExists(sPid):
-      raise newException(Exception, fmt"Process ID '{sPid} does not exist")
-  elif objT == pyStr:
-    let processName = process.to(string)
-    for p in enumProcesses():
-      if processName in p.name:
-        sPid = p.pid
-        break
-    if sPid == 0:
-      raise newException(Exception, fmt"Process '{processName}' not found")
-  else:
-    raise newException(Exception, "Process ID or Process Name required")
-
-  checkRoot()
-  result.debug = debug
-  result.pid = sPid
-  result.name = getProcessName(sPid)
-
-  when defined(windows):
-    result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
-    if result.handle == FALSE:
-      raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
-
-proc closeProcess(process: Process) {.exportpy: "close_process".} =
-  when defined(windows):
-    CloseHandle(process.handle)
-
 iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
   when defined(linux):
     checkRoot()
@@ -229,6 +193,44 @@ proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_mo
     if moduleName == module.name:
       return module
   raise newException(Exception, fmt"Module '{moduleName}' not found")
+
+proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
+  let
+    pyMod = pyBuiltinsModule()
+    pyInt = pyMod.getAttr("int")
+    pyStr = pyMod.str
+    objT = pyMod.type(process)
+
+  var sPid: int
+  if objT == pyInt:
+    sPid = process.to(int)
+    if not pidExists(sPid):
+      raise newException(Exception, fmt"Process ID '{sPid} does not exist")
+  elif objT == pyStr:
+    let processName = process.to(string)
+    for p in enumProcesses():
+      if processName in p.name:
+        sPid = p.pid
+        break
+    if sPid == 0:
+      raise newException(Exception, fmt"Process '{processName}' not found")
+  else:
+    raise newException(Exception, "Process ID or Process Name required")
+
+  checkRoot()
+  result.debug = debug
+  result.pid = sPid
+  result.name = getProcessName(sPid)
+  result.base = getModule(result, result.name).base
+
+  when defined(windows):
+    result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
+    if result.handle == FALSE:
+      raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
+
+proc closeProcess(process: Process) {.exportpy: "close_process".} =
+  when defined(windows):
+    CloseHandle(process.handle)
 
 iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "enum_memory_regions".} =
   var result: Page
@@ -554,3 +556,40 @@ proc freeMemory(process: Process, address: uint): bool {.exportpy: "free_memory"
     echo "[free_memory] only windows is currently supported"
   elif defined(windows):
     VirtualFreeEx(process.handle, cast[LPVOID](address), 0, MEM_RELEASE) == TRUE
+
+proc getProcAddress(moduleName, functionName: string): uint {.exportpy: "get_proc_address".} =
+  when defined(windows):
+    cast[uint](GetProcAddress(GetModuleHandleA(moduleName.cstring), functionName.cstring))
+
+proc createRemoteThread(process: Process, startAddress: uint, param: uint): bool {.exportpy: "create_remote_thread".} =
+  when defined(windows):
+    let hRemoteThread = CreateRemoteThread(
+      process.handle,
+      cast[LPSECURITY_ATTRIBUTES](NULL),
+      0.SIZE_T,
+      cast[LPTHREAD_START_ROUTINE](startAddress),
+      cast[LPVOID](param),
+      cast[DWORD](NULL),
+      cast[LPDWORD](NULL)
+      )
+    defer: CloseHandle(hRemoteThread)
+    if hRemoteThread != 0.HANDLE:
+      result = true
+      discard WaitForSingleObject(hRemoteThread, INFINITE)
+    VirtualFreeEx(process.handle, startAddress.addr, 0, MEM_RELEASE)
+
+proc inject_dll(process: Process, dllPath: string): bool {.exportpy: "inject_dll".} =
+  when defined(windows):
+    let
+      path = winstrConverterStringToPtrChar(dllPath & '\0')
+      allocaddr = VirtualAllocEx(process.handle, nil, len(cast[cstring](path)) + 1, MEM_COMMIT or MEM_RESERVE, PAGE_READWRITE)
+    if WriteProcessMemory( process.handle, allocaddr, path, len(cast[cstring](path)) + 1, nil, ) == FALSE:
+      memoryErr("WriteProcessMemory", cast[uint](allocaddr))
+    createRemoteThread(process, getProcAddress("kernel32.dll", "LoadLibraryA"), cast[uint](allocaddr))
+
+proc injectShellcode(process: Process, shellcode: string, params: uint =0): bool {.exportpy: "inject_shellcode".} =
+  when defined(windows):
+    let shellcodeAddr = VirtualAllocEx(process.handle,nil,len(shellcode) + 1,MEM_COMMIT or MEM_RESERVE,PAGE_EXECUTE_READWRITE)
+    if WriteProcessMemory(process.handle, shellcodeAddr, shellcode.cstring, len(shellcode) + 1, nil) == FALSE:
+      memoryErr("WriteProcessMemory", cast[uint](shellcodeAddr))
+    createRemoteThread(process, cast[uint](shellcodeAddr), params)
