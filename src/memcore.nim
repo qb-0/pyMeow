@@ -578,18 +578,14 @@ proc createRemoteThread*(process: Process, startAddress: uint, param: uint): boo
       discard WaitForSingleObject(hRemoteThread, INFINITE)
     VirtualFreeEx(process.handle, startAddress.addr, 0, MEM_RELEASE)
 
-proc inject_library*(process: Process, dllPath: string): bool {.exportpy: "inject_library".} =
+proc inject_library(process: Process, dllPath: string): bool {.exportpy: "inject_library".} =
   when defined(windows):
-    let
-      path = winstrConverterStringToPtrChar(dllPath & '\0')
-      allocaddr = VirtualAllocEx(process.handle, nil, len(cast[cstring](path)) + 1, MEM_COMMIT or MEM_RESERVE, PAGE_READWRITE)
-    if WriteProcessMemory( process.handle, allocaddr, path, len(cast[cstring](path)) + 1, nil, ) == FALSE:
-      memoryErr("WriteProcessMemory", cast[uint](allocaddr))
+    let allocaddr = allocateMemory(process, len(dllPath), PAGE_READWRITE)
+    writePointer(process, cast[uint](allocaddr), dllPath[0].unsafeAddr, dllPath.len)
     createRemoteThread(process, getProcAddress("kernel32.dll", "LoadLibraryA"), cast[uint](allocaddr))
 
 proc injectShellcode*(process: Process, shellcode: string, params: uint =0): bool {.exportpy: "inject_shellcode".} =
   when defined(windows):
-    let shellcodeAddr = VirtualAllocEx(process.handle,nil,len(shellcode) + 1,MEM_COMMIT or MEM_RESERVE,PAGE_EXECUTE_READWRITE)
-    if WriteProcessMemory(process.handle, shellcodeAddr, shellcode.cstring, len(shellcode) + 1, nil) == FALSE:
-      memoryErr("WriteProcessMemory", cast[uint](shellcodeAddr))
+    let shellcodeAddr = allocateMemory(process, len(shellcode) + 1, PAGE_EXECUTE_READWRITE)
+    writePointer(process, cast[uint](shellcodeAddr), shellcode.cstring, len(shellcode) + 1)
     createRemoteThread(process, cast[uint](shellcodeAddr), params)
