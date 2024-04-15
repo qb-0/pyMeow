@@ -557,11 +557,11 @@ proc freeMemory(process: Process, address: uint): bool {.exportpy: "free_memory"
   elif defined(windows):
     VirtualFreeEx(process.handle, cast[LPVOID](address), 0, MEM_RELEASE) == TRUE
 
-proc getProcAddress*(moduleName, functionName: string): uint {.exportpy: "get_proc_address".} =
+proc getProcAddress(moduleName, functionName: string): uint {.exportpy: "get_proc_address".} =
   when defined(windows):
     cast[uint](GetProcAddress(GetModuleHandleA(moduleName.cstring), functionName.cstring))
 
-proc createRemoteThread*(process: Process, startAddress: uint, param: uint): bool {.exportpy: "create_remote_thread".} =
+proc createRemoteThread(process: Process, startAddress: uint, param: uint): bool {.exportpy: "create_remote_thread".} =
   when defined(windows):
     let hRemoteThread = CreateRemoteThread(
       process.handle,
@@ -584,7 +584,7 @@ proc inject_library(process: Process, dllPath: string): bool {.exportpy: "inject
     writePointer(process, cast[uint](allocaddr), dllPath[0].unsafeAddr, dllPath.len)
     createRemoteThread(process, getProcAddress("kernel32.dll", "LoadLibraryA"), cast[uint](allocaddr))
 
-proc injectShellcode*(process: Process, shellcode: string, params: uint =0): bool {.exportpy: "inject_shellcode".} =
+proc injectShellcode(process: Process, shellcode: string, params: uint =0): bool {.exportpy: "inject_shellcode".} =
   when defined(windows):
     let shellcodeAddr = allocateMemory(process, len(shellcode) + 1, PAGE_EXECUTE_READWRITE)
     writePointer(process, cast[uint](shellcodeAddr), shellcode.cstring, len(shellcode) + 1)
