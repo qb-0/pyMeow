@@ -87,7 +87,6 @@ proc is64bit(process: Process): bool {.exportpy: "is_64_bit".} =
 iterator enumProcesses: Process {.exportpy: "enum_processes".} =
   var p: Process
   when defined(linux):
-    checkRoot()
     let allFiles = toSeq(walkDir("/proc", relative = true))
     for pid in mapIt(filterIt(allFiles, isDigit(it.path[0])), parseInt(it.path)):
         p.pid = pid
@@ -146,7 +145,6 @@ proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
 
 iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
   when defined(linux):
-    checkRoot()
     var modTable: Table[string, Module]
     for l in lines(fmt"/proc/{process.pid}/maps"):
       let s = l.split("/")
@@ -217,7 +215,6 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
   else:
     raise newException(Exception, "Process ID or Process Name required")
 
-  checkRoot()
   result.debug = debug
   result.pid = sPid
   result.name = getProcessName(sPid)
@@ -235,7 +232,6 @@ proc closeProcess(process: Process) {.exportpy: "close_process".} =
 iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "enum_memory_regions".} =
   var result: Page
   when defined(linux):
-    checkRoot()
     var pageStart, pageEnd: int
     for l in lines(fmt"/proc/{process.pid}/maps"):
       if module.name in l and scanf(l, "$h-$h", pageStart, pageEnd):
@@ -256,6 +252,7 @@ iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "
 
 proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
   when defined(linux):
+    checkRoot()
     var ioSrc, ioDst: IOVec
 
     ioDst.iov_base = dst
@@ -277,6 +274,7 @@ proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
 
 proc read*(process: Process, address: uint, t: typedesc): t =
   when defined(linux):
+    checkRoot()
     var
       ioSrc, ioDst: IOVec
       size = sizeof(t).uint
@@ -298,6 +296,7 @@ proc read*(process: Process, address: uint, t: typedesc): t =
 
 proc writePointer*(process: Process, address: uint, data: pointer, size: int) =
   when defined(linux):
+    checkRoot()
     var ioSrc, ioDst: IOVec
 
     ioSrc.iov_base = data
@@ -320,6 +319,7 @@ proc writePointer*(process: Process, address: uint, data: pointer, size: int) =
 proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t] =
   result = newSeq[t](size)
   when defined(linux):
+    checkRoot()
     var
       ioSrc, ioDst: IOVec
       bsize = size * sizeof(t).uint
@@ -341,6 +341,7 @@ proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t]
 
 proc write*(process: Process, address: uint, data: auto) =
   when defined(linux):
+    checkRoot()
     var
       ioSrc, ioDst: IOVec
       size = sizeof(data).uint
