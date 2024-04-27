@@ -36,6 +36,7 @@ type
     debug: bool
     base: uint
     when defined(windows):
+      path: string
       handle: HANDLE
 
   Module = object
@@ -139,8 +140,9 @@ proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
     discard readlink(fmt"/proc/{process.pid}/exe".cstring, path.cstring, maxPath)
     path.strip()
   elif defined(windows):
-    var path = newSeq[WCHAR](maxPath)
-    GetModuleFileNameEx(process.handle, 0, path[0].addr, maxPath)
+    var path: array[maxPath + 1, WCHAR]
+    let size = (toInt(sizeof(path) / sizeof(path[0]))).int32
+    discard QueryFullProcessImageNameW(process.handle, 0, path[0].addr, size.addr)
     nullTerminated($$path)
 
 iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
@@ -222,6 +224,7 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
 
   when defined(windows):
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
+    result.path = getProcessPath(result)
     if result.handle == FALSE:
       raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
 
