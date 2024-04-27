@@ -224,9 +224,9 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
 
   when defined(windows):
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
-    result.path = getProcessPath(result)
     if result.handle == FALSE:
       raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
+    result.path = getProcessPath(result)
 
 proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):
