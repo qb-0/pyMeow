@@ -36,7 +36,6 @@ type
     debug: bool
     base: uint
     when defined(windows):
-      path: string
       handle: HANDLE
 
   Module = object
@@ -226,7 +225,6 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
     if result.handle == FALSE:
       raise newException(Exception, fmt"Unable to open Process [Pid: {sPid}] {getErrorStr()}")
-    result.path = getProcessPath(result)
 
 proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):
