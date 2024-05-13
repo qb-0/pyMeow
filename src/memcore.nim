@@ -139,8 +139,9 @@ proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
     discard readlink(fmt"/proc/{process.pid}/exe".cstring, path.cstring, maxPath)
     path.strip()
   elif defined(windows):
-    var path = newSeq[WCHAR](maxPath)
-    GetModuleFileNameEx(process.handle, 0, path[0].addr, maxPath)
+    var path: array[maxPath + 1, WCHAR]
+    let size = (toInt(sizeof(path) / sizeof(path[0]))).int32
+    discard QueryFullProcessImageNameW(process.handle, 0, path[0].addr, size.addr)
     nullTerminated($$path)
 
 iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
