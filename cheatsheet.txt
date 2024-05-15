@@ -257,8 +257,8 @@ world_to_screen_noexc(matrix: float array (16), pos: Vector3, algo: int = 0): (b
 key_pressed(key: int): bool
 press_key(key: int)
 mouse_pressed(button: string = "left"): bool
-mouse_move(x, y: int, relative: bool = fase)
-mouse_down(button: string = "left)
+mouse_move(x, y: int, relative: bool = false)
+mouse_down(button: string = "left")
 mouse_up(button: string = "left")
 mouse_click(button: string = "left")
 mouse_position(): (x, y)
