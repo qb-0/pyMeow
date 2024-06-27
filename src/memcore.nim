@@ -1,6 +1,6 @@
 import
   os, strformat, sequtils,
-  strutils, nimpy
+  strutils, nimpy, tables
 
 pyExportModule("pyMeow")
 
@@ -504,13 +504,93 @@ proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
           return
         break
 
+proc boyerMooreSearch(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
+  const
+    wildCard = '?'
+    doubleWildCard = "??"
+    wildCardIntL = 256
+    wildCardIntR = 257
+    doubleWildCardInt = 258
+
+  proc splitPattern(pattern: string): seq[string] =
+    var patt = pattern.replace(" ", "")
+    result = newSeq[string]()
+    for i in countup(0, patt.len-1, 2):
+        result.add(patt[i..i+1])
+
+  proc patternToInts(pattern: seq[string]): seq[int] =
+    result = newSeq[int]()
+    for hex in pattern:
+      if wildCard in hex:
+        if hex == doubleWildCard:
+          result.add(doubleWildCardInt)
+        elif hex[0] == wildCard:
+          result.add(wildCardIntL)
+        else:
+          result.add(wildCardIntR)
+      else:
+        result.add(parseHexInt(hex))
+
+  proc isMatch(buffer: seq[byte], pattern: seq[int], start: int): bool =
+    for i in 0..<pattern.len:
+      let b = buffer[start + i].int
+      let p = pattern[i]
+      if p == doubleWildCardInt:
+        continue
+      elif p == wildCardIntL:
+        if b.toHex(1)[0] != pattern[i].toHex(1)[1]:
+          return false
+      elif p == wildCardIntR:
+        if b.toHex(2)[0] != pattern[i].toHex(2)[0]:
+          return false
+      elif p != b:
+        return false
+    return true
+
+  proc buildBadCharacterTable(pattern: seq[int]): Table[int, int] =
+    result = initTable[int, int]()
+    for i in 0..<pattern.len:
+      result[pattern[i]] = i
+
+  let
+    hexPattern = splitPattern(pattern)
+    intsPattern = patternToInts(hexPattern)
+    m = intsPattern.len
+    n = byteBuffer.len
+
+  if m == 0 or n == 0 or m > n:
+    return
+
+  let badCharacterTable = buildBadCharacterTable(intsPattern)
+
+  var s = 0
+  while s <= n - m:
+    var j = m - 1
+
+    while j >= 0 and isMatch(byteBuffer, intsPattern, s):
+      j -= 1
+
+    if j < 0:
+      result.add(s.uint)
+      if single:
+        return
+      if m > 1:
+        s += m - badCharacterTable.getOrDefault(byteBuffer[s + m - 1].int, -1)
+      else:
+        s += 1
+    else:
+      s += max(1, j - badCharacterTable.getOrDefault(byteBuffer[s + j].int, -1))
+
 proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_module".} =
   let
     module = getModule(process, moduleName)
     # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
 
-  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob1(pattern, byteBuffer, single)
+  elif algorithm == 1: aob2(pattern, byteBuffer, single)
+  else: boyerMooreSearch(pattern, byteBuffer, single)
+
   if result.len != 0:
     if not relative:
       for i, a in result:
@@ -522,14 +602,18 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: uint,
 
   let byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
 
-  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob1(pattern, byteBuffer, single)
+  elif algorithm == 1: aob2(pattern, byteBuffer, single)
+  else: boyerMooreSearch(pattern, byteBuffer, single)
   if result.len != 0:
     if not relative:
       for i, a in result:
         result[i] += rangeStart
 
 proc aobScanBytes(pattern: string, byteBuffer: seq[byte], single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_bytes".} =
-  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  result = if algorithm == 0: aob1(pattern, byteBuffer, single)
+  elif algorithm == 1: aob2(pattern, byteBuffer, single)
+  else: boyerMooreSearch(pattern, byteBuffer, single)
 
 proc pageProtection(process: Process, address: uint, newProtection: int32): int32 {.exportpy: "page_protection".} =
   when defined(linux):
