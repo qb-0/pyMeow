@@ -23,6 +23,7 @@ open_process(process: string|int, debug: bool = false): Process
 get_process_path(process: Process): string
 close_process(process: Process)
 enum_modules(process: Process): Module (iterator)
+enum_memory_regions(process: Process): Page (iterator)
 module_exists(process: Process, moduleName: string): bool
 get_module(process: Process, moduleName: string): Module
 is_64_bit(process: Process): bool

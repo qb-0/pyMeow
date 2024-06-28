@@ -45,9 +45,17 @@ type
     size: uint
 
   Page = object
-    start: uint
-    `end`: uint
-    size: uint
+    start*: uint
+    `end`*: uint
+    size*: uint
+    permissions*: string   # Linux
+    offset*: string        # Linux
+    dev*: string           # Linux
+    inode*: string         # Linux
+    path*: string          # Linux
+    state*: DWORD          # Windows
+    protect*: DWORD        # Windows
+    `type`*: DWORD         # Windows
 
 template checkRoot =
   when defined(linux):
@@ -230,25 +238,45 @@ proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):
     CloseHandle(process.handle)
 
-iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "enum_memory_regions".} =
+iterator enumMemoryRegions(process: Process): Page {.exportpy: "enum_memory_regions".} =
   var result: Page
   when defined(linux):
-    var pageStart, pageEnd: int
+    var
+      regionStart, regionEnd: int
+      permissions, offset, dev, inode: string
+      path: string
+    let parts = l.split(" ")
     for l in lines(fmt"/proc/{process.pid}/maps"):
-      if module.name in l and scanf(l, "$h-$h", pageStart, pageEnd):
-        result.start = pageStart.uint
-        result.`end` = pageEnd.uint
-        result.size = (pageEnd - pageStart).uint
+      if parts.len > 5:
+        discard scanf(parts[0], "$h-$h", regionStart, regionEnd)
+        permissions = parts[1]
+        offset = parts[2]
+        dev = parts[3]
+        inode = parts[4]
+        path = parts[5..^1].join(" ")
+
+        result.start = regionStart.uint
+        result.`end` = regionEnd.uint
+        result.size = regionEnd.uint - regionStart.uint
+        result.permissions = permissions
+        result.offset = offset
+        result.dev = dev
+        result.inode = inode
+        result.path = path
         yield result
   elif defined(windows):
     var
       mbi = MEMORY_BASIC_INFORMATION()
-      curAddr = module.base
-    while VirtualQueryEx(process.handle, cast[LPCVOID](curAddr), mbi.addr, sizeof(mbi).SIZE_T) != 0 and curAddr != module.`end`:
-      result.start = curAddr
-      result.`end` = result.start + mbi.RegionSize.uint
+      address: PVOID = nil
+
+    while VirtualQueryEx(process.handle, address, mbi.addr, sizeof(mbi).SIZE_T) != 0:
+      result.start = cast[uint](mbi.BaseAddress)
+      result.`end` = cast[uint](mbi.BaseAddress) + mbi.RegionSize.uint
       result.size = mbi.RegionSize.uint
-      curAddr += result.size
+      result.state = mbi.State
+      result.protect = mbi.Protect
+      result.`type` = mbi.Type
+      address = cast[PVOID](cast[uint](mbi.BaseAddress) + mbi.RegionSize.uint)
       yield result
 
 proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
