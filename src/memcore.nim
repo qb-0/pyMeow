@@ -612,7 +612,6 @@ proc boyerMooreSearch(pattern: string, byteBuffer: seq[byte], single: bool): seq
 proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_module".} =
   let
     module = getModule(process, moduleName)
-    # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
 
   result = if algorithm == 0: aob1(pattern, byteBuffer, single)
@@ -623,6 +622,35 @@ proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool
     if not relative:
       for i, a in result:
         result[i] += module.base
+
+proc aobScan(process: Process, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan".} =
+  const
+    MEM_COMMIT = 0x1000
+    MEM_FREE = 0x10000
+    MEM_RESERVE = 0x2000
+    PAGE_READONLY = 0x02
+    PAGE_READWRITE = 0x04
+    PAGE_NOACCESS = 0x01
+    PAGE_GUARD = 0x100
+
+  for region in enumMemoryRegions(process):
+    if region.state != MEM_COMMIT:
+      continue
+
+    if region.protect == PAGE_READONLY or region.protect != PAGE_READWRITE:
+      continue
+
+    var byteBuffer = process.readSeq(region.start, region.size)
+
+    result = if algorithm == 0: aob1(pattern, byteBuffer, single)
+    elif algorithm == 1: aob2(pattern, byteBuffer, single)
+    else: boyerMooreSearch(pattern, byteBuffer, single)
+
+    if result.len != 0:
+      if not relative:
+        for i, a in result:
+          result[i] += region.start
+      return
 
 proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: uint, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_range".} =
   if rangeStart >= rangeEnd:
