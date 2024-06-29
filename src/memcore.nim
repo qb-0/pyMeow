@@ -8,8 +8,7 @@ when defined(windows):
   import winim
 elif defined(linux):
   import
-    posix, strscans, tables,
-    ptrace
+    posix, strscans, ptrace
 
   proc process_vm_readv(
     pid: int,
@@ -626,12 +625,8 @@ proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool
 proc aobScan(process: Process, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan".} =
   const
     MEM_COMMIT = 0x1000
-    MEM_FREE = 0x10000
-    MEM_RESERVE = 0x2000
     PAGE_READONLY = 0x02
     PAGE_READWRITE = 0x04
-    PAGE_NOACCESS = 0x01
-    PAGE_GUARD = 0x100
 
   for region in enumMemoryRegions(process):
     if region.state != MEM_COMMIT:
