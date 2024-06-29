@@ -6,6 +6,15 @@ pyExportModule("pyMeow")
 
 when defined(windows):
   import winim
+  import winim/lean
+
+  proc NtReadVirtualMemory(
+    processHandle: HANDLE,
+    baseAddress: PVOID,
+    buffer: PVOID,
+    bufferSize: ULONG,
+    numberOfBytesRead: PULONG): NTSTATUS
+    {.stdcall, dynlib: "ntdll", importc, discardable.}
 elif defined(linux):
   import
     posix, strscans, ptrace
@@ -290,9 +299,9 @@ proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
     if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
       memoryErr("Read", address)
   elif defined(windows):
-    if ReadProcessMemory(
-      process.handle, cast[pointer](address), dst, size, nil
-    ) == FALSE:
+    if not NtReadVirtualMemory(
+      process.handle, cast[pointer](address), dst, cint size, nil
+    ).NT_SUCCESS:
       memoryErr("Read", address)
 
     if process.debug:
@@ -314,9 +323,9 @@ proc read*(process: Process, address: uint, t: typedesc): t =
     if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
       memoryErr("Read", address)
   elif defined(windows):
-    if ReadProcessMemory(
-      process.handle, cast[pointer](address), result.addr, sizeof(t), nil
-    ) == FALSE:
+    if not NtReadVirtualMemory(
+      process.handle, cast[pointer](address), result.addr, cint sizeof(t), nil
+    ).NT_SUCCESS:
       memoryErr("Read", address)
 
   if process.debug:
@@ -359,9 +368,9 @@ proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t]
     if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
       memoryErr("readSeq", address)
   elif defined(windows):
-    if ReadProcessMemory(
-      process.handle, cast[pointer](address), result[0].addr, size.int * sizeof(t), nil
-    ) == FALSE:
+    if not NtReadVirtualMemory(
+      process.handle, cast[pointer](address), result[0].addr, cint size.int * sizeof(t), nil
+    ).NT_SUCCESS:
       memoryErr("readSeq", address)
 
   if process.debug:
