@@ -6,14 +6,13 @@ pyExportModule("pyMeow")
 
 when defined(windows):
   import winim
-  import winim/lean
 
   proc NtReadVirtualMemory(
     processHandle: HANDLE,
-    baseAddress: PVOID,
-    buffer: PVOID,
-    bufferSize: ULONG,
-    numberOfBytesRead: PULONG): NTSTATUS
+    baseAddress: LPCVOID,
+    buffer: LPVOID,
+    bufferSize: SIZE_T,
+    numberOfBytesRead: ptr SIZE_T): NTSTATUS
     {.stdcall, dynlib: "ntdll", importc, discardable.}
 elif defined(linux):
   import
@@ -300,7 +299,7 @@ proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
       memoryErr("Read", address)
   elif defined(windows):
     if not NtReadVirtualMemory(
-      process.handle, cast[pointer](address), dst, cint size, nil
+      process.handle, cast[pointer](address), dst, size, nil
     ).NT_SUCCESS:
       memoryErr("Read", address)
 
@@ -324,7 +323,7 @@ proc read*(process: Process, address: uint, t: typedesc): t =
       memoryErr("Read", address)
   elif defined(windows):
     if not NtReadVirtualMemory(
-      process.handle, cast[pointer](address), result.addr, cint sizeof(t), nil
+      process.handle, cast[pointer](address), result.addr, sizeof(t), nil
     ).NT_SUCCESS:
       memoryErr("Read", address)
 
@@ -369,7 +368,7 @@ proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t]
       memoryErr("readSeq", address)
   elif defined(windows):
     if not NtReadVirtualMemory(
-      process.handle, cast[pointer](address), result[0].addr, cint size.int * sizeof(t), nil
+      process.handle, cast[pointer](address), result[0].addr, size.int * sizeof(t), nil
     ).NT_SUCCESS:
       memoryErr("readSeq", address)
 
@@ -549,7 +548,7 @@ proc boyerMooreSearch(pattern: string, byteBuffer: seq[byte], single: bool): seq
     doubleWildCardInt = 258
 
   proc splitPattern(pattern: string): seq[string] =
-    var patt = pattern.replace(" ", "")
+    let patt = pattern.replace(" ", "")
     result = newSeq[string]()
     for i in countup(0, patt.len-1, 2):
         result.add(patt[i..i+1])
@@ -641,7 +640,7 @@ proc aobScan(process: Process, pattern: string, relative: bool = false, single: 
     if region.state != MEM_COMMIT:
       continue
 
-    if region.protect == PAGE_READONLY or region.protect != PAGE_READWRITE:
+    if region.protect != PAGE_READWRITE:
       continue
 
     var byteBuffer = process.readSeq(region.start, region.size)
