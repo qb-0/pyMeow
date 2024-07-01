@@ -568,11 +568,13 @@ proc boyerMooreSearch(pattern: string, byteBuffer: seq[byte], single: bool): seq
 
   proc isMatch(buffer: seq[byte], pattern: seq[int], start: int): bool =
     for i in 0..<pattern.len:
-      let b = buffer[start + i].int
       let p = pattern[i]
       if p == doubleWildCardInt:
         continue
-      elif p == wildCardIntL:
+
+      let b = buffer[start + i].int
+
+      if p == wildCardIntL:
         if b.toHex(1)[0] != pattern[i].toHex(1)[1]:
           return false
       elif p == wildCardIntR:
@@ -633,7 +635,6 @@ proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool
 proc aobScan(process: Process, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan".} =
   const
     MEM_COMMIT = 0x1000
-    PAGE_READONLY = 0x02
     PAGE_READWRITE = 0x04
 
   for region in enumMemoryRegions(process):
