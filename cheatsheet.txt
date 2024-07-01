@@ -23,6 +23,7 @@ open_process(process: string|int, debug: bool = false): Process
 get_process_path(process: Process): string
 close_process(process: Process)
 enum_modules(process: Process): Module (iterator)
+enum_memory_regions(process: Process): Page (iterator)
 module_exists(process: Process, moduleName: string): bool
 get_module(process: Process, moduleName: string): Module
 is_64_bit(process: Process): bool
@@ -32,6 +33,7 @@ get_proc_address(moduleName, functionName: string): uint
 create_remote_thread(process: Process, startAddress: uint, param: uint): bool
 inject_library(process: Process, dllPath: string): bool
 
+aob_scan(process: Process, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): int array
 aob_scan_module(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): int array
 aob_scan_range(process: Process, pattern: string, rangeStart, rangeEnd: int, relative: bool = false, single: bool = true, algorithm: int = 0): int array
 aob_scan_bytes(pattern: string, byteBuffer: byte array, single: bool = true, algorithm: int = 0): int array
