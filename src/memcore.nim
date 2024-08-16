@@ -167,7 +167,7 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
 
   elif defined(windows):
     template yieldModule =
-      module.name = nullTerminated($$mEntry.szModule)
+      module.name = toLowerAscii(nullTerminated($$mEntry.szModule))
       module.base = cast[uint](mEntry.modBaseAddr)
       module.size = mEntry.modBaseSize.uint
       module.`end` = module.base + module.size
