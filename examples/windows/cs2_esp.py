@@ -3,7 +3,7 @@ import pyMeow as pm
 
 
 class Offsets:
-    m_pBoneArray = 480
+    m_pBoneArray = 496
 
 
 class Colors:
@@ -37,6 +37,10 @@ class Entity:
     @property
     def pos(self):
         return pm.r_vec3(self.proc, self.pawn_ptr + Offsets.m_vOldOrigin)
+    
+    @property
+    def dormant(self):
+        return pm.r_bool(self.proc, self.pawn_ptr + Offsets.m_bDormant)
 
     def bone_pos(self, bone):
         game_scene = pm.r_int64(self.proc, self.pawn_ptr + Offsets.m_pGameSceneNode)
@@ -50,16 +54,16 @@ class Entity:
         except:
             return False
         return True
-
+    
 
 class CS2Esp:
     def __init__(self):
         self.proc = pm.open_process("cs2.exe")
         self.mod = pm.get_module(self.proc, "client.dll")["base"]
 
-        offsets_name = ["dwViewMatrix", "dwEntityList", "dwLocalPlayerController", "dwLocalPlayerPawn", "dwForceJump"]
-        offsets = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/main/generated/offsets.json").json()
-        [setattr(Offsets, k, offsets["client_dll"]["data"][k]["value"]) for k in offsets_name]
+        offsets_name = ["dwViewMatrix", "dwEntityList", "dwLocalPlayerController", "dwLocalPlayerPawn"]
+        offsets = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/offsets.json").json()
+        [setattr(Offsets, k, offsets["client.dll"][k]) for k in offsets_name]
 
         client_dll_name = {
             "m_iIDEntIndex": "C_CSPlayerPawnBase",
@@ -70,19 +74,23 @@ class CS2Esp:
             "m_iTeamNum": "C_BaseEntity",
             "m_vOldOrigin": "C_BasePlayerPawn",
             "m_pGameSceneNode": "C_BaseEntity",
+            "m_bDormant": "CGameSceneNode",
         }
-        clientDll = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/generated/client.dll.json").json()
-        [setattr(Offsets, k, clientDll[client_dll_name[k]]["data"][k]["value"]) for k in client_dll_name]
+        clientDll = requests.get("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/client_dll.json").json()
+        [setattr(Offsets, k, clientDll["client.dll"]["classes"][client_dll_name[k]]["fields"][k]) for k in client_dll_name]
 
     def it_entities(self):
         ent_list = pm.r_int64(self.proc, self.mod + Offsets.dwEntityList)
         local = pm.r_int64(self.proc, self.mod + Offsets.dwLocalPlayerController)
+
         for i in range(1, 65):
             try:
                 entry_ptr = pm.r_int64(self.proc, ent_list + (8 * (i & 0x7FFF) >> 9) + 16)
                 controller_ptr = pm.r_int64(self.proc, entry_ptr + 120 * (i & 0x1FF))
+
                 if controller_ptr == local:
                     continue
+                
                 controller_pawn_ptr = pm.r_int64(self.proc, controller_ptr + Offsets.m_hPlayerPawn)
                 list_entry_ptr = pm.r_int64(self.proc, ent_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 16)
                 pawn_ptr = pm.r_int64(self.proc, list_entry_ptr + 120 * (controller_pawn_ptr & 0x1FF))
@@ -93,12 +101,15 @@ class CS2Esp:
 
     def run(self):
         pm.overlay_init("Counter-Strike 2", fps=144)
+
         while pm.overlay_loop():
             view_matrix = pm.r_floats(self.proc, self.mod + Offsets.dwViewMatrix, 16)
+        
             pm.begin_drawing()
             pm.draw_fps(0, 0)
+        
             for ent in self.it_entities():
-                if ent.wts(view_matrix) and ent.health > 0:
+                if ent.wts(view_matrix) and ent.health > 0 and not ent.dormant:
                     color = Colors.cyan if ent.team != 2 else Colors.orange
                     head = ent.pos2d["y"] - ent.head_pos2d["y"]
                     width = head / 2
@@ -120,6 +131,7 @@ class CS2Esp:
                         ent.head_pos2d["y"] - center / 2,
                         color,
                     )
+
                     # Box
                     pm.draw_rectangle(
                         ent.head_pos2d["x"] - center,
@@ -136,6 +148,7 @@ class CS2Esp:
                         color,
                         1.2,
                     )
+
                     # Info
                     txt = f"{ent.name} ({ent.health}%)"
                     pm.draw_text(
@@ -145,6 +158,7 @@ class CS2Esp:
                         15,
                         Colors.white,
                     )
+
             pm.end_drawing()
 
 
