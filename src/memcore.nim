@@ -188,9 +188,8 @@ proc moduleExists(process: Process, moduleName: string): bool {.exportpy: "modul
   moduleName in mapIt(toSeq(enumModules(process)), it.name)
 
 proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_module".} =
-  var mutablemoduleName = moduleName
   for module in enumModules(process):
-    if toLowerAscii(mutablemoduleName) == toLowerAscii(module.name):
+    if moduleName == module.name:
       return module
   raise newException(Exception, fmt"Module '{moduleName}' not found")
 
@@ -220,7 +219,11 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
   result.debug = debug
   result.pid = sPid
   result.name = getProcessName(sPid)
-  result.base = getModule(result, result.name).base
+  var modules = toSeq(enumModules(result))
+  if modules.len > 0:
+    result.base = modules[0].base
+  else:
+    result.base = 0
 
   when defined(windows):
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
