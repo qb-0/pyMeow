@@ -8,7 +8,7 @@
 
 import
   posix, strformat,
-  strscans, strutils
+  strscans
 
 {.pragma: sys, importc, header: "sys/syscall.h".}
 
