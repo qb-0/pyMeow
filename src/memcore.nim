@@ -167,7 +167,7 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
 
   elif defined(windows):
     template yieldModule =
-      module.name = toLowerAscii(nullTerminated($$mEntry.szModule))
+      module.name = nullTerminated($$mEntry.szModule)
       module.base = cast[uint](mEntry.modBaseAddr)
       module.size = mEntry.modBaseSize.uint
       module.`end` = module.base + module.size
@@ -188,8 +188,9 @@ proc moduleExists(process: Process, moduleName: string): bool {.exportpy: "modul
   moduleName in mapIt(toSeq(enumModules(process)), it.name)
 
 proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_module".} =
+  var mutablemoduleName = moduleName
   for module in enumModules(process):
-    if moduleName == module.name:
+    if toLowerAscii(mutablemoduleName) == toLowerAscii(module.name):
       return module
   raise newException(Exception, fmt"Module '{moduleName}' not found")
 
