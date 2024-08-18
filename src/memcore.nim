@@ -222,8 +222,6 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
   var modules = toSeq(enumModules(result))
   if modules.len > 0:
     result.base = modules[0].base
-  else:
-    result.base = 0
 
   when defined(windows):
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
