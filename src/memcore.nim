@@ -219,7 +219,9 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
   result.debug = debug
   result.pid = sPid
   result.name = getProcessName(sPid)
-  result.base = getModule(result, result.name).base
+  let modules = enumModules(result).toSeq()[0]
+  if modules.len > 0:
+    result.base = modules[0].base
 
   when defined(windows):
     result.handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sPid.DWORD)
