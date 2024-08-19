@@ -219,7 +219,7 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
   result.debug = debug
   result.pid = sPid
   result.name = getProcessName(sPid)
-  var modules = toSeq(enumModules(result))
+  let modules = enumModules(result).toSeq()[0]
   if modules.len > 0:
     result.base = modules[0].base
 
