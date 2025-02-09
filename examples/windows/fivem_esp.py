@@ -2,8 +2,7 @@
 # Offsets by https://unknowncheats.me
 # Version 1.0
 
-import pyMeow as pm
-import psutil, re, math
+import pyMeow as pm, math
 
 offsets = {
     "FiveM_b1604_GTAProcess.exe": {"world": 0x247F840, "replay": 0x1EFD4C8, "viewport": 0x2087780},
@@ -17,7 +16,7 @@ offsets = {
     "FiveM_b3095_GTAProcess.exe": {"world": 0x2593320, "replay": 0x1F58B58, "viewport": 0x20019E0}
 }
 
-process_name = next((p.info["name"] for p in psutil.process_iter(["name"]) if re.search(r"^FiveM_b\d+_GTAProcess\.exe$", p.info.get("name", ""))), None)
+process_name = [p for p in offsets.keys() if pm.process_exists(p)][0]
 process = pm.open_process(process_name)
 module = pm.get_module(process, process_name)["base"]
 
@@ -75,7 +74,6 @@ class Entity:
             if entity:
                 yield Entity(process, entity)
 
-
 def main():
     pm.overlay_init(title="FiveM", fps=144, exitKey=0)
 
@@ -87,7 +85,7 @@ def main():
             local_player_pos = pm.r_vec3(process, local_player + 0x90)
             replay_interface = pm.r_int64(process, replay + 0x18)
             view_matrix = pm.r_floats(process, viewport + 0x24C, 16)
-            max_distance = 300 # m
+            max_distance = 500 # m
 
             for entity in Entity.enumerate(process, replay_interface):
                 if entity.ptr == local_player:
@@ -108,7 +106,7 @@ def main():
                     endPosY=pos2d["y"],
                     color=pm.fade_color(pm.get_color("red"), 0.5),
                     thick=1
-                )          
+                )
             
             pm.end_drawing()
 
