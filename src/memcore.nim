@@ -1,15 +1,29 @@
 import
   os, strformat, sequtils,
-  strutils, nimpy
+  strutils, nimpy, tables
 
 pyExportModule("pyMeow")
 
+const
+  wildCard = '?'
+  doubleWildCard = "??"
+  wildCardIntL = 256
+  wildCardIntR = 257
+  doubleWildCardInt = 258
+
 when defined(windows):
   import winim
+
+  proc NtReadVirtualMemory(
+    processHandle: HANDLE,
+    baseAddress: LPCVOID,
+    buffer: LPVOID,
+    bufferSize: SIZE_T,
+    numberOfBytesRead: ptr SIZE_T): NTSTATUS
+    {.stdcall, dynlib: "ntdll", importc, discardable.}
 elif defined(linux):
   import
-    posix, strscans, tables,
-    ptrace
+    posix, strscans, ptrace
 
   proc process_vm_readv(
     pid: int,
@@ -45,9 +59,17 @@ type
     size: uint
 
   Page = object
-    start: uint
-    `end`: uint
-    size: uint
+    start*: uint
+    `end`*: uint
+    size*: uint
+    permissions*: string   # Linux
+    offset*: string        # Linux
+    dev*: string           # Linux
+    inode*: string         # Linux
+    path*: string          # Linux
+    state*: DWORD          # Windows
+    protect*: DWORD        # Windows
+    `type`*: DWORD         # Windows
 
 template checkRoot =
   when defined(linux):
@@ -232,25 +254,45 @@ proc closeProcess(process: Process) {.exportpy: "close_process".} =
   when defined(windows):
     CloseHandle(process.handle)
 
-iterator enumMemoryRegions(process: Process, module: Module): Page {.exportpy: "enum_memory_regions".} =
+iterator enumMemoryRegions(process: Process): Page {.exportpy: "enum_memory_regions".} =
   var result: Page
   when defined(linux):
-    var pageStart, pageEnd: int
+    var
+      regionStart, regionEnd: int
+      permissions, offset, dev, inode: string
+      path: string
+    let parts = l.split(" ")
     for l in lines(fmt"/proc/{process.pid}/maps"):
-      if module.name in l and scanf(l, "$h-$h", pageStart, pageEnd):
-        result.start = pageStart.uint
-        result.`end` = pageEnd.uint
-        result.size = (pageEnd - pageStart).uint
+      if parts.len > 5:
+        discard scanf(parts[0], "$h-$h", regionStart, regionEnd)
+        permissions = parts[1]
+        offset = parts[2]
+        dev = parts[3]
+        inode = parts[4]
+        path = parts[5..^1].join(" ")
+
+        result.start = regionStart.uint
+        result.`end` = regionEnd.uint
+        result.size = regionEnd.uint - regionStart.uint
+        result.permissions = permissions
+        result.offset = offset
+        result.dev = dev
+        result.inode = inode
+        result.path = path
         yield result
   elif defined(windows):
     var
       mbi = MEMORY_BASIC_INFORMATION()
-      curAddr = module.base
-    while VirtualQueryEx(process.handle, cast[LPCVOID](curAddr), mbi.addr, sizeof(mbi).SIZE_T) != 0 and curAddr != module.`end`:
-      result.start = curAddr
-      result.`end` = result.start + mbi.RegionSize.uint
+      address: PVOID = nil
+
+    while VirtualQueryEx(process.handle, address, mbi.addr, sizeof(mbi).SIZE_T) != 0:
+      result.start = cast[uint](mbi.BaseAddress)
+      result.`end` = cast[uint](mbi.BaseAddress) + mbi.RegionSize.uint
       result.size = mbi.RegionSize.uint
-      curAddr += result.size
+      result.state = mbi.State
+      result.protect = mbi.Protect
+      result.`type` = mbi.Type
+      address = cast[PVOID](cast[uint](mbi.BaseAddress) + mbi.RegionSize.uint)
       yield result
 
 proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
@@ -265,9 +307,9 @@ proc readPointer*(process: Process, address: uint, dst: pointer, size: int) =
     if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
       memoryErr("Read", address)
   elif defined(windows):
-    if ReadProcessMemory(
+    if not NtReadVirtualMemory(
       process.handle, cast[pointer](address), dst, size, nil
-    ) == FALSE:
+    ).NT_SUCCESS:
       memoryErr("Read", address)
 
     if process.debug:
@@ -289,9 +331,9 @@ proc read*(process: Process, address: uint, t: typedesc): t =
     if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
       memoryErr("Read", address)
   elif defined(windows):
-    if ReadProcessMemory(
+    if not NtReadVirtualMemory(
       process.handle, cast[pointer](address), result.addr, sizeof(t), nil
-    ) == FALSE:
+    ).NT_SUCCESS:
       memoryErr("Read", address)
 
   if process.debug:
@@ -334,9 +376,9 @@ proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t]
     if process_vm_readv(process.pid, ioDst.addr, 1, ioSrc.addr, 1, 0) == -1:
       memoryErr("readSeq", address)
   elif defined(windows):
-    if ReadProcessMemory(
+    if not NtReadVirtualMemory(
       process.handle, cast[pointer](address), result[0].addr, size.int * sizeof(t), nil
-    ) == FALSE:
+    ).NT_SUCCESS:
       memoryErr("readSeq", address)
 
   if process.debug:
@@ -386,137 +428,192 @@ proc writeArray*[T](process: Process, address: uint, data: openArray[T]): int {.
   if process.debug:
     echo "[W] [", type(data), "] 0x", address.toHex(), " -> ", data
 
-proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
-  # Credits to Iago Beuller
-  const
-    wildCard = '?'
-    doubleWildCard = "??"
-    wildCardIntL = 256
-    wildCardIntR = 257
-    doubleWildCardInt = 258
+# AOB Section
+proc splitPattern(pattern: string): seq[string] =
+  let patt = pattern.replace(" ", "")
+  result = newSeq[string]()
+  for i in countup(0, patt.len-1, 2):
+      result.add(patt[i..i+1])
 
-  proc splitPattern(pattern: string): seq[string] =
-    var patt = pattern.replace(" ", "")
-    try:
-      for i in countup(0, patt.len-1, 2):
-        result.add(patt[i..i+1])
-    except CatchableError:
-      raise newException(Exception, "Invalid pattern")
-
-  proc patternToInts(pattern: seq[string]): seq[int] =
-    for hex in pattern:
-      if wildCard in hex:
-        if hex == doubleWildCard:
-          result.add(doubleWildCardInt)
-        elif hex[0] == wildCard:
-          result.add(wildCardIntL)
-        else:
-          result.add(wildCardIntR)
+proc patternToInts(pattern: seq[string]): seq[int] =
+  result = newSeq[int]()
+  for hex in pattern:
+    if wildCard in hex:
+      if hex == doubleWildCard:
+        result.add(doubleWildCardInt)
+      elif hex[0] == wildCard:
+        result.add(wildCardIntL)
       else:
-          result.add(parseHexInt(hex))
+        result.add(wildCardIntR)
+    else:
+      result.add(parseHexInt(hex))
 
-  proc getIndexMatchOrder(pattern: seq[string]): seq[int] =
-      if pattern.len > 2:
-        let middleIndex = (pattern.len div 2) - 1
-        var midHexByteIndex, lastHexByteIndex: int
+proc isMatch(buffer: seq[byte], pattern: seq[int], start: int): bool =
+  for i in 0..<pattern.len:
+    let p = pattern[i]
+    if p == doubleWildCardInt:
+      continue
 
-        for i, hb in pattern:
-          if hb != doubleWildCard:
-            if not (wildCard in hb):
-              if i <= middleIndex or midHexByteIndex == 0:
-                midHexByteIndex = i
-              lastHexByteIndex = i
-            result.add(i)
+    let b = buffer[start + i].int
 
-        if lastHexByteIndex == 0:
-          lastHexByteIndex = result[^1]
-          discard result.pop()
-        else:
-          result.delete(result.find(lastHexByteIndex))
+    if p == wildCardIntL:
+      if b.toHex(1)[0] != pattern[i].toHex(1)[1]:
+        return false
+    elif p == wildCardIntR:
+      if b.toHex(2)[0] != pattern[i].toHex(2)[0]:
+        return false
+    elif p != b:
+      return false
+  return true
 
-        result.delete(result.find(midHexByteIndex))
-        result.insert(midHexByteIndex, 1)
-        result.insert(lastHexByteIndex, 0)
-      else:
-        for i, hb in pattern:
-          if hb != doubleWildCard:
-            result.add(i)
+proc boyerMooreSearch(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
+
+  proc buildBadCharacterTable(pattern: seq[int]): Table[int, int] =
+    result = initTable[int, int]()
+    for i in 0..<pattern.len:
+      result[pattern[i]] = i
 
   let
     hexPattern = splitPattern(pattern)
     intsPattern = patternToInts(hexPattern)
-    pIndexMatchOrder = getIndexMatchOrder(hexPattern)
+    m = intsPattern.len
+    n = byteBuffer.len
 
-  if pIndexMatchOrder.len == 0:
+  if m == 0 or n == 0 or m > n:
     return
 
-  var
-    found: bool
-    b, p: int
+  let badCharacterTable = buildBadCharacterTable(intsPattern)
 
-  for i in 0..byteBuffer.len-hexPattern.len:
-    found = true
-    for pId in pIndexMatchOrder:
-      b = byteBuffer[i+pId].int
-      p = intsPattern[pId]
+  var s = 0
+  while s <= n - m:
+    var j = m - 1
 
-      if p != b:
-        found = false
+    while j >= 0 and isMatch(byteBuffer, intsPattern, s):
+      j -= 1
 
-        if p == wildCardIntL:
-          if b.toHex(1)[0] == hexPattern[pId][1]:
-            found = true
-          else:
-            break
-        elif p == wildCardIntR and b.toHex(2)[0] == hexPattern[pId][0]:
-          found = true
-        else:
-          break
-
-    if found:
-      result.add(i.uint)
+    if j < 0:
+      result.add(s.uint)
       if single:
         return
+      if m > 1:
+        s += m - badCharacterTable.getOrDefault(byteBuffer[s + m - 1].int, -1)
+      else:
+        s += 1
+    else:
+      s += max(1, j - badCharacterTable.getOrDefault(byteBuffer[s + j].int, -1))
 
-proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
-  const
-    wildCard = "??"
-    wildCardByte = 200.byte # Not safe
+proc boyerMooreHorspool(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
 
-  proc patternToBytes(pattern: string): seq[byte] =
-    var patt = pattern.replace(" ", "")
-    try:
-      for i in countup(0, patt.len-1, 2):
-        let hex = patt[i..i+1]
-        if hex == wildCard:
-          result.add(wildCardByte)
-        else:
-          result.add(parseHexInt(hex).byte)
-    except CatchableError:
-      raise newException(Exception, "Invalid pattern")
+  proc buildBadCharacterTable(pattern: seq[int]): Table[int, int] =
+    result = initTable[int, int]()
+    for i in 0..<256:
+      result[i] = pattern.len
+    for i in 0..<pattern.len - 1:
+      result[pattern[i]] = pattern.len - i - 1
 
-  let bytePattern = patternToBytes(pattern)
-  for curIndex, _ in byteBuffer:
-    for sigIndex, s in bytePattern:
-      if byteBuffer[curIndex + sigIndex] != s and s != wildCardByte:
-        break
-      elif sigIndex == bytePattern.len-1:
-        result.add(curIndex.uint)
-        if single:
-          return
-        break
+  let
+    hexPattern = splitPattern(pattern)
+    intsPattern = patternToInts(hexPattern)
+    m = intsPattern.len
+    n = byteBuffer.len
+
+  if m == 0 or n == 0 or m > n:
+    return
+
+  let badCharacterTable = buildBadCharacterTable(intsPattern)
+
+  var s = 0
+  while s <= n - m:
+    if isMatch(byteBuffer, intsPattern, s):
+      result.add(s.uint)
+      if single:
+        return
+    s += badCharacterTable.getOrDefault(byteBuffer[s + m - 1].int, m)
+
+  return result
+
+proc quickSearch(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
+
+  proc buildBadCharacterTable(pattern: seq[int]): Table[int, int] =
+    result = initTable[int, int]()
+    for i in 0..<256:
+      result[i] = pattern.len + 1
+    for i in 0..<pattern.len:
+      result[pattern[i]] = pattern.len - i
+
+  let
+    hexPattern = splitPattern(pattern)
+    intsPattern = patternToInts(hexPattern)
+    m = intsPattern.len
+    n = byteBuffer.len
+
+  if m == 0 or n == 0 or m > n:
+    return
+
+  let badCharacterTable = buildBadCharacterTable(intsPattern)
+
+  var s = 0
+  while s <= n - m:
+    if isMatch(byteBuffer, intsPattern, s):
+      result.add(s.uint)
+      if single:
+        return
+    if s + m < n:
+      s += badCharacterTable.getOrDefault(byteBuffer[s + m].int, m + 1)
+    else:
+      break
+
+  return result
 
 proc aobScanModule(process: Process, moduleName, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_module".} =
   let
     module = getModule(process, moduleName)
-    # TODO: Reading a whole module is a bad idea. Read pages instead.
     byteBuffer = process.readSeq(module.base, module.size)
 
-  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  case algorithm:
+    of 0:
+      result = boyerMooreSearch(pattern, byteBuffer, single)
+    of 1:
+      result = boyerMooreHorspool(pattern, byteBuffer, single)
+    of 2:
+      result = quickSearch(pattern, byteBuffer, single)
+    else:
+      result = boyerMooreSearch(pattern, byteBuffer, single)
+
   if result.len != 0:
     if not relative:
       for i, a in result:
         result[i] += module.base
+
+proc aobScan(process: Process, pattern: string, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan".} =
+  const
+    MEM_COMMIT = 0x1000
+    PAGE_READWRITE = 0x04
+
+  for region in enumMemoryRegions(process):
+    if region.state != MEM_COMMIT:
+      continue
+
+    if region.protect != PAGE_READWRITE:
+      continue
+
+    var byteBuffer = process.readSeq(region.start, region.size)
+
+    case algorithm:
+      of 0:
+        result = boyerMooreSearch(pattern, byteBuffer, single)
+      of 1:
+        result = boyerMooreHorspool(pattern, byteBuffer, single)
+      of 2:
+        result = quickSearch(pattern, byteBuffer, single)
+      else:
+        result = boyerMooreSearch(pattern, byteBuffer, single)
+
+    if result.len != 0:
+      if not relative:
+        for i, a in result:
+          result[i] += region.start
+      return
 
 proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: uint, relative: bool = false, single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_range".} =
   if rangeStart >= rangeEnd:
@@ -524,14 +621,31 @@ proc aobScanRange(process: Process, pattern: string, rangeStart, rangeEnd: uint,
 
   let byteBuffer = process.readSeq(rangeStart, rangeEnd - rangeStart)
 
-  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  case algorithm:
+    of 0:
+      result = boyerMooreSearch(pattern, byteBuffer, single)
+    of 1:
+      result = boyerMooreHorspool(pattern, byteBuffer, single)
+    of 2:
+      result = quickSearch(pattern, byteBuffer, single)
+    else:
+      result = boyerMooreSearch(pattern, byteBuffer, single)
+
   if result.len != 0:
     if not relative:
       for i, a in result:
         result[i] += rangeStart
 
 proc aobScanBytes(pattern: string, byteBuffer: seq[byte], single: bool = true, algorithm: int = 0): seq[uint] {.exportpy: "aob_scan_bytes".} =
-  result = if algorithm == 0: aob1(pattern, byteBuffer, single) else: aob2(pattern, byteBuffer, single)
+  case algorithm:
+    of 0:
+      result = boyerMooreSearch(pattern, byteBuffer, single)
+    of 1:
+      result = boyerMooreHorspool(pattern, byteBuffer, single)
+    of 2:
+      result = quickSearch(pattern, byteBuffer, single)
+    else:
+      result = boyerMooreSearch(pattern, byteBuffer, single)
 
 proc pageProtection(process: Process, address: uint, newProtection: int32): int32 {.exportpy: "page_protection".} =
   when defined(linux):
