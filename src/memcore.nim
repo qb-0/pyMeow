@@ -63,7 +63,7 @@ proc getOSError: tuple[code: int, error: string] {.exportpy: "get_os_error".} =
     (osLastError().int, errMsg)
 
 proc getErrorStr: string =
-  let err = getOSError()
+  let err: tuple[code: int, error: string] = getOSError()
   result = fmt"[Error: {err.code} - {err.error}]"
 
 proc memoryErr(m: string, address: uint) {.inline.} =
@@ -74,8 +74,8 @@ proc memoryErr(m: string, address: uint) {.inline.} =
 
 proc is64bit(process: Process): bool {.exportpy: "is_64_bit".} =
   when defined(linux):
-    var buffer = newSeq[byte](5)
-    let exe = open(fmt"/proc/{process.pid}/exe", fmRead)
+    var buffer: seq[byte] = newSeq[byte](5)
+    let exe: File = open(fmt"/proc/{process.pid}/exe", fmRead)
     discard exe.readBytes(buffer, 0, 5)
     result = buffer[4] == 2
     close(exe)
@@ -87,7 +87,7 @@ proc is64bit(process: Process): bool {.exportpy: "is_64_bit".} =
 iterator enumProcesses: Process {.exportpy: "enum_processes".} =
   var p: Process
   when defined(linux):
-    let allFiles = toSeq(walkDir("/proc", relative = true))
+    let allFiles: seq[tuple[kind: PathComponent, path: string]] = toSeq(walkDir("/proc", relative = true))
     for pid in mapIt(filterIt(allFiles, isDigit(it.path[0])), parseInt(it.path)):
         p.pid = pid
         p.name = readFile(fmt"/proc/{pid}/comm").strip()
@@ -133,9 +133,9 @@ proc getProcessName(pid: int): string {.exportpy: "get_process_name".} =
   raise newException(Exception, fmt"Process '{pid}' not found")
 
 proc getProcessPath(process: Process): string {.exportpy: "get_process_path".} =
-  const maxPath = 4096
+  const maxPath: int = 4096
   when defined(linux):
-    var path = newString(maxPath)
+    var path: string = newString(maxPath)
     discard readlink(fmt"/proc/{process.pid}/exe".cstring, path.cstring, maxPath)
     path.strip()
   elif defined(windows):
@@ -148,11 +148,11 @@ iterator enumModules(process: Process): Module {.exportpy: "enum_modules"} =
   when defined(linux):
     var modTable: Table[string, Module]
     for l in lines(fmt"/proc/{process.pid}/maps"):
-      let s = l.split("/")
+      let s: seq[string] = l.split("/")
       if s.len > 1:
         var
           pageStart, pageEnd: int
-          modName = s[^1]
+          modName: string = s[^1]
         discard scanf(l, "$h-$h", pageStart, pageEnd)
         if modName notin modTable:
           modTable[modName] = Module(name: modName)
@@ -195,10 +195,10 @@ proc getModule(process: Process, moduleName: string): Module {.exportpy: "get_mo
 
 proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "open_process".} =
   let
-    pyMod = pyBuiltinsModule()
-    pyInt = pyMod.getAttr("int")
-    pyStr = pyMod.str
-    objT = pyMod.type(process)
+    pyMod: PyObject = pyBuiltinsModule()
+    pyInt: PyObject = pyMod.getAttr("int")
+    pyStr: PyObject = pyMod.str
+    objT: PyObject = pyMod.type(process)
 
   var sPid: int
   if objT == pyInt:
@@ -219,7 +219,7 @@ proc openProcess(process: PyObject, debug: bool = false): Process {.exportpy: "o
   result.debug = debug
   result.pid = sPid
   result.name = getProcessName(sPid)
-  let modules = enumModules(result).toSeq()
+  let modules: seq[Module] = enumModules(result).toSeq()
   if modules.len > 0:
     result.base = modules[0].base
 
@@ -315,7 +315,7 @@ proc writePointer*(process: Process, address: uint, data: pointer, size: int) =
       memoryErr("Write", address)
 
   if process.debug:
-    var buf = newSeq[byte](size)
+    var buf: seq[byte] = newSeq[byte](size)
     copyMem(buf[0].addr, data, size)
     echo "[W] [seq[byte]] 0x", address.toHex(), " -> ", $buf
 
@@ -325,7 +325,7 @@ proc readSeq*(process: Process, address, size: uint, t: typedesc = byte): seq[t]
     checkRoot()
     var
       ioSrc, ioDst: IOVec
-      bsize = size * sizeof(t).uint
+      bsize: uint = size * sizeof(t).uint
 
     ioDst.iov_base = result[0].addr
     ioDst.iov_len = bsize
@@ -389,14 +389,14 @@ proc writeArray*[T](process: Process, address: uint, data: openArray[T]): int {.
 proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
   # Credits to Iago Beuller
   const
-    wildCard = '?'
-    doubleWildCard = "??"
-    wildCardIntL = 256
-    wildCardIntR = 257
-    doubleWildCardInt = 258
+    wildCard: char = '?'
+    doubleWildCard: string = "??"
+    wildCardIntL: int = 256
+    wildCardIntR: int = 257
+    doubleWildCardInt: int = 258
 
   proc splitPattern(pattern: string): seq[string] =
-    var patt = pattern.replace(" ", "")
+    var patt: string = pattern.replace(" ", "")
     try:
       for i in countup(0, patt.len-1, 2):
         result.add(patt[i..i+1])
@@ -417,7 +417,7 @@ proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
 
   proc getIndexMatchOrder(pattern: seq[string]): seq[int] =
       if pattern.len > 2:
-        let middleIndex = (pattern.len div 2) - 1
+        let middleIndex: int = (pattern.len div 2) - 1
         var midHexByteIndex, lastHexByteIndex: int
 
         for i, hb in pattern:
@@ -443,9 +443,9 @@ proc aob1(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
             result.add(i)
 
   let
-    hexPattern = splitPattern(pattern)
-    intsPattern = patternToInts(hexPattern)
-    pIndexMatchOrder = getIndexMatchOrder(hexPattern)
+    hexPattern: seq[string] = splitPattern(pattern)
+    intsPattern: seq[int] = patternToInts(hexPattern)
+    pIndexMatchOrder: seq[int] = getIndexMatchOrder(hexPattern)
 
   if pIndexMatchOrder.len == 0:
     return
@@ -484,10 +484,10 @@ proc aob2(pattern: string, byteBuffer: seq[byte], single: bool): seq[uint] =
     wildCardByte = 200.byte # Not safe
 
   proc patternToBytes(pattern: string): seq[byte] =
-    var patt = pattern.replace(" ", "")
+    var patt: string = pattern.replace(" ", "")
     try:
       for i in countup(0, patt.len-1, 2):
-        let hex = patt[i..i+1]
+        let hex: string = patt[i..i+1]
         if hex == wildCard:
           result.add(wildCardByte)
         else:

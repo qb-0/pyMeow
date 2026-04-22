@@ -60,7 +60,7 @@ proc getWindowInfo(name: string): tuple[x, y, width, height: int] {.exportpy: "g
     result.height = rect.bottom
 
 proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow", logLevel: int = 5, exitKey: int = -1, trackTarget: bool = false) {.exportpy: "overlay_init"} =
-  let res = getDisplayResolution()
+  let res: (int, int) = getDisplayResolution()
   setTraceLogLevel(logLevel)
   setTargetFPS(fps.cint)
   setConfigFlags(WINDOW_UNDECORATED)
@@ -73,7 +73,7 @@ proc overlayInit(target: string = "Full", fps: int = 0, title: string = "PyMeow"
   initWindow(res[0] - 1, res[1] - 1, title)
 
   if target != "Full":
-    let winInfo = getWindowInfo(target)
+    let winInfo: tuple[x: int, y: int, width: int, height: int] = getWindowInfo(target)
     overlayOpts.targetX = winInfo.x
     overlayOpts.targetY = winInfo.y
     overlayOpts.targetWidth = winInfo.width
@@ -99,7 +99,7 @@ proc overlayLoop: bool {.exportpy: "overlay_loop".} =
   if keyPressed(overlayOpts.exitKey):
     rl.closeWindow()
   if overlayOpts.trackTarget:
-    let winInfo = getWindowInfo(overlayOpts.target)
+    let winInfo: tuple[x: int, y: int, width: int, height: int] = getWindowInfo(overlayOpts.target)
     if winInfo.x != overlayOpts.targetX or winInfo.y != overlayOpts.targetY:
       overlayOpts.targetX = winInfo.x
       overlayOpts.targetY = winInfo.y
@@ -141,7 +141,7 @@ proc setWindowIcon(filePath: string) {.exportpy: "set_window_icon".} =
   rl.setWindowIcon(rl.loadImage(filePath))
 
 proc setWindowFlag(flag: int) {.exportpy: "set_window_flag".} =
-  let f = flag.cuint
+  let f: cuint = flag.cuint
   if rl.isWindowState(f):
     rl.clearWindowState(f)
     return

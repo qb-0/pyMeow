@@ -23,8 +23,8 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
       disp = XOpenDisplay(nil)
 
     let
-      root = XRootWindow(disp, 0)
-      shot = XGetImage(
+      root: Window = XRootWindow(disp, 0)
+      shot: PXImage = XGetImage(
         disp, root,
         x.int, y.int,
         width.cuint, height.cuint,
@@ -36,7 +36,7 @@ iterator pixelEnumRegion(x, y, width, height: float): Pixel {.exportpy: "pixel_e
     p.color.a = 255
     for x in 0..<width.int:
       for y in 0..<height.int:
-        var xp = XGetPixel(shot, x, y)
+        var xp: culong = XGetPixel(shot, x, y)
         p.x = x
         p.y = y
         p.color.r = ((xp and shot.red_mask) shr 16).uint8

@@ -19,11 +19,11 @@ proc pointerChain64(process: Process, base: uint, offsets: openArray[uint]): uin
   result = result + offsets[^1]
 
 proc readString(process: Process, address: uint, size: uint = 30): string {.exportpy: "r_string".} =
-  let s = process.readSeq(address, size, char)
+  let s: seq[char] = process.readSeq(address, size, char)
   $cast[cstring](s[0].unsafeAddr)
 
 proc bytesToString(process: Process, address: uint, size: uint): string {.exportpy: "bytes_to_string".} =
-  let s = process.readSeq(address, size, char)
+  let s: seq[char] = process.readSeq(address, size, char)
   s.join("").convert("utf-8", "utf-16").strip()
 
 proc readInt(process: Process, address: uint): int32 {.exportpy: "r_int".} =
@@ -103,8 +103,8 @@ proc readCType(process: Process, address: uint, ctype: PyObject): PPyObject {.ex
 
 proc read(process: Process, address: uint, `type`: string, size: uint = 1): PPyObject {.exportpy: "r".} =
   let
-    o = size == 1
-    tl = `type`.toLower()
+    o: bool = size == 1
+    tl: string = `type`.toLower()
 
   template r(t: typedesc) =
     if o:
@@ -215,9 +215,9 @@ proc writeCType(process: Process, address: uint, data: PyObject) {.exportpy: "w_
 
 proc write(process: Process, address: uint, data: PPyObject, `type`: string) {.exportpy: "w".} =
   let
-    pyMod = pyBuiltinsModule()
-    l = pyMod.list == pyMod.type(data)
-    tl = `type`.toLower()
+    pyMod: PyObject = pyBuiltinsModule()
+    l: bool = pyMod.list == pyMod.type(data)
+    tl: string = `type`.toLower()
 
   template w(t: typedesc) =
     if l:

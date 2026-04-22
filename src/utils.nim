@@ -125,19 +125,19 @@ proc checkCollisionCircles(pos1X, pos1Y, radius1, pos2X, pos2Y, radius2: float):
 
 proc getDisplayResolution*: (int, int) {.exportpy: "get_display_resolution".} =
   when defined(linux):
-    let disp = XOpenDisplay(nil)
+    let disp: PDisplay = XOpenDisplay(nil)
     defer: discard XCloseDisplay(disp)
     var mCount: cint
-    let pxInfo = XineramaQueryScreens(disp, mCount.addr)[]
+    let pxInfo: XineramaScreenInfo = XineramaQueryScreens(disp, mCount.addr)[]
     (pxInfo.width.int, pxInfo.height.int)
   elif defined(windows):
     (GetSystemMetrics(SM_CXSCREEN).int, GetSystemMetrics(SM_CYSCREEN).int)
 
 proc compareColorPCT*(color1, color2: rl.Color): float {.exportpy: "compare_color_pct".} =
   let
-    r = abs(color1.r.int - color2.r.int).float / 255
-    g = abs(color1.g.int - color2.g.int).float / 255
-    b = abs(color1.b.int - color2.b.int).float / 255
+    r: float = abs(color1.r.int - color2.r.int).float / 255
+    g: float = abs(color1.g.int - color2.g.int).float / 255
+    b: float = abs(color1.b.int - color2.b.int).float / 255
   result = 100 - ((r + g + b) / 3 * 100)
 
 proc getMonitorCount: int {.exportpy: "get_monitor_count".} =
@@ -164,7 +164,7 @@ proc getWindowTitle(processId: int): string {.exportpy: "get_window_title".} =
       winHandle = GetNextWindow(winHandle, GW_HWNDNEXT)
   elif defined(linux):
     let
-      p = startProcess("wmctrl", "", ["-l", "-p"], options={poUsePath, poStdErrToStdOut})
+      p: Process = startProcess("wmctrl", "", ["-l", "-p"], options={poUsePath, poStdErrToStdOut})
       (lines, exitCode) = p.readLines()
 
     if exitCode == 0:

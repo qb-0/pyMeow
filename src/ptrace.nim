@@ -15,28 +15,28 @@ import
 proc ptrace[T](request: cint, pid: int, a: pointer, data: T): pointer {.cdecl, importc, header: "sys/ptrace.h", discardable.}
 
 const
-  PTRACE_TRACEME* = 0
-  PTRACE_PEEKTEXT* = 1
-  PTRACE_PEEKDATA* = 2
-  PTRACE_PEEKUSER* = 3
-  PTRACE_POKETEXT* = 4
-  PTRACE_POKEDATA* = 5
-  PTRACE_POKEUSER* = 6
-  PTRACE_CONT* = 7
-  PTRACE_KILL* = 8
-  PTRACE_SINGLESTEP* = 9
-  PTRACE_GETREGS* = 12
-  PTRACE_SETREGS* = 13
-  PTRACE_ATTACH* = 16
-  PTRACE_DETACH* = 17
-  PTRACE_SYSCALL* = 24
-  PTRACE_SETOPTIONS* = 0x4200
-  PTRACE_GETEVENTMSG* = 0x4201
-  PTRACE_GETSIGINFO* = 0x4202
-  PTRACE_SETSIGINFO* = 0x4203
-  PTRACE_SEIZE* = 0x4206
-  PTRACE_INTERRUPT* = 0x4207
-  PTRACE_LISTEN* = 0x4208
+  PTRACE_TRACEME*: cint = 0
+  PTRACE_PEEKTEXT*: cint = 1
+  PTRACE_PEEKDATA*: cint = 2
+  PTRACE_PEEKUSER*: cint = 3
+  PTRACE_POKETEXT*: cint = 4
+  PTRACE_POKEDATA*: cint = 5
+  PTRACE_POKEUSER*: cint = 6
+  PTRACE_CONT*: cint = 7
+  PTRACE_KILL*: cint = 8
+  PTRACE_SINGLESTEP*: cint = 9
+  PTRACE_GETREGS*: cint = 12
+  PTRACE_SETREGS*: cint = 13
+  PTRACE_ATTACH*: cint = 16
+  PTRACE_DETACH*: cint = 17
+  PTRACE_SYSCALL*: cint = 24
+  PTRACE_SETOPTIONS*: cint = 0x4200
+  PTRACE_GETEVENTMSG*: cint = 0x4201
+  PTRACE_GETSIGINFO*: cint = 0x4202
+  PTRACE_SETSIGINFO*: cint = 0x4203
+  PTRACE_SEIZE*: cint = 0x4206
+  PTRACE_INTERRUPT*: cint = 0x4207
+  PTRACE_LISTEN*: cint = 0x4208
 
 let
   SYS_llseek* {.sys, importc: "SYS__llseek".}: cint
@@ -445,7 +445,7 @@ proc injectSyscall(pid: int, syscall: int, arg0, arg1, arg2, arg3, arg4, arg5: p
   regs.r8 = arg4
   regs.r9 = arg5
   injectionAddr = cast[pointer](regs.rip)
-  var oldData = ptrace(PTRACE_PEEKDATA, pid, injectionAddr, 0)
+  var oldData: pointer = ptrace(PTRACE_PEEKDATA, pid, injectionAddr, 0)
   ptrace(PTRACE_POKEDATA, pid, injectionAddr, cast[pointer](injectionBuf))
   ptrace(PTRACE_SETREGS, pid, nil, regs.addr)
   ptrace(PTRACE_SINGLESTEP, pid, nil, nil)
@@ -465,5 +465,5 @@ proc pageProtection*(pid, src, protection: int) =
   injectSyscall(pid, SYS_mprotect, cast[pointer](pageStart), cast[pointer](pageEnd), cast[pointer](protection), nil, nil, nil)
 
 proc allocateMemory*(pid, size, protection: int): uint =
-  let ret = injectSyscall(pid, SYS_mmap, nil, cast[pointer](size), cast[pointer](protection), cast[pointer](MAP_ANONYMOUS or MAP_PRIVATE), cast[pointer](-1), nil)
+  let ret: pointer = injectSyscall(pid, SYS_mmap, nil, cast[pointer](size), cast[pointer](protection), cast[pointer](MAP_ANONYMOUS or MAP_PRIVATE), cast[pointer](-1), nil)
   cast[uint](ret)
