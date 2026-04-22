@@ -25,10 +25,6 @@ cd pyMeow && nim c pyMeow
 ```
 
 ## :globe_with_meridians: Projects
-#### [Fury](https://github.com/gabsroot/Fury) by [gabsroot](https://github.com/gabsroot)
-> Fury is an external cheat for Counter-Strike 2, developed using python.
-<img src="https://i.ibb.co/My8Pv5Zt/409779211-81b4e500-cc72-4b7d-918c-8546c4c23344.png" alt="alt text" width="450" height="250">
-
 #### [pyMeow SWBF2](https://github.com/qb-0/pyMeowSWBF2) by [qb](https://github.com/qb-0)
 > Configurable cross platform Starwars Battlefront 2 ESP
 <img src="https://github.com/qb-0/pyMeowSWBF2/raw/master/screenshots/screenshot.png" alt="alt text" width="450" height="250">
